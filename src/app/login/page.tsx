@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -14,6 +15,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useApp } from "@/components/providers/app-provider";
+import type { UserRole } from "@/lib/types";
 
 const formSchema = z.object({
   email: z
@@ -27,9 +30,17 @@ const formSchema = z.object({
   rememberMe: z.boolean().default(false).optional(),
 });
 
+const emailToRoleMap: Record<string, UserRole> = {
+    "candidate@example.com": "candidate",
+    "recruiter@example.com": "recruiter",
+    "admin@example.com": "admin"
+}
+
+
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const { setRole } = useApp();
   const [showPassword, setShowPassword] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -44,8 +55,7 @@ export default function LoginPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
-    console.log(values);
-
+    
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
@@ -59,6 +69,9 @@ export default function LoginPage() {
         setIsSubmitting(false);
         return;
     }
+    
+    const userRole = emailToRoleMap[values.email] || "candidate";
+    setRole(userRole);
 
     toast({
       title: "Inicio de sesión exitoso",
