@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -20,6 +21,7 @@ import {
   Shield,
   LogOut,
   Users,
+  FileText,
 } from "lucide-react";
 import { Icons } from "@/components/icons";
 import { useApp } from "@/components/providers/app-provider";
@@ -59,6 +61,16 @@ export function DashboardSidebar() {
           <Link href="/dashboard/profile"><User /><span>Mi Perfil</span></Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton asChild isActive={isActive("/dashboard/applications")} tooltip="Postulaciones">
+          <Link href="/dashboard/applications"><FileText /><span>Mis Postulaciones</span></Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+       <SidebarMenuItem>
+        <SidebarMenuButton asChild isActive={isActive("/dashboard/settings")} tooltip="Configuración">
+          <Link href="/dashboard/settings"><Settings /><span>Configuración</span></Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
     </>
   );
 
@@ -69,6 +81,11 @@ export function DashboardSidebar() {
           <Link href="/dashboard"><Briefcase /><span>Vacantes</span></Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
+       <SidebarMenuItem>
+        <SidebarMenuButton asChild isActive={isActive("/dashboard/settings")} tooltip="Configuración">
+          <Link href="/dashboard/settings"><Settings /><span>Configuración</span></Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
     </>
   );
 
@@ -77,6 +94,11 @@ export function DashboardSidebar() {
       <SidebarMenuItem>
         <SidebarMenuButton asChild isActive={isActive("/dashboard")} tooltip="Auditoría">
           <Link href="/dashboard"><Shield /><span>Auditoría y Equidad</span></Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+       <SidebarMenuItem>
+        <SidebarMenuButton asChild isActive={isActive("/dashboard/settings")} tooltip="Configuración">
+          <Link href="/dashboard/settings"><Settings /><span>Configuración</span></Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
     </>
