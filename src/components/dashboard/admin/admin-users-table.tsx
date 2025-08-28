@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast";
 import type { User } from "@/lib/types";
+import Link from "next/link";
 
 const roleVariantMap: Record<User['role'], 'destructive' | 'secondary' | 'outline'> = {
     admin: 'destructive',
@@ -119,7 +120,9 @@ export function AdminUsersTable() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                            <DropdownMenuItem onClick={() => alert('Navegar al perfil del usuario...')}>Ver Perfil</DropdownMenuItem>
+                             <DropdownMenuItem asChild>
+                                <Link href={`/dashboard/users/${user.id}`}>Ver Perfil</Link>
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleSuspend(user.id)}>
                                 <UserX className="mr-2 h-4 w-4" />
                                 {user.status === 'active' ? 'Suspender' : 'Reactivar'}
