@@ -31,6 +31,14 @@ export interface Candidate {
   resumeRef?: string;
 }
 
+export interface Organization {
+  id: string;
+  name: string;
+  description: string;
+  website: string;
+  logoUrl: string;
+}
+
 export interface Skill {
   name: string;
   level: number; // 0-5

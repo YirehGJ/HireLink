@@ -1,10 +1,20 @@
-import type { User, Job, Candidate, Recommendation, Application } from './types';
+import type { User, Job, Candidate, Recommendation, Application, Organization } from './types';
 
 export const users: User[] = [
   { id: 'user-1', email: 'candidate@example.com', fullName: 'Alex Doe', role: 'candidate', status: 'active' },
   { id: 'user-2', email: 'recruiter@example.com', fullName: 'Brenda Smith', role: 'recruiter', status: 'active', organizationRef: 'org-1' },
   { id: 'user-3', email: 'admin@example.com', fullName: 'Casey Jones', role: 'admin', status: 'active' },
   { id: 'user-4', email: 'candidate2@example.com', fullName: 'Devon Ray', role: 'candidate', status: 'active' },
+];
+
+export const organizations: Organization[] = [
+    {
+        id: 'org-1',
+        name: 'Tech Innovators Inc.',
+        description: 'Pioneering the future of technology with cutting-edge solutions and a passion for innovation. Join us to build tomorrow, today.',
+        website: 'https://tech-innovators.example.com',
+        logoUrl: 'https://picsum.photos/seed/tech-innovators/200/200'
+    }
 ];
 
 export const candidates: Candidate[] = [
@@ -140,4 +150,8 @@ export function getCandidate(id: string) {
 
 export function getUser(id: string) {
     return users.find(u => u.id === id);
+}
+
+export function getOrganization(id: string) {
+    return organizations.find(org => org.id === id);
 }
