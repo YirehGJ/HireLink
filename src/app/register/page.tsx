@@ -72,9 +72,9 @@ export default function RegisterPage() {
       footerContent={
         <>
           ¿Ya tienes una cuenta?{' '}
-          <Link href="/login" className="font-semibold text-primary hover:underline hover:text-primary/90">
-            Inicia sesión
-          </Link>
+           <Button variant="link" asChild className="p-0 h-auto font-semibold">
+            <Link href="/login">Inicia sesión</Link>
+          </Button>
         </>
       }
     >

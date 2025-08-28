@@ -31,7 +31,7 @@ export default function Home() {
         <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 text-center">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-4xl md:text-6xl font-bold font-headline tracking-tighter text-foreground">
-              Conectamos Talento con Oportunidades, <br/> con el Poder de la IA Explicable
+              Conectamos Talento con Oportunidades, <br/> con el Poder de la <span className="text-secondary">IA Explicable</span>
             </h1>
             <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
               HireLink es la plataforma líder que utiliza inteligencia artificial para analizar perfiles, recomendar vacantes y transparentar el porqué de cada recomendación.
@@ -40,7 +40,7 @@ export default function Home() {
               <Button size="lg" asChild>
                 <Link href="/register">Encontrar mi próximo empleo</Link>
               </Button>
-              <Button size="lg" variant="secondary" asChild>
+              <Button size="lg" variant="outline" asChild>
                 <Link href="/register?role=recruiter">Contratar al mejor talento</Link>
               </Button>
             </div>
@@ -84,7 +84,7 @@ export default function Home() {
               </Card>
               <Card className="text-center bg-transparent dark:bg-card/50 border-0 md:border shadow-none md:shadow-sm">
                 <CardHeader>
-                  <div className="mx-auto bg-purple-500/10 text-purple-500 p-3 rounded-full w-fit">
+                  <div className="mx-auto bg-green-500/10 text-green-500 p-3 rounded-full w-fit">
                     <Users className="h-8 w-8" />
                   </div>
                   <CardTitle className="mt-4 font-headline">Para Reclutadores</CardTitle>

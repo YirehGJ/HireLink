@@ -27,8 +27,8 @@ export function JobsList() {
             <Card key={job.id} className="hover:shadow-lg transition-shadow duration-200 flex flex-col">
                 <CardHeader>
                     <div className="flex justify-between items-start gap-2">
-                        <CardTitle className="font-headline text-lg">{job.title}</CardTitle>
-                        <Badge variant={job.status === 'published' ? 'default' : 'outline'}>
+                        <CardTitle className="font-headline text-lg text-primary dark:text-primary-foreground/90">{job.title}</CardTitle>
+                        <Badge variant={job.status === 'published' ? 'secondary' : 'outline'}>
                             {statusText}
                         </Badge>
                     </div>

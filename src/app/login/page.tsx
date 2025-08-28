@@ -75,9 +75,9 @@ export default function LoginPage() {
       footerContent={
         <>
           ¿No tienes cuenta?{' '}
-          <Link href="/register" className="font-semibold text-primary hover:underline hover:text-primary/90">
-            Regístrate
-          </Link>
+          <Button variant="link" asChild className="p-0 h-auto font-semibold">
+            <Link href="/register">Regístrate</Link>
+          </Button>
         </>
       }
     >
@@ -140,12 +140,13 @@ export default function LoginPage() {
                 </FormItem>
               )}
             />
-            <Link
-              href="/forgot-password"
-              className="text-sm font-medium text-primary hover:underline hover:text-primary/90"
+            <Button
+              variant="link"
+              asChild
+              className="p-0 h-auto text-sm font-medium"
             >
-              ¿Olvidaste tu contraseña?
-            </Link>
+              <Link href="/forgot-password">¿Olvidaste tu contraseña?</Link>
+            </Button>
           </div>
           <Button type="submit" className="w-full" disabled={isSubmitting}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

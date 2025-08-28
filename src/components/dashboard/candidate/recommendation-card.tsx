@@ -26,7 +26,7 @@ export function RecommendationCard({ recommendation, job }: RecommendationCardPr
       <CardHeader>
         <div className="flex justify-between items-start">
             <div>
-                <CardTitle className="font-headline text-xl">{job.title}</CardTitle>
+                <CardTitle className="font-headline text-xl text-primary dark:text-primary-foreground/90">{job.title}</CardTitle>
                 <CardDescription className="flex items-center gap-2 mt-1 flex-wrap">
                     <span className="flex items-center"><MapPin className="h-4 w-4 mr-1.5" /> {job.location}</span>
                     <span className="flex items-center"><Briefcase className="h-4 w-4 mr-1.5 ml-2" /> {job.seniority}</span>
@@ -35,7 +35,7 @@ export function RecommendationCard({ recommendation, job }: RecommendationCardPr
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <Badge variant="secondary" className="bg-accent/10 text-accent font-bold border-accent/20">
+                  <Badge variant="secondary" className="font-bold">
                       <Zap className="h-3 w-3 mr-1" />
                       {(recommendation.score * 100).toFixed(0)}% Match
                   </Badge>
@@ -52,11 +52,11 @@ export function RecommendationCard({ recommendation, job }: RecommendationCardPr
         <div className="mt-4">
             <h4 className="text-sm font-semibold mb-2 text-foreground">Razones Principales</h4>
             <div className="flex flex-wrap gap-2">
-                {recommendation.reasons.slice(0, 3).map((reason, i) => (
+                {recommendation.reasons.map((reason, i) => (
                     <TooltipProvider key={i}>
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <Badge variant="outline" className="cursor-default">
+                                <Badge variant="lilac" className="cursor-default">
                                     <CheckCircle className="h-3 w-3 mr-1.5 text-green-500"/>
                                     {reason}
                                 </Badge>
