@@ -1,4 +1,5 @@
 
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,7 @@ import type { Application, Job } from "@/lib/types";
 import { format } from "date-fns";
 import Link from "next/link";
 import { ExternalLink, FileText } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ApplicationWithJob extends Application {
     job: Job | undefined;
@@ -15,7 +17,7 @@ interface ApplicationsTableProps {
   applications: ApplicationWithJob[];
 }
 
-const statusVariantMap: Record<Application['status'], "default" | "secondary" | "destructive" | "outline"> = {
+const statusVariantMap: Record<Application['status'], "default" | "secondary" | "destructive" | "outline" | "lilac"> = {
     applied: 'secondary',
     screening: 'default',
     assessment: 'default',
