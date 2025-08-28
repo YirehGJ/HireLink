@@ -1,9 +1,11 @@
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from '@/components/icons';
 import { Briefcase, Users, BrainCircuit } from 'lucide-react';
+import { ThemeSwitcher } from '@/components/theme-switcher';
 
 export default function Home() {
   return (
@@ -16,7 +18,8 @@ export default function Home() {
               HireLink
             </span>
           </Link>
-          <nav className="flex items-center gap-4">
+          <nav className="flex items-center gap-2">
+            <ThemeSwitcher />
             <Button variant="ghost" asChild>
               <Link href="/login">Iniciar Sesión</Link>
             </Button>
