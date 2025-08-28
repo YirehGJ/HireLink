@@ -148,7 +148,7 @@ export default function DashboardPage() {
       />
       
       {role === "candidate" && <RecommendationFeed />}
-      {role === "admin" && <AdminOverview />}
+      {role === "admin" && <AdminDashboard />}
     </div>
   );
 }

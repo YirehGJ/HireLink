@@ -42,7 +42,10 @@ export function DashboardSidebar() {
   const router = useRouter();
   const { user, role, setRole, isMounted } = useApp();
 
-  const isActive = (path: string) => pathname === path || pathname.startsWith(`${path}/`);
+  const isActive = (path: string) => {
+    if (path === '/dashboard') return pathname === path;
+    return pathname.startsWith(path);
+  }
 
   const handleLogout = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -152,13 +155,12 @@ export function DashboardSidebar() {
     )
   }
 
-  // Adjust dashboard link based on role
   const dashboardHome = role === 'recruiter' ? "/dashboard/jobs" : "/dashboard";
 
   return (
     <Sidebar variant="sidebar" collapsible="icon">
       <SidebarHeader className="items-center justify-center text-center">
-        <Link href="/dashboard" className="flex items-center gap-2">
+        <Link href={dashboardHome} className="flex items-center gap-2">
           <Icons.logo className="h-8 w-8 text-primary" />
           <span className="text-xl font-bold font-headline tracking-tighter">HireLink</span>
         </Link>
