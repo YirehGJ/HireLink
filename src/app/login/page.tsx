@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useApp } from "@/components/providers/app-provider";
-import type { UserRole } from "@/lib/types";
+import { users } from "@/lib/data";
 
 const formSchema = z.object({
   email: z
@@ -30,17 +30,11 @@ const formSchema = z.object({
   rememberMe: z.boolean().default(false).optional(),
 });
 
-const emailToRoleMap: Record<string, UserRole> = {
-    "candidate@example.com": "candidate",
-    "recruiter@example.com": "recruiter",
-    "admin@example.com": "admin"
-}
-
 
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { setRole } = useApp();
+  const { setUser } = useApp();
   const [showPassword, setShowPassword] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -70,8 +64,19 @@ export default function LoginPage() {
         return;
     }
     
-    const userRole = emailToRoleMap[values.email] || "candidate";
-    setRole(userRole);
+    const loggedInUser = users.find(u => u.email === values.email);
+
+    if (!loggedInUser) {
+        toast({
+            title: "Error de autenticación",
+            description: "No se encontró ningún usuario con ese correo.",
+            variant: "destructive"
+        });
+        setIsSubmitting(false);
+        return;
+    }
+
+    setUser(loggedInUser);
 
     toast({
       title: "Inicio de sesión exitoso",

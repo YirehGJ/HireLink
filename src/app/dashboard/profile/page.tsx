@@ -4,7 +4,7 @@
 import { useApp } from "@/components/providers/app-provider";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { UserProfileForm } from "@/components/dashboard/candidate/user-profile-form";
-import { getCandidate, getOrganization } from "@/lib/data";
+import { getCandidateByUserId, getOrganization } from "@/lib/data";
 import { OrganizationProfileForm } from "@/components/dashboard/recruiter/organization-profile-form";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -21,8 +21,7 @@ export default function ProfilePage() {
         )
     }
 
-    // In a real app, you'd fetch this based on the logged-in user's ID
-    const candidateProfile = role === 'candidate' ? getCandidate('candidate-1') : null;
+    const candidateProfile = role === 'candidate' ? getCandidateByUserId(user.id) : null;
     const organizationProfile = role === 'recruiter' && user.organizationRef ? getOrganization(user.organizationRef) : null;
     
     const titles = {

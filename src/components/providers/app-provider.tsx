@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
@@ -7,43 +8,47 @@ import { users } from '@/lib/data';
 interface AppContextType {
   user: User | null;
   role: UserRole | null;
-  setRole: (role: UserRole) => void;
+  setUser: (user: User | null) => void;
   isMounted: boolean;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
 
-const mockUsers: Record<UserRole, User> = {
-    candidate: users.find(u => u.role === 'candidate')!,
-    recruiter: users.find(u => u.role === 'recruiter')!,
-    admin: users.find(u => u.role === 'admin')!,
-};
-
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [role, setRole] = useState<UserRole | null>(null);
+  const [user, setUserState] = useState<User | null>(null);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    const storedRole = localStorage.getItem('hirelink-role') as UserRole;
-    if (storedRole && ['candidate', 'recruiter', 'admin'].includes(storedRole)) {
-      setRole(storedRole);
-    } else {
-      setRole('candidate'); // Default role
+    try {
+      const storedUser = localStorage.getItem('hirelink-user');
+      if (storedUser) {
+        setUserState(JSON.parse(storedUser));
+      } else {
+        // Default to first candidate if no user is stored
+        setUserState(users.find(u => u.role === 'candidate')!);
+      }
+    } catch (error) {
+        console.error("Failed to parse user from localStorage", error);
+        setUserState(users.find(u => u.role === 'candidate')!);
     }
     setIsMounted(true);
   }, []);
 
-  const handleSetRole = (newRole: UserRole) => {
-    localStorage.setItem('hirelink-role', newRole);
-    setRole(newRole);
+  const handleSetUser = (newUser: User | null) => {
+    if (newUser) {
+      localStorage.setItem('hirelink-user', JSON.stringify(newUser));
+    } else {
+      localStorage.removeItem('hirelink-user');
+    }
+    setUserState(newUser);
   };
-
-  const user = useMemo(() => (role ? mockUsers[role] : null), [role]);
+  
+  const role = useMemo(() => user?.role || null, [user]);
 
   const value = {
     user,
     role,
-    setRole: handleSetRole,
+    setUser: handleSetUser,
     isMounted
   };
 

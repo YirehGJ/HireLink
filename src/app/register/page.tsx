@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -14,6 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useApp } from "@/components/providers/app-provider";
 
 const formSchema = z.object({
   fullName: z
@@ -32,6 +34,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
+  const { setUser } = useApp();
   const defaultRole =
     searchParams.get("role") === "recruiter" ? "recruiter" : "candidate";
   const [showPassword, setShowPassword] = React.useState(false);
@@ -51,17 +54,25 @@ export default function RegisterPage() {
     setIsSubmitting(true);
     console.log(values);
 
-    // Simulate API call
+    // Simulate API call and creating a new user
     await new Promise((resolve) => setTimeout(resolve, 1500));
+    
+    const newUser = {
+        id: `user-${Math.random().toString(36).substring(7)}`,
+        email: values.email,
+        fullName: values.fullName,
+        role: values.role,
+        status: 'active' as const,
+        organizationRef: values.role === 'recruiter' ? 'org-1' : undefined,
+    };
+
+    setUser(newUser);
 
     toast({
       title: "Registro exitoso",
       description: "¡Bienvenido a HireLink! Redirigiendo...",
     });
 
-    if (typeof window !== "undefined") {
-      localStorage.setItem("hirelink-role", values.role);
-    }
     router.push("/dashboard");
   }
 

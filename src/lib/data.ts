@@ -1,3 +1,4 @@
+
 import type { User, Job, Candidate, Recommendation, Application, Organization } from './types';
 
 export const users: User[] = [
@@ -146,6 +147,10 @@ export function getJob(id: string) {
 
 export function getCandidate(id: string) {
     return candidates.find(c => c.id === id);
+}
+
+export function getCandidateByUserId(userId: string) {
+    return candidates.find(c => c.userRef === userId);
 }
 
 export function getUser(id: string) {

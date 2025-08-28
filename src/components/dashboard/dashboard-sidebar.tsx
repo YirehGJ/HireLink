@@ -40,7 +40,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function DashboardSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, role, setRole, isMounted } = useApp();
+  const { user, role, setUser, isMounted } = useApp();
 
   const isActive = (path: string) => {
     if (path === '/dashboard') return pathname === path;
@@ -49,7 +49,7 @@ export function DashboardSidebar() {
 
   const handleLogout = (e: React.MouseEvent) => {
     e.preventDefault();
-    localStorage.removeItem('hirelink-role');
+    setUser(null);
     router.push('/');
   }
 

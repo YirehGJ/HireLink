@@ -1,8 +1,14 @@
-import { recommendations, getJob } from '@/lib/data';
+
+"use client";
+
+import { recommendations, getJob, candidates } from '@/lib/data';
 import { RecommendationCard } from './recommendation-card';
+import { useApp } from '@/components/providers/app-provider';
 
 export function RecommendationFeed() {
-  const candidateRecs = recommendations.filter(r => r.candidateRef === 'candidate-1');
+  const { user } = useApp();
+  const candidate = candidates.find(c => c.userRef === user?.id);
+  const candidateRecs = candidate ? recommendations.filter(r => r.candidateRef === candidate.id) : [];
   
   if (candidateRecs.length === 0) {
       return (
