@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -9,9 +10,18 @@ import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { redirect, usePathname } from "next/navigation";
+import { useEffect } from "react";
 
 export default function DashboardPage() {
   const { role, user, isMounted } = useApp();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (isMounted && role === 'recruiter' && pathname === '/dashboard') {
+        redirect('/dashboard/jobs');
+    }
+  }, [role, isMounted, pathname]);
 
   const getGreeting = () => {
     const hours = new Date().getHours();
@@ -66,6 +76,11 @@ export default function DashboardPage() {
     candidate: null,
     admin: null,
   }
+  
+  if (role === 'recruiter') {
+      // Redirect handled by useEffect
+      return null;
+  }
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-8">
@@ -77,7 +92,6 @@ export default function DashboardPage() {
       />
       
       {role === "candidate" && <RecommendationFeed />}
-      {role === "recruiter" && <JobsList />}
       {role === "admin" && <AdminDashboard />}
     </div>
   );

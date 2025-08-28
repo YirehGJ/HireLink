@@ -22,6 +22,7 @@ import {
   LogOut,
   Users,
   FileText,
+  Building,
 } from "lucide-react";
 import { Icons } from "@/components/icons";
 import { useApp } from "@/components/providers/app-provider";
@@ -41,7 +42,7 @@ export function DashboardSidebar() {
   const router = useRouter();
   const { user, role, setRole, isMounted } = useApp();
 
-  const isActive = (path: string) => pathname === path;
+  const isActive = (path: string) => pathname === path || pathname.startsWith(`${path}/`);
 
   const handleLogout = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -77,8 +78,8 @@ export function DashboardSidebar() {
   const recruiterNav = (
     <>
       <SidebarMenuItem>
-        <SidebarMenuButton asChild isActive={isActive("/dashboard")} tooltip="Vacantes">
-          <Link href="/dashboard"><Briefcase /><span>Vacantes</span></Link>
+        <SidebarMenuButton asChild isActive={isActive("/dashboard/jobs")} tooltip="Vacantes">
+          <Link href="/dashboard/jobs"><Briefcase /><span>Vacantes</span></Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
@@ -102,8 +103,23 @@ export function DashboardSidebar() {
   const adminNav = (
     <>
       <SidebarMenuItem>
-        <SidebarMenuButton asChild isActive={isActive("/dashboard")} tooltip="Auditoría">
-          <Link href="/dashboard"><Shield /><span>Auditoría y Equidad</span></Link>
+        <SidebarMenuButton asChild isActive={pathname === "/dashboard"} tooltip="Panel Principal">
+          <Link href="/dashboard"><Home /><span>Panel Principal</span></Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton asChild isActive={isActive("/dashboard/admin/users")} tooltip="Usuarios">
+          <Link href="/dashboard/admin/users"><Users /><span>Gestión de Usuarios</span></Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+       <SidebarMenuItem>
+        <SidebarMenuButton asChild isActive={isActive("/dashboard/admin/jobs")} tooltip="Vacantes">
+          <Link href="/dashboard/admin/jobs"><Briefcase /><span>Gestión de Vacantes</span></Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton asChild isActive={isActive("/dashboard/admin/audit")} tooltip="Auditoría">
+          <Link href="/dashboard/admin/audit"><Shield /><span>Auditoría y Equidad</span></Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
        <SidebarMenuItem>
@@ -135,6 +151,9 @@ export function DashboardSidebar() {
       </Sidebar>
     )
   }
+
+  // Adjust dashboard link based on role
+  const dashboardHome = role === 'recruiter' ? "/dashboard/jobs" : "/dashboard";
 
   return (
     <Sidebar variant="sidebar" collapsible="icon">
