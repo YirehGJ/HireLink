@@ -5,7 +5,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
-import { Loader2, Trash2, UploadCloud, PlusCircle } from "lucide-react";
+import { Loader2, Trash2, UploadCloud, PlusCircle, Sparkles } from "lucide-react";
 import React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import type { Candidate } from "@/lib/types";
+import type { Candidate, Skill } from "@/lib/types";
+import { extractSkillsFromResume, ExtractSkillsFromResumeOutput } from "@/ai/flows/extract-skills-from-resume";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
 
 const skillSchema = z.object({
   name: z.string().min(1, "El nombre de la habilidad es requerido."),
@@ -35,6 +38,8 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isAnalyzing, setIsAnalyzing] = React.useState(false);
+  const [resumeFile, setResumeFile] = React.useState<File | null>(null);
   
   const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
@@ -47,16 +52,65 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control: form.control,
     name: "skills",
   });
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      setResumeFile(event.target.files[0]);
+    }
+  };
+
+  const handleAnalyzeResume = async () => {
+    if (!resumeFile) {
+        toast({
+            title: "Ningún archivo seleccionado",
+            description: "Por favor, selecciona tu CV para analizar.",
+            variant: "destructive"
+        });
+        return;
+    }
+
+    setIsAnalyzing(true);
+    toast({
+      title: "Analizando tu CV...",
+      description: "La IA está extrayendo tus habilidades. Esto puede tardar un momento.",
+    });
+
+    try {
+        const reader = new FileReader();
+        reader.readAsDataURL(resumeFile);
+        reader.onload = async () => {
+            const resumeDataUri = reader.result as string;
+            const extractedSkills: ExtractSkillsFromResumeOutput = await extractSkillsFromResume({ resumeDataUri });
+            
+            // @ts-ignore
+            replace(extractedSkills); // RHF useFieldArray's replace doesn't know about `source` property
+            
+            toast({
+              title: "¡Análisis completo!",
+              description: `Se han añadido ${extractedSkills.length} habilidades a tu perfil. Revisa y ajústalas si es necesario.`,
+            });
+        }
+    } catch (error) {
+        console.error("Error analyzing resume:", error);
+        toast({
+            title: "Error en el análisis",
+            description: "No se pudieron extraer las habilidades del CV. Inténtalo de nuevo.",
+            variant: "destructive"
+        });
+    } finally {
+        setIsAnalyzing(false);
+    }
+  }
+
 
   function onSubmit(values: z.infer<typeof profileSchema>) {
     setIsSubmitting(true);
     console.log(values);
     
-    // Simulate API call
     setTimeout(() => {
         toast({
           title: "Perfil Actualizado",
@@ -120,6 +174,15 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
                     <CardDescription>Detalla tus competencias técnicas y blandas. Serán usadas por la IA para las recomendaciones.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                    {fields.length === 0 && (
+                        <Alert>
+                            <Sparkles className="h-4 w-4" />
+                            <AlertTitle>¡Potencia tu perfil!</AlertTitle>
+                            <AlertDescription>
+                                Sube tu CV para que la IA extraiga tus habilidades, o añádelas manualmente.
+                            </AlertDescription>
+                        </Alert>
+                    )}
                     {fields.map((field, index) => (
                         <div key={field.id} className="grid grid-cols-[1fr_auto_auto_auto] items-end gap-2 p-3 border rounded-lg">
                             <FormField control={form.control} name={`skills.${index}.name`} render={({ field }) => (
@@ -168,15 +231,21 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
                     <CardDescription>La IA analizará tu CV para extraer habilidades automáticamente.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg text-center">
+                    <label htmlFor="resume-upload" className="relative flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg text-center cursor-pointer hover:border-primary transition-colors">
                         <UploadCloud className="h-12 w-12 text-muted-foreground" />
-                        <p className="mt-4 text-sm text-muted-foreground">Arrastra y suelta tu CV aquí, o haz clic para seleccionarlo.</p>
+                        <p className="mt-4 text-sm text-muted-foreground">Arrastra y suelta tu CV o haz clic para subirlo.</p>
                         <p className="text-xs text-muted-foreground mt-1">PDF, DOCX (Máx 5MB)</p>
-                         <Button type="button" variant="secondary" className="mt-4">
-                            Subir Archivo
-                        </Button>
-                    </div>
-                     {profile?.resumeRef && <p className="text-sm mt-4 text-center text-muted-foreground">Actual: {profile.resumeRef}</p>}
+                         <Input id="resume-upload" type="file" className="sr-only" onChange={handleFileChange} accept=".pdf,.docx" />
+                    </label>
+                     {resumeFile && <p className="text-sm mt-4 text-center text-muted-foreground">Seleccionado: {resumeFile.name}</p>}
+                     <Button type="button" className="w-full mt-4" onClick={handleAnalyzeResume} disabled={isAnalyzing || !resumeFile}>
+                        {isAnalyzing ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                            <Sparkles className="mr-2 h-4 w-4" />
+                        )}
+                        Analizar con IA
+                    </Button>
                 </CardContent>
             </Card>
             <Card>

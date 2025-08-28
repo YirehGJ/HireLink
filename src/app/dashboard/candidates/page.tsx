@@ -1,6 +1,9 @@
+
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { candidates } from "@/lib/data";
+import { CandidateCard } from "@/components/dashboard/recruiter/candidate-card";
 
 export default function CandidatesPage() {
     return (
@@ -18,9 +21,10 @@ export default function CandidatesPage() {
                         className="pl-10 max-w-lg"
                     />
                 </div>
-                <div className="text-center text-muted-foreground py-16 border-2 border-dashed rounded-lg">
-                    <h3 className="text-lg font-semibold">Funcionalidad en desarrollo</h3>
-                    <p>Aquí se mostrará la lista de candidatos que coincidan con tu búsqueda.</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                    {candidates.map(candidate => (
+                        <CandidateCard key={candidate.id} candidate={candidate} />
+                    ))}
                 </div>
             </div>
         </div>

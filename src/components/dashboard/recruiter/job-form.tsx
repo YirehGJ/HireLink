@@ -1,9 +1,12 @@
+
 "use client";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
+import React from "react";
+import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,6 +29,7 @@ const jobSchema = z.object({
 export function JobForm({ job }: { job?: Job }) {
   const router = useRouter();
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   
   const form = useForm<z.infer<typeof jobSchema>>({
     resolver: zodResolver(jobSchema),
@@ -39,19 +43,24 @@ export function JobForm({ job }: { job?: Job }) {
   });
 
   function onSubmit(values: z.infer<typeof jobSchema>) {
+    setIsSubmitting(true);
     console.log(values);
-    toast({
-      title: "Vacante Guardada",
-      description: "La vacante ha sido guardada exitosamente.",
-    });
-    router.push("/dashboard");
+    setTimeout(() => {
+        toast({
+          title: job ? "Vacante Actualizada" : "Vacante Creada",
+          description: "La vacante ha sido guardada exitosamente.",
+        });
+        setIsSubmitting(false);
+        if (!job) {
+            router.push("/dashboard/jobs");
+        }
+    }, 1500)
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <Card>
-          <CardContent className="p-6 space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField control={form.control} name="title" render={({ field }) => (
                     <FormItem>
@@ -90,7 +99,7 @@ export function JobForm({ job }: { job?: Job }) {
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 h-full">
                         <div className="space-y-0.5">
                             <FormLabel>Remoto Permitido</FormLabel>
-                            <FormDescription>¿Se puede trabajar en esta posición de forma remota?</FormDescription>
+                            <FormDescription className="text-xs">¿Se puede trabajar en esta posición de forma remota?</FormDescription>
                         </div>
                         <FormControl>
                             <Switch checked={field.value} onCheckedChange={field.onChange} />
@@ -103,16 +112,21 @@ export function JobForm({ job }: { job?: Job }) {
                 <FormItem>
                     <FormLabel>Descripción de la Vacante</FormLabel>
                     <FormControl><Textarea placeholder="Describe las responsabilidades, requerimientos, etc. Soporta Markdown." rows={10} {...field} /></FormControl>
+                     <FormDescription>
+                        Puedes usar Markdown para dar formato al texto.
+                    </FormDescription>
                     <FormMessage />
                 </FormItem>
             )} />
 
             <div className="flex justify-end gap-2 pt-4">
-                <Button variant="outline" type="button" onClick={() => router.back()}>Cancelar</Button>
-                <Button type="submit">Guardar Vacante</Button>
+                <Button variant="ghost" type="button" onClick={() => router.back()}>Cancelar</Button>
+                <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {job ? "Guardar Cambios" : "Crear Vacante"}
+                </Button>
             </div>
-          </CardContent>
-        </Card>
+
       </form>
     </Form>
   );
