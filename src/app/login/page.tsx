@@ -5,66 +5,64 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import React from "react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
-  email: z.string().email({ message: "Por favor, introduce un email válido." }),
-  password: z.string().min(1, { message: "La contraseña es requerida." }),
+  email: z.string().email({ message: "Formato de email inválido." }).min(1, { message: "El email es requerido." }),
+  password: z.string().min(8, { message: "La contraseña debe tener al menos 8 caracteres." }),
+  rememberMe: z.boolean().default(false).optional(),
 });
 
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const [showPassword, setShowPassword] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
       password: "",
+      rememberMe: false,
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // TODO: Implement actual Firebase login
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsSubmitting(true);
     console.log(values);
+
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
     toast({
       title: "Inicio de sesión exitoso",
       description: "Redirigiendo a tu panel...",
     });
-    // Simulate login and redirect
+
     router.push("/dashboard");
+    setIsSubmitting(false);
   }
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-2xl font-headline">Iniciar Sesión</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-2xl md:text-3xl font-headline text-center">Iniciar Sesión</CardTitle>
+        <CardDescription className="text-center">
           Introduce tus credenciales para acceder a tu cuenta.
         </CardDescription>
       </CardHeader>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <CardContent className="space-y-4">
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="email"
@@ -85,26 +83,65 @@ export default function LoginPage() {
                 <FormItem>
                   <FormLabel>Contraseña</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="********" {...field} />
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="********"
+                        {...field}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:bg-transparent"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                      >
+                        {showPassword ? <EyeOff /> : <Eye />}
+                      </Button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </CardContent>
-          <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full">
+            <div className="flex items-center justify-between gap-4">
+              <FormField
+                control={form.control}
+                name="rememberMe"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="cursor-pointer">Recuérdame</FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              <Link
+                href="/forgot-password"
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
+            <Button type="submit" className="w-full h-11" disabled={isSubmitting}>
+              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Entrar
             </Button>
-            <p className="text-sm text-center text-muted-foreground">
+            <p className="text-sm text-center text-muted-foreground pt-2">
               ¿No tienes cuenta?{" "}
-              <Link href="/register" className="font-medium text-primary hover:underline">
+              <Link href="/register" className="font-semibold text-primary hover:underline">
                 Regístrate
               </Link>
             </p>
-          </CardFooter>
-        </form>
-      </Form>
+          </form>
+        </Form>
+      </CardContent>
     </Card>
   );
 }

@@ -5,13 +5,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import React from "react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -35,7 +36,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   fullName: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres." }),
-  email: z.string().email({ message: "Por favor, introduce un email válido." }),
+  email: z.string().email({ message: "Formato de email inválido." }),
   password: z.string().min(8, { message: "La contraseña debe tener al menos 8 caracteres." }),
   role: z.enum(["candidate", "recruiter"], { required_error: "Debes seleccionar un tipo de cuenta." }),
 });
@@ -45,6 +46,8 @@ export default function RegisterPage() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const defaultRole = searchParams.get('role') === 'recruiter' ? 'recruiter' : 'candidate';
+  const [showPassword, setShowPassword] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -56,31 +59,36 @@ export default function RegisterPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // TODO: Implement actual Firebase registration
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsSubmitting(true);
     console.log(values);
+
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
     toast({
       title: "Registro exitoso",
       description: "¡Bienvenido a HireLink! Redirigiendo...",
     });
-    // Simulate login and redirect
+    
     if (typeof window !== 'undefined') {
       localStorage.setItem('hirelink-role', values.role);
     }
     router.push("/dashboard");
+    setIsSubmitting(false);
   }
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-2xl font-headline">Crear una cuenta</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-2xl md:text-3xl font-headline text-center">Crear una cuenta</CardTitle>
+        <CardDescription className="text-center">
           Únete a la plataforma líder en gestión de talento.
         </CardDescription>
       </CardHeader>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <CardContent className="space-y-4">
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
               control={form.control}
               name="fullName"
@@ -88,7 +96,7 @@ export default function RegisterPage() {
                 <FormItem>
                   <FormLabel>Nombre completo</FormLabel>
                   <FormControl>
-                    <Input placeholder="Tu nombre" {...field} />
+                    <Input placeholder="Tu nombre y apellido" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -114,7 +122,22 @@ export default function RegisterPage() {
                 <FormItem>
                   <FormLabel>Contraseña</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="Mínimo 8 caracteres" {...field} />
+                    <div className="relative">
+                        <Input
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Mínimo 8 caracteres"
+                            {...field}
+                        />
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:bg-transparent"
+                            onClick={() => setShowPassword((prev) => !prev)}
+                        >
+                            {showPassword ? <EyeOff /> : <Eye />}
+                        </Button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -141,20 +164,19 @@ export default function RegisterPage() {
                 </FormItem>
               )}
             />
-          </CardContent>
-          <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full h-11" disabled={isSubmitting}>
+              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Crear cuenta
             </Button>
-            <p className="text-sm text-center text-muted-foreground">
+            <p className="text-sm text-center text-muted-foreground pt-2">
               ¿Ya tienes una cuenta?{" "}
-              <Link href="/login" className="font-medium text-primary hover:underline">
+              <Link href="/login" className="font-semibold text-primary hover:underline">
                 Inicia sesión
               </Link>
             </p>
-          </CardFooter>
-        </form>
-      </Form>
+          </form>
+        </Form>
+      </CardContent>
     </Card>
   );
 }
