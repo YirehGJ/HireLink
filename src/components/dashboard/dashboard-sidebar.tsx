@@ -81,6 +81,16 @@ export function DashboardSidebar() {
           <Link href="/dashboard"><Briefcase /><span>Vacantes</span></Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton asChild isActive={isActive("/dashboard/candidates")} tooltip="Candidatos">
+          <Link href="/dashboard/candidates"><Users /><span>Candidatos</span></Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+       <SidebarMenuItem>
+        <SidebarMenuButton asChild isActive={isActive("/dashboard/profile")} tooltip="Perfil">
+          <Link href="/dashboard/profile"><User /><span>Perfil</span></Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
        <SidebarMenuItem>
         <SidebarMenuButton asChild isActive={isActive("/dashboard/settings")} tooltip="Configuración">
           <Link href="/dashboard/settings"><Settings /><span>Configuración</span></Link>
