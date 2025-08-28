@@ -1,6 +1,13 @@
+
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { UserProfileForm } from "@/components/dashboard/candidate/user-profile-form";
+import { getCandidate } from "@/lib/data";
+
 
 export default function ProfilePage() {
+    // In a real app, you'd fetch this based on the logged-in user's ID
+    const candidateProfile = getCandidate('candidate-1');
+
     return (
         <div className="p-4 sm:p-6 lg:p-8 space-y-8">
             <DashboardHeader 
@@ -8,9 +15,8 @@ export default function ProfilePage() {
                 title="Mi Perfil Profesional"
                 description="Mantén tu información actualizada para recibir las mejores recomendaciones."
             />
-            <div className="text-center text-muted-foreground py-16 border-2 border-dashed rounded-lg">
-                <h3 className="text-lg font-semibold">En construcción</h3>
-                <p>Aquí irá el formulario para editar el perfil y subir el CV.</p>
+            <div className="max-w-4xl mx-auto">
+                <UserProfileForm profile={candidateProfile} />
             </div>
         </div>
     );

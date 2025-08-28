@@ -3,6 +3,9 @@ import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Bell, Lock, Paintbrush } from 'lucide-react';
+import { ThemeSwitcher } from "@/components/dashboard/settings/theme-switcher";
+import { SecuritySettings } from "@/components/dashboard/settings/security-settings";
+import { NotificationSettings } from "@/components/dashboard/settings/notification-settings";
 
 export default function SettingsPage() {
     return (
@@ -24,11 +27,8 @@ export default function SettingsPage() {
                             <CardTitle>Apariencia</CardTitle>
                             <CardDescription>Personaliza cómo se ve HireLink en tu dispositivo.</CardDescription>
                         </CardHeader>
-                        <CardContent className="flex items-center justify-center h-64 bg-card/50 rounded-lg border-2 border-dashed">
-                             <div className="text-center text-muted-foreground">
-                                <Paintbrush className="h-16 w-16 mx-auto" />
-                                <p className="mt-4">Controles para cambiar tema (claro/oscuro) irán aquí.</p>
-                            </div>
+                        <CardContent>
+                            <ThemeSwitcher />
                         </CardContent>
                     </Card>
                 </TabsContent>
@@ -38,11 +38,8 @@ export default function SettingsPage() {
                             <CardTitle>Notificaciones</CardTitle>
                             <CardDescription>Elige cómo quieres recibir las actualizaciones.</CardDescription>
                         </CardHeader>
-                        <CardContent className="flex items-center justify-center h-64 bg-card/50 rounded-lg border-2 border-dashed">
-                            <div className="text-center text-muted-foreground">
-                                <Bell className="h-16 w-16 mx-auto" />
-                                <p className="mt-4">Opciones para notificaciones (email, push) irán aquí.</p>
-                            </div>
+                        <CardContent>
+                           <NotificationSettings />
                         </CardContent>
                     </Card>
                 </TabsContent>
@@ -52,11 +49,8 @@ export default function SettingsPage() {
                             <CardTitle>Seguridad</CardTitle>
                             <CardDescription>Gestiona tu contraseña y la seguridad de tu cuenta.</CardDescription>
                         </CardHeader>
-                        <CardContent className="flex items-center justify-center h-64 bg-card/50 rounded-lg border-2 border-dashed">
-                             <div className="text-center text-muted-foreground">
-                                <Lock className="h-16 w-16 mx-auto" />
-                                <p className="mt-4">Opciones para cambiar contraseña y 2FA irán aquí.</p>
-                            </div>
+                        <CardContent>
+                            <SecuritySettings />
                         </CardContent>
                     </Card>
                 </TabsContent>

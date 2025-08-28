@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import type { Application, Job } from "@/lib/types";
 import { format } from "date-fns";
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, FileText } from "lucide-react";
 
 interface ApplicationWithJob extends Application {
     job: Job | undefined;
@@ -26,52 +26,75 @@ const statusVariantMap: Record<Application['status'], "default" | "secondary" | 
     withdrawn: 'outline'
 };
 
+const statusTextMap: Record<Application['status'], string> = {
+    applied: 'Postulado',
+    screening: 'En Revisión',
+    assessment: 'Evaluación',
+    interview: 'Entrevista',
+    offer: 'Oferta',
+    hired: 'Contratado',
+    rejected: 'Rechazado',
+    withdrawn: 'Retirado'
+};
+
 
 export function ApplicationsTable({ applications }: ApplicationsTableProps) {
   if (applications.length === 0) {
     return (
-      <div className="text-center py-16 border-2 border-dashed rounded-lg">
-        <h3 className="text-xl font-semibold">Aún no has aplicado a ninguna vacante</h3>
+      <div className="text-center py-16 border-2 border-dashed rounded-lg bg-card/50">
+        <FileText className="h-12 w-12 mx-auto text-muted-foreground" />
+        <h3 className="text-xl font-semibold mt-4">Aún no has aplicado a ninguna vacante</h3>
         <p className="text-muted-foreground mt-2">Explora tus recomendaciones y encuentra tu próxima oportunidad.</p>
+        <Button asChild className="mt-4">
+            <Link href="/dashboard">Ver Recomendaciones</Link>
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="border rounded-lg overflow-hidden">
-        <Table>
-            <TableHeader>
-                <TableRow>
-                    <TableHead>Vacante</TableHead>
-                    <TableHead>Empresa</TableHead>
-                    <TableHead>Fecha de Postulación</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {applications.map(app => (
-                    <TableRow key={app.id}>
-                        <TableCell className="font-medium">{app.job?.title || 'Vacante no encontrada'}</TableCell>
-                        <TableCell className="text-muted-foreground">{app.job?.organizationRef || 'N/A'}</TableCell>
-                        <TableCell className="text-muted-foreground">{format(new Date(app.appliedAt), 'dd/MM/yyyy')}</TableCell>
-                        <TableCell>
-                             <Badge variant={statusVariantMap[app.status] || 'outline'} className="capitalize">
-                                {app.status}
-                            </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                             <Button variant="ghost" size="sm" asChild>
-                                <Link href={`/dashboard/jobs/${app.jobRef}`}>
-                                    Ver Vacante
-                                    <ExternalLink className="h-3 w-3 ml-2"/>
-                                </Link>
-                            </Button>
-                        </TableCell>
+    <Card>
+      <CardHeader>
+        <CardTitle>Historial de Postulaciones</CardTitle>
+        <CardDescription>Aquí puedes ver todas las vacantes a las que has aplicado y su estado actual.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="border rounded-lg overflow-hidden">
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Vacante</TableHead>
+                        <TableHead className="hidden md:table-cell">Empresa</TableHead>
+                        <TableHead className="hidden sm:table-cell">Fecha</TableHead>
+                        <TableHead>Estado</TableHead>
+                        <TableHead className="text-right">Acciones</TableHead>
                     </TableRow>
-                ))}
-            </TableBody>
-        </Table>
-    </div>
+                </TableHeader>
+                <TableBody>
+                    {applications.map(app => (
+                        <TableRow key={app.id}>
+                            <TableCell className="font-medium">{app.job?.title || 'Vacante no encontrada'}</TableCell>
+                            <TableCell className="text-muted-foreground hidden md:table-cell">{app.job?.organizationRef || 'N/A'}</TableCell>
+                            <TableCell className="text-muted-foreground hidden sm:table-cell">{format(new Date(app.appliedAt), 'dd/MM/yyyy')}</TableCell>
+                            <TableCell>
+                                <Badge variant={statusVariantMap[app.status] || 'outline'} className="capitalize">
+                                    {statusTextMap[app.status]}
+                                </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                                <Button variant="ghost" size="sm" asChild>
+                                    <Link href={`/dashboard/jobs/${app.jobRef}`}>
+                                        Ver Vacante
+                                        <ExternalLink className="h-3 w-3 ml-2"/>
+                                    </Link>
+                                </Button>
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
