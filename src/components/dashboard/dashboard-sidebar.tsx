@@ -171,19 +171,6 @@ export function DashboardSidebar() {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="flex-col gap-4">
-        <div className="px-2 space-y-2">
-            <Label className="text-xs text-muted-foreground px-2">Cambiar Rol (Demo)</Label>
-            <Select onValueChange={(value) => setRole(value as any)} defaultValue={role}>
-              <SelectTrigger className="h-9">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="candidate">Candidato</SelectItem>
-                <SelectItem value="recruiter">Reclutador</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-              </SelectContent>
-            </Select>
-        </div>
         <SidebarSeparator />
         <SidebarMenu>
             <SidebarMenuItem>
