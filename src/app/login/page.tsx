@@ -55,56 +55,58 @@ export default function LoginPage() {
   }
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle className="text-2xl font-headline">Iniciar Sesión</CardTitle>
-        <CardDescription>
-          Introduce tus credenciales para acceder a tu cuenta.
-        </CardDescription>
-      </CardHeader>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <CardContent className="space-y-4">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="tu@email.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Contraseña</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="********" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-          <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full">
-              Entrar
-            </Button>
-            <p className="text-sm text-center text-muted-foreground">
-              ¿No tienes cuenta?{" "}
-              <Link href="/register" className="font-medium text-primary hover:underline">
-                Regístrate
-              </Link>
-            </p>
-          </CardFooter>
-        </form>
-      </Form>
-    </Card>
+    <div className="flex items-center justify-center">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-2xl font-headline">Iniciar Sesión</CardTitle>
+          <CardDescription>
+            Introduce tus credenciales para acceder a tu cuenta.
+          </CardDescription>
+        </CardHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="tu@email.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Contraseña</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="********" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+            <CardFooter className="flex flex-col gap-4">
+              <Button type="submit" className="w-full">
+                Entrar
+              </Button>
+              <p className="text-sm text-center text-muted-foreground">
+                ¿No tienes cuenta?{" "}
+                <Link href="/register" className="font-medium text-primary hover:underline">
+                  Regístrate
+                </Link>
+              </p>
+            </CardFooter>
+          </form>
+        </Form>
+      </Card>
+    </div>
   );
 }
