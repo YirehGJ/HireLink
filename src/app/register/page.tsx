@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import React from "react";
+import React, { Suspense } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useApp } from "@/components/providers/app-provider";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const formSchema = z.object({
   fullName: z
@@ -30,7 +31,7 @@ const formSchema = z.object({
   }),
 });
 
-export default function RegisterPage() {
+function RegisterPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -181,4 +182,50 @@ export default function RegisterPage() {
       </Form>
     </FormCard>
   );
+}
+
+
+function RegisterPageLoading() {
+  return (
+    <FormCard
+      title="Crear una cuenta"
+      description="Únete a la plataforma líder en gestión de talento."
+      footerContent={
+        <>
+          ¿Ya tienes una cuenta?{' '}
+           <Button variant="link" asChild className="p-0 h-auto font-semibold">
+            <Link href="/login">Inicia sesión</Link>
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-24"/>
+          <Skeleton className="h-10 w-full"/>
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-24"/>
+          <Skeleton className="h-10 w-full"/>
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-24"/>
+          <Skeleton className="h-10 w-full"/>
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-24"/>
+          <Skeleton className="h-10 w-full"/>
+        </div>
+        <Skeleton className="h-10 w-full"/>
+      </div>
+    </FormCard>
+  )
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<RegisterPageLoading />}>
+      <RegisterPageContent />
+    </Suspense>
+  )
 }
