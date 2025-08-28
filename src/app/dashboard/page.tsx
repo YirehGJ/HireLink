@@ -30,7 +30,7 @@ export default function DashboardPage() {
     return "Buenas noches";
   };
 
-  if (!isMounted) {
+  if (!isMounted || !user) {
     return (
       <div className="p-4 sm:p-6 lg:p-8 space-y-8">
         <div className="flex justify-between">
@@ -86,9 +86,9 @@ export default function DashboardPage() {
     <div className="p-4 sm:p-6 lg:p-8 space-y-8">
       <DashboardHeader 
         greeting={`${getGreeting()}, ${user.fullName.split(' ')[0]}!`}
-        title={titles[role]}
-        description={descriptions[role]}
-        actions={actions[role]}
+        title={titles[role!]}
+        description={descriptions[role!]}
+        actions={actions[role!]}
       />
       
       {role === "candidate" && <RecommendationFeed />}
