@@ -4,7 +4,6 @@
 import Link from "next/link";
 import { useApp } from "@/components/providers/app-provider";
 import { RecommendationFeed } from "@/components/dashboard/candidate/recommendation-feed";
-import { AdminDashboard } from "@/components/dashboard/admin/admin-dashboard";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Users, Briefcase, Shield } from "lucide-react";
@@ -148,7 +147,7 @@ export default function DashboardPage() {
       />
       
       {role === "candidate" && <RecommendationFeed />}
-      {role === "admin" && <AdminDashboard />}
+      {role === "admin" && <AdminOverview />}
     </div>
   );
 }
