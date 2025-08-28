@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Sidebar,
   SidebarHeader,
@@ -36,9 +36,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function DashboardSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, role, setRole, isMounted } = useApp();
 
   const isActive = (path: string) => pathname === path;
+
+  const handleLogout = (e: React.MouseEvent) => {
+    e.preventDefault();
+    localStorage.removeItem('hirelink-role');
+    router.push('/');
+  }
 
   const candidateNav = (
     <>
@@ -75,35 +82,11 @@ export function DashboardSidebar() {
     </>
   );
 
-  const sidebarContent = (
-    <SidebarMenu>
-      {role === 'candidate' && candidateNav}
-      {role === 'recruiter' && recruiterNav}
-      {role === 'admin' && adminNav}
-    </SidebarMenu>
-  );
-
-  const roleSwitcher = (
-    <div className="px-2 space-y-2">
-        <Label className="text-xs text-muted-foreground px-2">Cambiar Rol (Demo)</Label>
-        <Select onValueChange={(value) => setRole(value as any)} defaultValue={role}>
-          <SelectTrigger className="h-9">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="candidate">Candidato</SelectItem>
-            <SelectItem value="recruiter">Reclutador</SelectItem>
-            <SelectItem value="admin">Admin</SelectItem>
-          </SelectContent>
-        </Select>
-    </div>
-  );
-
-  if (!isMounted) {
+  if (!isMounted || !role || !user) {
     return (
       <Sidebar variant="sidebar" collapsible="icon">
         <SidebarHeader>
-          <Skeleton className="h-8 w-8" />
+          <Skeleton className="h-8 w-8 rounded-full" />
           <Skeleton className="h-6 w-24" />
         </SidebarHeader>
         <SidebarContent className="p-2 space-y-2">
@@ -111,6 +94,10 @@ export function DashboardSidebar() {
           <Skeleton className="h-8 w-full" />
         </SidebarContent>
         <SidebarFooter>
+          <div className="px-2 py-4 space-y-4">
+            <Skeleton className="h-6 w-20" />
+            <Skeleton className="h-9 w-full" />
+          </div>
           <Skeleton className="h-20 w-full" />
         </SidebarFooter>
       </Sidebar>
@@ -126,10 +113,26 @@ export function DashboardSidebar() {
         </Link>
       </SidebarHeader>
       <SidebarContent>
-        {sidebarContent}
+        <SidebarMenu>
+          {role === 'candidate' && candidateNav}
+          {role === 'recruiter' && recruiterNav}
+          {role === 'admin' && adminNav}
+        </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="flex-col gap-4">
-        {roleSwitcher}
+        <div className="px-2 space-y-2">
+            <Label className="text-xs text-muted-foreground px-2">Cambiar Rol (Demo)</Label>
+            <Select onValueChange={(value) => setRole(value as any)} defaultValue={role}>
+              <SelectTrigger className="h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="candidate">Candidato</SelectItem>
+                <SelectItem value="recruiter">Reclutador</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
+              </SelectContent>
+            </Select>
+        </div>
         <SidebarSeparator />
         <SidebarMenu>
             <SidebarMenuItem>
@@ -147,7 +150,7 @@ export function DashboardSidebar() {
                 </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Cerrar Sesión">
+                <SidebarMenuButton asChild tooltip="Cerrar Sesión" onClick={handleLogout}>
                     <Link href="/"><LogOut /><span>Cerrar Sesión</span></Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>

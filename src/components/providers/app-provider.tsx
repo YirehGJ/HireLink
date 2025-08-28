@@ -5,8 +5,8 @@ import type { User, UserRole } from '@/lib/types';
 import { users } from '@/lib/data';
 
 interface AppContextType {
-  user: User;
-  role: UserRole;
+  user: User | null;
+  role: UserRole | null;
   setRole: (role: UserRole) => void;
   isMounted: boolean;
 }
@@ -20,13 +20,15 @@ const mockUsers: Record<UserRole, User> = {
 };
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [role, setRole] = useState<UserRole>('candidate');
+  const [role, setRole] = useState<UserRole | null>(null);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     const storedRole = localStorage.getItem('hirelink-role') as UserRole;
     if (storedRole && ['candidate', 'recruiter', 'admin'].includes(storedRole)) {
       setRole(storedRole);
+    } else {
+      setRole('candidate'); // Default role
     }
     setIsMounted(true);
   }, []);
@@ -36,7 +38,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setRole(newRole);
   };
 
-  const user = useMemo(() => mockUsers[role], [role]);
+  const user = useMemo(() => (role ? mockUsers[role] : null), [role]);
 
   const value = {
     user,

@@ -30,7 +30,7 @@ export default function Home() {
       <main className="flex-1">
         <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 text-center">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl md:text-6xl font-extrabold font-headline tracking-tighter text-foreground">
+            <h1 className="text-4xl md:text-6xl font-bold font-headline tracking-tighter text-foreground">
               Conectamos Talento con Oportunidades, <br/> con el Poder de la IA Explicable
             </h1>
             <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -47,7 +47,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="bg-card/50 py-20 md:py-24">
+        <section className="bg-card/50 dark:bg-card/20 py-20 md:py-24">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold font-headline">¿Por qué HireLink?</h2>
@@ -56,7 +56,7 @@ export default function Home() {
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <Card className="text-center border-0 md:border shadow-none md:shadow-sm">
+              <Card className="text-center bg-transparent dark:bg-card/50 border-0 md:border shadow-none md:shadow-sm">
                 <CardHeader>
                   <div className="mx-auto bg-primary/10 text-primary p-3 rounded-full w-fit">
                     <BrainCircuit className="h-8 w-8" />
@@ -69,9 +69,9 @@ export default function Home() {
                   </CardDescription>
                 </CardContent>
               </Card>
-              <Card className="text-center border-0 md:border shadow-none md:shadow-sm">
+              <Card className="text-center bg-transparent dark:bg-card/50 border-0 md:border shadow-none md:shadow-sm">
                 <CardHeader>
-                  <div className="mx-auto bg-accent/10 text-accent p-3 rounded-full w-fit">
+                  <div className="mx-auto bg-secondary/10 text-secondary p-3 rounded-full w-fit">
                     <Briefcase className="h-8 w-8" />
                   </div>
                   <CardTitle className="mt-4 font-headline">Para Candidatos</CardTitle>
@@ -82,7 +82,7 @@ export default function Home() {
                   </CardDescription>
                 </CardContent>
               </Card>
-              <Card className="text-center border-0 md:border shadow-none md:shadow-sm">
+              <Card className="text-center bg-transparent dark:bg-card/50 border-0 md:border shadow-none md:shadow-sm">
                 <CardHeader>
                   <div className="mx-auto bg-purple-500/10 text-purple-500 p-3 rounded-full w-fit">
                     <Users className="h-8 w-8" />
