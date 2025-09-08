@@ -7,11 +7,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "genkit": "genkit"
+    "lint": "next lint"
   },
   "dependencies": {
-    "@genkit-ai/googleai": "^1.0.0",
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
@@ -39,7 +37,6 @@
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.1.7",
     "firebase": "^10.14.1",
-    "genkit": "^1.0.0",
     "lucide-react": "^0.412.0",
     "next": "^14.2.5",
     "next-themes": "^0.3.0",
@@ -53,12 +50,14 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@genkit-ai/googleai": "^1.0.0",
     "@types/node": "^20.14.11",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "dotenv": "^16.4.5",
     "eslint": "^8",
     "eslint-config-next": "14.2.5",
+    "genkit": "^1.0.0",
     "postcss": "^8.4.39",
     "tailwindcss": "^3.4.6",
     "typescript": "^5.5.3"
