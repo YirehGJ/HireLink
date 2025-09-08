@@ -21,7 +21,7 @@ export default function ProfilePage() {
         )
     }
 
-    const candidateProfile = role === 'candidate' ? getCandidateByUserId(user.id) : null;
+    const candidateProfile = role === 'candidate' ? (getCandidateByUserId(user.id) || null) : null;
     const organizationProfile = role === 'recruiter' && user.organizationRef ? getOrganization(user.organizationRef) : null;
     
     const titles = {
