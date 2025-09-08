@@ -7,14 +7,9 @@ import { Button } from "@/components/ui/button";
 import type { Application, Candidate } from "@/lib/types";
 import { format } from "date-fns";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, FileText, Loader2, Sparkles } from "lucide-react";
+import { MoreHorizontal, FileText } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { filterApplicationsByAiMatch } from "@/ai/flows/filter-applications-by-ai-match";
-import { jobs } from "@/lib/data";
-import { useToast } from "@/hooks/use-toast";
-import { Tooltip, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-
 
 interface ApplicantWithCandidate extends Application {
     candidate: Candidate | undefined;
@@ -46,76 +41,6 @@ const statusTextMap: Record<Application['status'], string> = {
     withdrawn: 'Retirado'
 };
 
-const scoreColor = (score: number) => {
-    if (score > 0.8) return 'text-green-500';
-    if (score > 0.6) return 'text-yellow-500';
-    return 'text-red-500';
-}
-
-function MatchScore({applicant}: {applicant: ApplicantWithCandidate}) {
-    const [score, setScore] = React.useState<number | null>(null);
-    const [reasons, setReasons] = React.useState<string[]>([]);
-    const [isLoading, setIsLoading] = React.useState(false);
-    const { toast } = useToast();
-
-    const calculateMatch = async () => {
-        if (!applicant.candidate) return;
-        setIsLoading(true);
-
-        try {
-            const job = jobs.find(j => j.id === applicant.jobRef);
-            if (!job) throw new Error("Job not found");
-
-            const result = await filterApplicationsByAiMatch({
-                jobDescription: job.descriptionMd,
-                candidateSkills: applicant.candidate.skills.map(s => s.name)
-            });
-            setScore(result.matchScore);
-            setReasons(result.reasons);
-        } catch(error) {
-            console.error("Error calculating match score:", error);
-            toast({
-                title: "Error de IA",
-                description: "No se pudo calcular el puntaje de afinidad.",
-                variant: "destructive"
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    }
-
-    if (isLoading) {
-        return <Loader2 className="h-4 w-4 animate-spin" />
-    }
-    
-    if (score !== null) {
-        return (
-             <TooltipProvider>
-                <Tooltip>
-                    <TooltipTrigger>
-                        <span className={`font-bold ${scoreColor(score)}`}>
-                            {(score * 100).toFixed(0)}%
-                        </span>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        <p className="font-bold mb-2">Razones de Afinidad:</p>
-                        <ul className="list-disc pl-4">
-                            {reasons.map((r, i) => <li key={i}>{r}</li>)}
-                        </ul>
-                    </TooltipContent>
-                </Tooltip>
-            </TooltipProvider>
-        )
-    }
-
-    return (
-        <Button variant="ghost" size="sm" onClick={calculateMatch}>
-            <Sparkles className="h-4 w-4 mr-2"/>
-            Calcular
-        </Button>
-    );
-}
-
 export function ApplicantsTable({ applicants }: ApplicantsTableProps) {
   if (applicants.length === 0) {
     return (
@@ -140,7 +65,6 @@ export function ApplicantsTable({ applicants }: ApplicantsTableProps) {
                     <TableRow>
                         <TableHead>Candidato</TableHead>
                         <TableHead className="hidden md:table-cell">Postuló</TableHead>
-                        <TableHead className="hidden sm:table-cell">Afinidad IA</TableHead>
                         <TableHead>Estado</TableHead>
                         <TableHead className="text-right">Acciones</TableHead>
                     </TableRow>
@@ -161,9 +85,6 @@ export function ApplicantsTable({ applicants }: ApplicantsTableProps) {
                                 </div>
                             </TableCell>
                             <TableCell className="text-muted-foreground hidden md:table-cell">{format(new Date(app.appliedAt), 'dd/MM/yyyy')}</TableCell>
-                            <TableCell className="text-muted-foreground hidden sm:table-cell">
-                               <MatchScore applicant={app} />
-                            </TableCell>
                             <TableCell>
                                 <Badge variant={statusVariantMap[app.status] || 'outline'} className="capitalize">
                                     {statusTextMap[app.status]}

@@ -5,7 +5,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
-import { Loader2, Trash2, UploadCloud, PlusCircle, Sparkles } from "lucide-react";
+import { Loader2, Trash2, PlusCircle } from "lucide-react";
 import React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import type { Candidate, Skill } from "@/lib/types";
-import { extractSkillsFromResume, ExtractSkillsFromResumeOutput } from "@/ai/flows/extract-skills-from-resume";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 
@@ -38,8 +37,6 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [isAnalyzing, setIsAnalyzing] = React.useState(false);
-  const [resumeFile, setResumeFile] = React.useState<File | null>(null);
   
   const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
@@ -52,60 +49,10 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
     },
   });
 
-  const { fields, append, remove, replace } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "skills",
   });
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      setResumeFile(event.target.files[0]);
-    }
-  };
-
-  const handleAnalyzeResume = async () => {
-    if (!resumeFile) {
-        toast({
-            title: "Ningún archivo seleccionado",
-            description: "Por favor, selecciona tu CV para analizar.",
-            variant: "destructive"
-        });
-        return;
-    }
-
-    setIsAnalyzing(true);
-    toast({
-      title: "Analizando tu CV...",
-      description: "La IA está extrayendo tus habilidades. Esto puede tardar un momento.",
-    });
-
-    try {
-        const reader = new FileReader();
-        reader.readAsDataURL(resumeFile);
-        reader.onload = async () => {
-            const resumeDataUri = reader.result as string;
-            const extractedSkills: ExtractSkillsFromResumeOutput = await extractSkillsFromResume({ resumeDataUri });
-            
-            // @ts-ignore
-            replace(extractedSkills); // RHF useFieldArray's replace doesn't know about `source` property
-            
-            toast({
-              title: "¡Análisis completo!",
-              description: `Se han añadido ${extractedSkills.length} habilidades a tu perfil. Revisa y ajústalas si es necesario.`,
-            });
-        }
-    } catch (error) {
-        console.error("Error analyzing resume:", error);
-        toast({
-            title: "Error en el análisis",
-            description: "No se pudieron extraer las habilidades del CV. Inténtalo de nuevo.",
-            variant: "destructive"
-        });
-    } finally {
-        setIsAnalyzing(false);
-    }
-  }
-
 
   function onSubmit(values: z.infer<typeof profileSchema>) {
     setIsSubmitting(true);
@@ -176,10 +123,9 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
                 <CardContent className="space-y-4">
                     {fields.length === 0 && (
                         <Alert>
-                            <Sparkles className="h-4 w-4" />
                             <AlertTitle>¡Potencia tu perfil!</AlertTitle>
                             <AlertDescription>
-                                Sube tu CV para que la IA extraiga tus habilidades, o añádelas manualmente.
+                                Añade tus habilidades manualmente para mejorar las recomendaciones.
                             </AlertDescription>
                         </Alert>
                     )}
@@ -225,29 +171,6 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
           </div>
 
           <div className="lg:col-span-1 space-y-6">
-             <Card>
-                <CardHeader>
-                    <CardTitle>Tu Currículum</CardTitle>
-                    <CardDescription>La IA analizará tu CV para extraer habilidades automáticamente.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <label htmlFor="resume-upload" className="relative flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg text-center cursor-pointer hover:border-primary transition-colors">
-                        <UploadCloud className="h-12 w-12 text-muted-foreground" />
-                        <p className="mt-4 text-sm text-muted-foreground">Arrastra y suelta tu CV o haz clic para subirlo.</p>
-                        <p className="text-xs text-muted-foreground mt-1">PDF, DOCX (Máx 5MB)</p>
-                         <Input id="resume-upload" type="file" className="sr-only" onChange={handleFileChange} accept=".pdf,.docx" />
-                    </label>
-                     {resumeFile && <p className="text-sm mt-4 text-center text-muted-foreground">Seleccionado: {resumeFile.name}</p>}
-                     <Button type="button" className="w-full mt-4" onClick={handleAnalyzeResume} disabled={isAnalyzing || !resumeFile}>
-                        {isAnalyzing ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                            <Sparkles className="mr-2 h-4 w-4" />
-                        )}
-                        Analizar con IA
-                    </Button>
-                </CardContent>
-            </Card>
             <Card>
                 <CardHeader>
                     <CardTitle>Guardar Cambios</CardTitle>
