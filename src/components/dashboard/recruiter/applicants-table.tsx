@@ -1,4 +1,5 @@
 
+
 "use client"
 import * as React from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -10,6 +11,25 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { MoreHorizontal, FileText } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+// Normaliza cualquier fecha que pueda venir de Firestore (Timestamp, {seconds}, string, number) a Date
+type FireTime =
+  | Date
+  | { toDate?: () => Date; seconds?: number; nanoseconds?: number }
+  | string
+  | number
+  | null
+  | undefined;
+
+function toJsDate(v: FireTime): Date {
+  if (v instanceof Date) return v;
+  if (!v) return new Date(NaN); // muestra "Invalid Date" si viene vacío
+  const anyV = v as any;
+  if (typeof anyV?.toDate === 'function') return anyV.toDate(); // Timestamp
+  if (typeof anyV?.seconds === 'number') return new Date(anyV.seconds * 1000); // objeto serializado
+  return new Date(anyV as string | number); // string o number
+}
+
 
 interface ApplicantWithCandidate extends Application {
     candidate: Candidate | undefined;
@@ -84,7 +104,7 @@ export function ApplicantsTable({ applicants }: ApplicantsTableProps) {
                                     </div>
                                 </div>
                             </TableCell>
-                            <TableCell className="text-muted-foreground hidden md:table-cell">{format(new Date(app.appliedAt), 'dd/MM/yyyy')}</TableCell>
+                            <TableCell className="text-muted-foreground hidden md:table-cell">{format(toJsDate(app.appliedAt as any), 'dd/MM/yyyy')}</TableCell>
                             <TableCell>
                                 <Badge variant={statusVariantMap[app.status] || 'outline'} className="capitalize">
                                     {statusTextMap[app.status]}

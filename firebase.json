@@ -2,21 +2,10 @@
 {
   "hosting": {
     "site": "hirelink-fd1fe",
-    "public": "out",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
-    ],
-    "predeploy": [
-      "npm run build"
-    ]
+    "source": ".",
+    "frameworksBackend": {
+      "region": "us-central1"
+    }
   },
   "storage": {
     "rules": "storage.rules"

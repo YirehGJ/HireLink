@@ -40,9 +40,23 @@ const statusTextMap: Record<Application['status'], string> = {
     withdrawn: 'Retirado'
 };
 
-const toDate = (date: Date | Timestamp): Date => {
-    return date instanceof Timestamp ? date.toDate() : date;
-};
+// Normaliza cualquier fecha que pueda venir de Firestore (Timestamp, {seconds}, string, number) a Date
+type FireTime =
+  | Date
+  | { toDate?: () => Date; seconds?: number; nanoseconds?: number }
+  | string
+  | number
+  | null
+  | undefined;
+
+function toJsDate(v: FireTime): Date {
+  if (v instanceof Date) return v;
+  if (!v) return new Date(NaN); // muestra "Invalid Date" si viene vacío
+  const anyV = v as any;
+  if (typeof anyV?.toDate === 'function') return anyV.toDate(); // Timestamp
+  if (typeof anyV?.seconds === 'number') return new Date(anyV.seconds * 1000); // objeto serializado
+  return new Date(anyV as string | number); // string o number
+}
 
 
 export function ApplicationsTable({ applications }: ApplicationsTableProps) {
@@ -82,7 +96,7 @@ export function ApplicationsTable({ applications }: ApplicationsTableProps) {
                         <TableRow key={app.id}>
                             <TableCell className="font-medium">{app.job?.title || 'Vacante no encontrada'}</TableCell>
                             <TableCell className="text-muted-foreground hidden md:table-cell">{app.job?.organizationRef || 'N/A'}</TableCell>
-                            <TableCell className="text-muted-foreground hidden sm:table-cell">{format(toDate(app.appliedAt), 'dd/MM/yyyy')}</TableCell>
+                            <TableCell className="text-muted-foreground hidden sm:table-cell">{format(toJsDate(app.appliedAt), 'dd/MM/yyyy')}</TableCell>
                             <TableCell>
                                 <Badge variant={statusVariantMap[app.status] || 'outline'} className="capitalize">
                                     {statusTextMap[app.status]}
