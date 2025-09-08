@@ -2,6 +2,7 @@
 {
   "hosting": {
     "site": "hirelink-fd1fe",
+    "source": ".",
     "frameworksBackend": {
       "id": "hirelink-backend",
       "region": "us-central1"
