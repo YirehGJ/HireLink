@@ -4,6 +4,7 @@
 import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
 import type { User, UserRole } from '@/lib/types';
 import { users } from '@/lib/data';
+import { app } from '@/lib/firebase'; // Import Firebase app
 
 interface AppContextType {
   user: User | null;
@@ -19,6 +20,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    // This effect now also ensures Firebase is initialized on the client
+    const initFirebase = async () => {
+      // You can use the `app` object here if needed, for example, for Analytics
+    };
+    initFirebase();
+    
     try {
       const storedUser = localStorage.getItem('hirelink-user');
       if (storedUser) {
