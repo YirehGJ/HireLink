@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import Link from "next/link";
 import { ExternalLink, FileText } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Timestamp } from "firebase/firestore";
 
 interface ApplicationWithJob extends Application {
     job: Job | undefined;
@@ -37,6 +38,10 @@ const statusTextMap: Record<Application['status'], string> = {
     hired: 'Contratado',
     rejected: 'Rechazado',
     withdrawn: 'Retirado'
+};
+
+const toDate = (date: Date | Timestamp): Date => {
+    return date instanceof Timestamp ? date.toDate() : date;
 };
 
 
@@ -77,7 +82,7 @@ export function ApplicationsTable({ applications }: ApplicationsTableProps) {
                         <TableRow key={app.id}>
                             <TableCell className="font-medium">{app.job?.title || 'Vacante no encontrada'}</TableCell>
                             <TableCell className="text-muted-foreground hidden md:table-cell">{app.job?.organizationRef || 'N/A'}</TableCell>
-                            <TableCell className="text-muted-foreground hidden sm:table-cell">{format(new Date(app.appliedAt), 'dd/MM/yyyy')}</TableCell>
+                            <TableCell className="text-muted-foreground hidden sm:table-cell">{format(toDate(app.appliedAt), 'dd/MM/yyyy')}</TableCell>
                             <TableCell>
                                 <Badge variant={statusVariantMap[app.status] || 'outline'} className="capitalize">
                                     {statusTextMap[app.status]}
