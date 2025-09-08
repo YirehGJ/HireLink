@@ -2,12 +2,6 @@
 {
   "hosting": {
     "site": "hirelink-fd1fe",
-    "source": ".",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
     "frameworksBackend": {
       "id": "hirelink-backend",
       "region": "us-central1"
@@ -23,5 +17,3 @@
     "indexes": "firestore.indexes.json"
   }
 }
-
-    
