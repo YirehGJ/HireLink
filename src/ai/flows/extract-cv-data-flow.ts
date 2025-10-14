@@ -1,21 +1,20 @@
 
 'use server';
 /**
- * @fileOverview Flujo de Genkit para extraer datos estructurados de un CV en PDF.
+ * @fileOverview Flujo de Genkit para extraer datos estructurados de un texto de CV.
  *
- * - extractCvData: Llama al flujo principal para procesar el CV.
- * - CvExtractionInput: El tipo de entrada para el flujo (Data URI del PDF).
+ * - extractCvData: Llama al flujo principal para procesar el texto del CV.
+ * - CvExtractionInput: El tipo de entrada para el flujo (texto del CV).
  * - CvExtractionOutput: El tipo de salida del flujo (datos estructurados del perfil).
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit/zod';
-import * as pdfParse from 'pdf-parse';
 
-// Esquema de entrada: un Data URI que contiene el PDF.
+// Esquema de entrada: el texto extraído de un CV.
 const CvExtractionInputSchema = z.object({
-  pdfDataUri: z.string().describe(
-    "El CV en formato PDF, como un data URI que debe incluir un MIME type y usar codificación Base64. Formato esperado: 'data:application/pdf;base64,<encoded_data>'."
+  cvText: z.string().describe(
+    "El texto completo extraído de un currículum vitae."
   ),
 });
 export type CvExtractionInput = z.infer<typeof CvExtractionInputSchema>;
@@ -39,39 +38,14 @@ export type CvExtractionOutput = z.infer<typeof CvExtractionOutputSchema>;
 
 /**
  * Función exportada que los componentes de React llamarán.
- * @param input La entrada con el Data URI del PDF.
+ * @param input La entrada con el texto del CV.
  * @returns Los datos extraídos del CV.
  */
 export async function extractCvData(input: CvExtractionInput): Promise<CvExtractionOutput> {
   return extractCvDataFlow(input);
 }
 
-
-// 1. Definir la herramienta para extraer texto del PDF
-const parsePdfTool = ai.defineTool(
-    {
-        name: 'parsePdfTool',
-        description: 'Extrae el texto de un archivo PDF proporcionado como un Data URI.',
-        inputSchema: z.object({ pdfDataUri: z.string() }),
-        outputSchema: z.object({ text: z.string() }),
-    },
-    async (input) => {
-        try {
-            const base64Data = input.pdfDataUri.split(',')[1];
-            const pdfBuffer = Buffer.from(base64Data, 'base64');
-            const data = await pdfParse(pdfBuffer);
-            // Limpia el texto para eliminar espacios excesivos y saltos de línea
-            const cleanedText = data.text.replace(/\s\s+/g, ' ').replace(/\n\s*\n/g, '\n').trim();
-            return { text: cleanedText };
-        } catch (error) {
-            console.error('Error parsing PDF:', error);
-            return { text: '' }; // Devuelve texto vacío en caso de error
-        }
-    }
-);
-
-
-// 2. Definir el flujo principal que orquesta la extracción
+// Define el flujo principal que orquesta la extracción
 const extractCvDataFlow = ai.defineFlow(
   {
     name: 'extractCvDataFlow',
@@ -79,21 +53,16 @@ const extractCvDataFlow = ai.defineFlow(
     outputSchema: CvExtractionOutputSchema,
   },
   async (input) => {
-    
-    // Paso 1: Usar la herramienta para extraer el texto del PDF
-    const parsed = await parsePdfTool(input);
-
-    if (!parsed.text) {
-        throw new Error("No se pudo extraer texto del PDF.");
+    if (!input.cvText) {
+        throw new Error("No se proporcionó texto del CV.");
     }
     
-    // Paso 2: Usar el modelo de IA para analizar el texto extraído
     const llmResponse = await ai.generate({
       prompt: `Analiza el siguiente texto extraído de un currículum vitae (CV) y extrae la información solicitada en el formato JSON especificado.
 
 Texto del CV:
 """
-${parsed.text}
+${input.cvText}
 """
 
 Extrae los siguientes campos:
@@ -107,7 +76,7 @@ Sé conciso y preciso.`,
         schema: CvExtractionOutputSchema,
         format: 'json'
       },
-      model: 'googleai/gemini-2.5-flash', // Usamos un modelo rápido para esta tarea
+      model: 'googleai/gemini-2.5-flash',
     });
 
     const output = llmResponse.output();

@@ -7,6 +7,7 @@ import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { Loader2, Trash2, PlusCircle, FileUp, BrainCircuit } from "lucide-react";
 import React from "react";
+import * as pdfjsLib from "pdfjs-dist";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,6 +42,10 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
   const [isParsingCv, setIsParsingCv] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   
+  React.useEffect(() => {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+  }, []);
+
   const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -89,17 +94,26 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
 
     try {
         const reader = new FileReader();
-        reader.readAsDataURL(file);
+        reader.readAsArrayBuffer(file);
         reader.onload = async () => {
-            const pdfDataUri = reader.result as string;
-            const extractedData = await extractCvData({ pdfDataUri });
+            const pdfData = new Uint8Array(reader.result as ArrayBuffer);
+            const doc = await pdfjsLib.getDocument({ data: pdfData }).promise;
+            let text = '';
+            for (let i = 1; i <= doc.numPages; i++) {
+                const page = await doc.getPage(i);
+                const content = await page.getTextContent();
+                text += content.items.map((item: any) => item.str).join(' ');
+            }
+            
+            const cleanedText = text.replace(/\s\s+/g, ' ').replace(/\n\s*\n/g, '\n').trim();
+
+            const extractedData = await extractCvData({ cvText: cleanedText });
 
             if (extractedData) {
                 form.setValue('headline', extractedData.headline, { shouldValidate: true });
                 form.setValue('location', extractedData.location, { shouldValidate: true });
                 form.setValue('yearsOfExperience', extractedData.yearsOfExperience, { shouldValidate: true });
                 
-                // Replace instead of append to avoid duplicates on re-upload
                 replace(extractedData.skills);
 
                 toast({
@@ -119,7 +133,6 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
         });
     } finally {
         setIsParsingCv(false);
-        // Reset file input to allow re-upload of the same file
         if(fileInputRef.current) {
             fileInputRef.current.value = "";
         }
@@ -201,7 +214,7 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
                             <FormField control={form.control} name={`skills.${index}.years`} render={({ field }) => (
                                 <FormItem>
                                     <FormLabel className={index !== 0 ? "sr-only" : ""}>Años</FormLabel>
-                                    <FormControl><Input type="number" min="0" max="60" className="w-20" placeholder="3" {...field} /></FormControl>
+                                    <FormControl><Input type="number" min="0" className="w-20" placeholder="3" {...field} /></FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )} />
@@ -279,3 +292,4 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
     </Form>
   );
 }
+
