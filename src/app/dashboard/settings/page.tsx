@@ -2,9 +2,9 @@
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bell, Lock, Paintbrush } from 'lucide-react';
+import { Bell, Lock, Paintbrush, User } from 'lucide-react';
 import { ThemeSwitcher } from "@/components/dashboard/settings/theme-switcher";
-import { SecuritySettings } from "@/components/dashboard/settings/security-settings";
+import { AccountSettings } from "@/components/dashboard/settings/account-settings";
 import { NotificationSettings } from "@/components/dashboard/settings/notification-settings";
 
 export default function SettingsPage() {
@@ -19,7 +19,7 @@ export default function SettingsPage() {
                 <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="appearance">Apariencia</TabsTrigger>
                     <TabsTrigger value="notifications">Notificaciones</TabsTrigger>
-                    <TabsTrigger value="security">Seguridad</TabsTrigger>
+                    <TabsTrigger value="security">Cuenta y Seguridad</TabsTrigger>
                 </TabsList>
                 <TabsContent value="appearance" className="mt-6">
                     <Card>
@@ -46,11 +46,11 @@ export default function SettingsPage() {
                 <TabsContent value="security" className="mt-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Seguridad</CardTitle>
-                            <CardDescription>Gestiona tu contraseña y la seguridad de tu cuenta.</CardDescription>
+                            <CardTitle>Cuenta y Seguridad</CardTitle>
+                            <CardDescription>Gestiona tu información personal, contraseña y seguridad de tu cuenta.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <SecuritySettings />
+                            <AccountSettings />
                         </CardContent>
                     </Card>
                 </TabsContent>
