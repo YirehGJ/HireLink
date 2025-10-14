@@ -92,7 +92,7 @@ export default function LoginPage() {
     
     try {
         const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
-        await ensureUserProfileExists(firestore, userCredential.user, { fullName: values.email });
+        await ensureUserProfileExists(firestore, userCredential.user, { fullName: values.email.split('@')[0] });
         toast({
             title: "Inicio de sesión exitoso",
             description: "Redirigiendo a tu panel...",
