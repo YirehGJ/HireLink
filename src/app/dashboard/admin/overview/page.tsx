@@ -2,7 +2,7 @@
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { users, jobs, applications } from "@/lib/data";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Briefcase, Shield } from "lucide-react";
+import { Users, Briefcase, Shield, User } from "lucide-react";
 import Link from "next/link";
 
 
@@ -40,7 +40,7 @@ const AdminOverview = () => (
           </CardContent>
         </Card>
       </div>
-       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Link href="/dashboard/admin/users" className="bg-card p-6 rounded-lg hover:bg-muted/50 transition-colors flex flex-col items-center text-center">
               <Users className="h-10 w-10 mb-2 text-primary"/>
               <h3 className="text-lg font-semibold">Gestionar Usuarios</h3>
@@ -55,6 +55,11 @@ const AdminOverview = () => (
               <Shield className="h-10 w-10 mb-2 text-primary"/>
               <h3 className="text-lg font-semibold">Auditoría y Equidad</h3>
               <p className="text-sm text-muted-foreground">Monitorear la actividad de la plataforma.</p>
+          </Link>
+           <Link href="/dashboard/profile" className="bg-card p-6 rounded-lg hover:bg-muted/50 transition-colors flex flex-col items-center text-center">
+              <User className="h-10 w-10 mb-2 text-primary"/>
+              <h3 className="text-lg font-semibold">Ver mi Perfil</h3>
+              <p className="text-sm text-muted-foreground">Visualiza la información de tu cuenta.</p>
           </Link>
       </div>
     </div>
