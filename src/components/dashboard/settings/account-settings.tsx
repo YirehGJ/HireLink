@@ -7,6 +7,9 @@ import { z } from "zod";
 import React from "react";
 import { Loader2 } from "lucide-react";
 import { useApp } from "@/components/providers/app-provider";
+import { updateProfile } from "firebase/auth";
+import { doc, updateDoc } from "firebase/firestore";
+import { useAuth, useFirestore } from "@/firebase";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -57,7 +60,9 @@ const accountFormSchema = z
 type AccountFormValues = z.infer<typeof accountFormSchema>;
 
 export function AccountSettings() {
-  const { user, isMounted } = useApp();
+  const { user, setUser, isMounted } = useApp();
+  const auth = useAuth();
+  const firestore = useFirestore();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const form = useForm<AccountFormValues>({
@@ -84,14 +89,54 @@ export function AccountSettings() {
   }, [user, form]);
 
 
-  function onSubmit(data: AccountFormValues) {
+  async function onSubmit(data: AccountFormValues) {
     setIsSubmitting(true);
-    console.log(data);
-    setTimeout(() => {
-        toast({
-          title: "Cuenta actualizada",
-          description: "La información de tu cuenta ha sido guardada exitosamente.",
-        });
+
+    if (!auth?.currentUser || !firestore || !user) {
+      toast({ title: "Error", description: "No se pudo actualizar el perfil.", variant: "destructive"});
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const updates: Promise<any>[] = [];
+      const updatedUserData: any = {};
+      
+      // Update display name if changed
+      if (data.fullName !== user.fullName) {
+        updates.push(updateProfile(auth.currentUser, { displayName: data.fullName }));
+        updates.push(updateDoc(doc(firestore, "users", user.id), { fullName: data.fullName }));
+        updatedUserData.fullName = data.fullName;
+      }
+      
+      // TODO: Handle email change (requires re-authentication)
+      if (data.email !== user.email) {
+          console.warn("El cambio de email no está implementado todavía.");
+      }
+
+      // TODO: Handle password change
+      if (data.newPassword) {
+        console.warn("El cambio de contraseña no está implementado todavía.");
+      }
+      
+      await Promise.all(updates);
+
+      // Update local app state
+      setUser(prevUser => prevUser ? { ...prevUser, ...updatedUserData } : null);
+
+      toast({
+        title: "Cuenta actualizada",
+        description: "La información de tu cuenta ha sido guardada exitosamente.",
+      });
+
+    } catch (error) {
+       console.error("Error updating profile:", error);
+       toast({
+        title: "Error",
+        description: "No se pudo actualizar el perfil.",
+        variant: "destructive",
+      });
+    } finally {
         setIsSubmitting(false);
         form.reset({
           ...form.getValues(),
@@ -99,7 +144,7 @@ export function AccountSettings() {
           newPassword: "",
           confirmPassword: "",
         });
-    }, 1500)
+    }
   }
 
   if (!isMounted) {
@@ -140,7 +185,7 @@ export function AccountSettings() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="tu@email.com" {...field} />
+                <Input type="email" placeholder="tu@email.com" {...field} disabled />
               </FormControl>
               <FormMessage />
             </FormItem>

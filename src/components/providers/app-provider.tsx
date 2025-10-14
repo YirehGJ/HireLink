@@ -3,10 +3,11 @@
 
 import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
 import type { User, UserRole } from '@/lib/types';
-import { useUser, useDoc } from '@/firebase'; // Import the new useUser and useDoc hooks
+import { useUser, useDoc } from '@/firebase';
 
 interface AppContextType {
   user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
   role: UserRole | null;
   isMounted: boolean;
 }
@@ -15,22 +16,29 @@ const AppContext = createContext<AppContextType | null>(null);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const { user: firebaseUser, loading: authLoading } = useUser();
+  const [userState, setUserState] = useState<User | null>(null);
   const [isMounted, setIsMounted] = useState(false);
 
-  // Get the user profile from Firestore using the authenticated user's UID
   const userDocPath = firebaseUser ? `users/${firebaseUser.uid}` : '';
-  const { data: user, loading: userLoading } = useDoc<User>(userDocPath);
+  const { data: userFromFirestore, loading: userLoading } = useDoc<User>(userDocPath);
   
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  const role = useMemo(() => user?.role || null, [user]);
+  useEffect(() => {
+    if (userFromFirestore) {
+      setUserState(userFromFirestore);
+    }
+  }, [userFromFirestore]);
+
+  const role = useMemo(() => userState?.role || null, [userState]);
 
   const loading = authLoading || userLoading;
 
   const value = {
-    user: user || null,
+    user: userState,
+    setUser: setUserState,
     role,
     isMounted: isMounted && !loading,
   };
@@ -45,5 +53,3 @@ export function useApp() {
   }
   return context;
 }
-
-    
