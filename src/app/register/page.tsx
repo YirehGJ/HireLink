@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -76,13 +76,16 @@ function RegisterPageContent() {
 
         // Update Firebase Auth profile
         await updateProfile(firebaseUser, { displayName: values.fullName });
+        
+        // Hardcode admin role for the specific admin email
+        const role = values.email === 'admin@test.com' ? 'admin' : values.role;
 
         // Create user document in Firestore
         const newUserProfile: User = {
           id: firebaseUser.uid,
           email: values.email,
           fullName: values.fullName,
-          role: values.role,
+          role: role,
           status: 'active',
         };
         await setDoc(doc(firestore, "users", firebaseUser.uid), newUserProfile);
@@ -127,11 +130,12 @@ function RegisterPageContent() {
       const userDoc = await getDoc(userDocRef);
 
       if (!userDoc.exists()) {
+        const role = googleUser.email === 'admin@test.com' ? 'admin' : 'candidate';
         const newUserProfile: User = {
           id: googleUser.uid,
           email: googleUser.email!,
           fullName: googleUser.displayName || "Usuario de Google",
-          role: 'candidate',
+          role: role,
           status: 'active',
         };
         

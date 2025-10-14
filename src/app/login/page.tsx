@@ -46,11 +46,14 @@ const ensureUserProfileExists = async (
   const userDoc = await getDoc(userDocRef);
 
   if (!userDoc.exists()) {
+    // Hardcode admin role for the specific admin email
+    const role = firebaseUser.email === 'admin@test.com' ? 'admin' : (defaults.role || 'candidate');
+
     const newUserProfile: User = {
       id: firebaseUser.uid,
       email: firebaseUser.email!,
       fullName: firebaseUser.displayName || defaults.fullName || "Nuevo Usuario",
-      role: defaults.role || "candidate",
+      role: role,
       status: "active",
       ...defaults,
     };
