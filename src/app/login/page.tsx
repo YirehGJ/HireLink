@@ -9,7 +9,7 @@ import * as z from "zod";
 import React from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, User as FirebaseUser } from "firebase/auth";
-import { doc, setDoc, getDoc, Firestore } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
 
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth, useFirestore } from "@/firebase";
 import { Icons } from "@/components/icons";
 import { Separator } from "@/components/ui/separator";
-import { User } from "@/lib/types";
+import type { User } from "@/lib/types";
 
 
 const formSchema = z.object({
@@ -35,6 +35,28 @@ const formSchema = z.object({
     .min(6, { message: "La contraseña debe tener al menos 6 caracteres." }),
   rememberMe: z.boolean().default(false).optional(),
 });
+
+const ensureUserProfileExists = async (
+  firestore: ReturnType<typeof useFirestore>,
+  firebaseUser: FirebaseUser,
+  defaults: Partial<User> = {}
+) => {
+  if (!firestore) return;
+  const userDocRef = doc(firestore, "users", firebaseUser.uid);
+  const userDoc = await getDoc(userDocRef);
+
+  if (!userDoc.exists()) {
+    const newUserProfile: User = {
+      id: firebaseUser.uid,
+      email: firebaseUser.email!,
+      fullName: firebaseUser.displayName || defaults.fullName || "Nuevo Usuario",
+      role: defaults.role || "candidate",
+      status: "active",
+      ...defaults,
+    };
+    await setDoc(userDocRef, newUserProfile);
+  }
+};
 
 
 export default function LoginPage() {
@@ -55,26 +77,6 @@ export default function LoginPage() {
     },
   });
 
-  const ensureUserProfileExists = async (firebaseUser: FirebaseUser, role: User['role'] = 'candidate', fullName?: string, organizationRef?: string) => {
-    if (!firestore) return;
-    const userDocRef = doc(firestore, "users", firebaseUser.uid);
-    const userDoc = await getDoc(userDocRef);
-
-    if (!userDoc.exists()) {
-      const newUserProfile: Partial<User> = {
-        id: firebaseUser.uid,
-        email: firebaseUser.email!,
-        fullName: fullName || firebaseUser.displayName || "Nuevo Usuario",
-        role: role,
-        status: 'active',
-      };
-      if (organizationRef) {
-        newUserProfile.organizationRef = organizationRef;
-      }
-      await setDoc(userDocRef, newUserProfile);
-    }
-  };
-
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
@@ -90,7 +92,7 @@ export default function LoginPage() {
     
     try {
         const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
-        await ensureUserProfileExists(userCredential.user);
+        await ensureUserProfileExists(firestore, userCredential.user, { fullName: values.email });
         toast({
             title: "Inicio de sesión exitoso",
             description: "Redirigiendo a tu panel...",
@@ -119,7 +121,7 @@ export default function LoginPage() {
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
-      await ensureUserProfileExists(result.user, 'candidate');
+      await ensureUserProfileExists(firestore, result.user, { role: 'candidate' });
 
       toast({ title: "Inicio de sesión con Google exitoso" });
       router.push("/dashboard");

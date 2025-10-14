@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import React, { Suspense } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ import { useAuth, useFirestore } from "@/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Icons } from "@/components/icons";
 import { Separator } from "@/components/ui/separator";
+import type { User } from "@/lib/types";
 
 const formSchema = z.object({
   fullName: z
@@ -59,7 +60,7 @@ function RegisterPageContent() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
-    if (!auth) {
+    if (!auth || !firestore) {
         toast({
             title: "Error de configuración",
             description: "Los servicios de Firebase no están disponibles.",
@@ -70,14 +71,28 @@ function RegisterPageContent() {
     }
 
     try {
-        await createUserWithEmailAndPassword(auth, values.email, values.password);
+        const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+        const firebaseUser = userCredential.user;
+
+        // Update Firebase Auth profile
+        await updateProfile(firebaseUser, { displayName: values.fullName });
+
+        // Create user document in Firestore
+        const newUserProfile: User = {
+          id: firebaseUser.uid,
+          email: values.email,
+          fullName: values.fullName,
+          role: values.role,
+          status: 'active',
+        };
+        await setDoc(doc(firestore, "users", firebaseUser.uid), newUserProfile);
 
         toast({
           title: "¡Registro exitoso!",
-          description: "Tu cuenta ha sido creada. Por favor, inicia sesión.",
+          description: "Tu cuenta ha sido creada. Serás redirigido.",
         });
 
-        router.push("/login");
+        router.push("/dashboard");
 
     } catch (error: any) {
         console.error("Firebase Registration Error:", error);
@@ -112,13 +127,12 @@ function RegisterPageContent() {
       const userDoc = await getDoc(userDocRef);
 
       if (!userDoc.exists()) {
-        // Create profile only if it doesn't exist
-        const newUserProfile = {
+        const newUserProfile: User = {
           id: googleUser.uid,
           email: googleUser.email!,
           fullName: googleUser.displayName || "Usuario de Google",
-          role: 'candidate' as const, // Default role for Google sign-up
-          status: 'active' as const,
+          role: 'candidate',
+          status: 'active',
         };
         
         await setDoc(userDocRef, newUserProfile);
