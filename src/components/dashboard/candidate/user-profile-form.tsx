@@ -5,7 +5,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
-import { Loader2, Trash2, PlusCircle, FileUp } from "lucide-react";
+import { Loader2, Trash2, PlusCircle, FileUp, BrainCircuit } from "lucide-react";
 import React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import type { Candidate, Skill } from "@/lib/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { extractCvData } from "@/ai/flows/extract-cv-data-flow";
 
 
 const skillSchema = z.object({
@@ -37,6 +38,8 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isParsingCv, setIsParsingCv] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   
   const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
@@ -49,12 +52,12 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control: form.control,
     name: "skills",
   });
 
-  function onSubmit(values: z.infer<typeof profileSchema>) {
+  async function onSubmit(values: z.infer<typeof profileSchema>) {
     setIsSubmitting(true);
     console.log(values);
     
@@ -67,6 +70,62 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
     }, 1500)
   }
 
+  const handleCvUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || file.type !== 'application/pdf') {
+        toast({
+            title: "Archivo inválido",
+            description: "Por favor, selecciona un archivo PDF.",
+            variant: "destructive"
+        });
+        return;
+    }
+    
+    setIsParsingCv(true);
+    toast({
+        title: "Procesando CV...",
+        description: "La IA está extrayendo tu información. Esto puede tardar un momento.",
+    });
+
+    try {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = async () => {
+            const pdfDataUri = reader.result as string;
+            const extractedData = await extractCvData({ pdfDataUri });
+
+            if (extractedData) {
+                form.setValue('headline', extractedData.headline, { shouldValidate: true });
+                form.setValue('location', extractedData.location, { shouldValidate: true });
+                form.setValue('yearsOfExperience', extractedData.yearsOfExperience, { shouldValidate: true });
+                
+                // Replace instead of append to avoid duplicates on re-upload
+                replace(extractedData.skills);
+
+                toast({
+                    title: "¡Información extraída!",
+                    description: "Tu formulario ha sido actualizado con los datos de tu CV.",
+                });
+            } else {
+                 throw new Error("No data extracted");
+            }
+        }
+    } catch (error) {
+        console.error("Error parsing CV:", error);
+        toast({
+            title: "Error al procesar CV",
+            description: "No se pudo extraer la información. Por favor, intenta de nuevo o llena el formulario manualmente.",
+            variant: "destructive"
+        });
+    } finally {
+        setIsParsingCv(false);
+        // Reset file input to allow re-upload of the same file
+        if(fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    }
+  }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -75,7 +134,7 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
             <Card>
                 <CardHeader>
                     <CardTitle>Información Principal</CardTitle>
-                    <CardDescription>Estos son los datos que los reclutadores verán primero.</CardDescription>
+                    <CardDescription>Estos son los datos que los reclutadores verán primero. Puedes subier tu CV para autocompletar.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <FormField control={form.control} name="headline" render={({ field }) => (
@@ -122,10 +181,11 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {fields.length === 0 && (
-                        <Alert>
+                         <Alert>
+                            <BrainCircuit className="h-4 w-4" />
                             <AlertTitle>¡Potencia tu perfil!</AlertTitle>
                             <AlertDescription>
-                                Añade tus habilidades manualmente para mejorar las recomendaciones.
+                                Sube tu CV para que la IA extraiga tus habilidades o añádelas manualmente.
                             </AlertDescription>
                         </Alert>
                     )}
@@ -176,17 +236,24 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
             <Card>
                 <CardHeader>
                     <CardTitle>Currículum Vitae (CV)</CardTitle>
-                    <CardDescription>Sube tu CV para que la IA extraiga tus habilidades y los reclutadores puedan verlo.</CardDescription>
+                    <CardDescription>Sube tu CV para que la IA extraiga tus habilidades y rellene el formulario.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                      <Alert>
                         <FileUp className="h-4 w-4" />
-                        <AlertTitle>No hay un CV subido</AlertTitle>
+                        <AlertTitle>Sube tu CV</AlertTitle>
                         <AlertDescription>
-                           Sube tu CV en formato PDF para completar tu perfil.
+                           Selecciona tu CV en formato PDF para autocompletar tu perfil.
                         </AlertDescription>
                     </Alert>
-                    <Input id="cv-upload" type="file" accept=".pdf" />
+                    <Input 
+                        id="cv-upload" 
+                        type="file" 
+                        accept=".pdf" 
+                        onChange={handleCvUpload}
+                        disabled={isParsingCv}
+                        ref={fileInputRef}
+                    />
                 </CardContent>
             </Card>
             <Card>
@@ -199,9 +266,9 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
                     </p>
                 </CardContent>
                 <CardFooter className="flex-col items-stretch gap-2">
-                     <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Guardar Perfil
+                     <Button type="submit" disabled={isSubmitting || isParsingCv}>
+                        {(isSubmitting || isParsingCv) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {isParsingCv ? 'Analizando CV...' : (isSubmitting ? 'Guardando...' : 'Guardar Perfil')}
                     </Button>
                     <Button variant="ghost" type="button" onClick={() => router.back()}>Cancelar</Button>
                 </CardFooter>
