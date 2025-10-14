@@ -26,7 +26,7 @@ const formSchema = z.object({
   password: z
     .string()
     .min(1, { message: "La contraseña es requerida." })
-    .min(8, { message: "La contraseña debe tener al menos 8 caracteres." }),
+    .min(6, { message: "La contraseña debe tener al menos 6 caracteres." }),
   rememberMe: z.boolean().default(false).optional(),
 });
 
@@ -41,8 +41,8 @@ export default function LoginPage() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: "dev@test.com",
+      password: "123456",
       rememberMe: false,
     },
   });
@@ -52,24 +52,14 @@ export default function LoginPage() {
     
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    // Simulate error
-    if (values.email === "error@example.com") {
-        toast({
-            title: "Error de autenticación",
-            description: "Credenciales inválidas. Por favor, inténtalo de nuevo.",
-            variant: "destructive"
-        });
-        setIsSubmitting(false);
-        return;
-    }
     
     const loggedInUser = users.find(u => u.email === values.email);
 
-    if (!loggedInUser) {
+    // NOTE: This is mock authentication. In a real app, you'd validate the password hash.
+    if (!loggedInUser || values.password !== '123456') {
         toast({
             title: "Error de autenticación",
-            description: "No se encontró ningún usuario con ese correo.",
+            description: "Credenciales inválidas. Por favor, inténtalo de nuevo.",
             variant: "destructive"
         });
         setIsSubmitting(false);

@@ -2,10 +2,9 @@
 import type { User, Job, Candidate, Recommendation, Application, Organization } from './types';
 
 export const users: User[] = [
-  { id: 'user-1', email: 'candidate@example.com', fullName: 'Alex Doe', role: 'candidate', status: 'active' },
-  { id: 'user-2', email: 'recruiter@example.com', fullName: 'Brenda Smith', role: 'recruiter', status: 'active', organizationRef: 'org-1' },
-  { id: 'user-3', email: 'admin@example.com', fullName: 'Casey Jones', role: 'admin', status: 'active' },
-  { id: 'user-4', email: 'candidate2@example.com', fullName: 'Devon Ray', role: 'candidate', status: 'active' },
+  { id: 'user-admin', email: 'admin@test.com', fullName: 'Admin User', role: 'admin', status: 'active' },
+  { id: 'user-recruiter', email: 'brand@test.com', fullName: 'Brand Recruiter', role: 'recruiter', status: 'active', organizationRef: 'org-1' },
+  { id: 'user-dev', email: 'dev@test.com', fullName: 'Dev Candidate', role: 'candidate', status: 'active' },
 ];
 
 export const organizations: Organization[] = [
@@ -20,33 +19,19 @@ export const organizations: Organization[] = [
 
 export const candidates: Candidate[] = [
   {
-    id: 'candidate-1',
-    userRef: 'user-1',
-    headline: 'Senior Frontend Developer',
-    location: 'Mexico City, MX',
-    yearsOfExperience: 8,
-    available: true,
-    skills: [
-      { name: 'React', level: 5, years: 8, source: 'resume' },
-      { name: 'TypeScript', level: 5, years: 6, source: 'resume' },
-      { name: 'Next.js', level: 4, years: 4, source: 'resume' },
-      { name: 'GraphQL', level: 3, years: 3, source: 'resume' },
-    ],
-  },
-  {
-    id: 'candidate-2',
-    userRef: 'user-4',
-    headline: 'Backend Engineer',
-    location: 'Guadalajara, MX',
+    id: 'candidate-dev',
+    userRef: 'user-dev',
+    headline: 'Full-stack Developer',
+    location: 'Remote',
     yearsOfExperience: 5,
     available: true,
     skills: [
-        { name: 'Node.js', level: 5, years: 5, source: 'resume' },
-        { name: 'PostgreSQL', level: 4, years: 4, source: 'resume' },
-        { name: 'Docker', level: 4, years: 3, source: 'resume' },
-        { name: 'AWS', level: 3, years: 3, source: 'resume' },
+      { name: 'React', level: 5, years: 5, source: 'resume' },
+      { name: 'TypeScript', level: 4, years: 4, source: 'resume' },
+      { name: 'Node.js', level: 4, years: 3, source: 'resume' },
+      { name: 'GraphQL', level: 3, years: 2, source: 'resume' },
     ],
-  }
+  },
 ];
 
 export const jobs: Job[] = [
@@ -74,70 +59,30 @@ export const jobs: Job[] = [
     status: 'published',
     searchTags: ['nodejs', 'postgres', 'docker', 'aws'],
   },
-  {
-    id: 'job-3',
-    organizationRef: 'org-1',
-    title: 'Mid-level Full-stack Developer',
-    descriptionMd: 'Work across our stack, from React frontend to our Node.js backend. A great opportunity to grow and learn from a talented team of engineers.',
-    location: 'Remote',
-    remoteAllowed: true,
-    contractType: 'Full-time',
-    seniority: 'mid',
-    status: 'draft',
-    searchTags: ['react', 'nodejs', 'fullstack'],
-  },
 ];
 
 export const recommendations: Recommendation[] = [
-  {
-    id: 'rec-1',
-    candidateRef: 'candidate-1',
-    jobRef: 'job-1',
-    score: 0.92,
-    reasons: ['Excellent match for React', 'Strong TypeScript experience', 'Next.js proficiency'],
-    engineVersion: '1.0.0',
-    createdAt: new Date(),
-  },
-  {
-    id: 'rec-2',
-    candidateRef: 'candidate-1',
-    jobRef: 'job-3',
-    score: 0.78,
-    reasons: ['Strong React skills', 'Potential to grow into full-stack', 'Experience with related technologies'],
-    engineVersion: '1.0.0',
-    createdAt: new Date(),
-  },
-  {
-    id: 'rec-3',
-    candidateRef: 'candidate-2',
-    jobRef: 'job-2',
-    score: 0.88,
-    reasons: ['Expert in Node.js', 'Solid database experience', 'Familiar with cloud infrastructure'],
-    engineVersion: '1.0.0',
-    createdAt: new Date(),
-  },
+    {
+        id: 'rec-1',
+        candidateRef: 'candidate-dev',
+        jobRef: 'job-1',
+        score: 0.85,
+        reasons: ['Strong React skills', 'TypeScript experience', 'Leadership potential'],
+        engineVersion: '1.0.0',
+        createdAt: new Date(),
+    }
 ];
 
 export const applications: Application[] = [
     {
         id: 'app-1',
-        candidateRef: 'candidate-1',
-        jobRef: 'job-1',
-        status: 'screening',
+        candidateRef: 'candidate-dev',
+        jobRef: 'job-2',
+        status: 'interview',
         source: 'recommendation',
         cvRef: 'cv.pdf',
-        appliedAt: new Date(2024, 6, 10),
-        updatedAt: new Date(2024, 6, 12),
-    },
-    {
-        id: 'app-2',
-        candidateRef: 'candidate-2',
-        jobRef: 'job-1',
-        status: 'applied',
-        source: 'search',
-        cvRef: 'cv2.pdf',
-        appliedAt: new Date(2024, 6, 11),
-        updatedAt: new Date(2024, 6, 11),
+        appliedAt: new Date(2024, 6, 15),
+        updatedAt: new Date(2024, 6, 16),
     }
 ];
 
