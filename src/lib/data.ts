@@ -17,49 +17,9 @@ export const organizations: Organization[] = [
     }
 ];
 
-export const candidates: Candidate[] = [
-  {
-    id: 'candidate-dev',
-    userRef: 'user-dev',
-    headline: 'Full-stack Developer',
-    location: 'Remote',
-    yearsOfExperience: 5,
-    available: true,
-    skills: [
-      { name: 'React', level: 5, years: 5, source: 'resume' },
-      { name: 'TypeScript', level: 4, years: 4, source: 'resume' },
-      { name: 'Node.js', level: 4, years: 3, source: 'resume' },
-      { name: 'GraphQL', level: 3, years: 2, source: 'resume' },
-    ],
-  },
-];
+export const candidates: Candidate[] = [];
 
-export const jobs: Job[] = [
-  {
-    id: 'job-1',
-    organizationRef: 'org-1',
-    title: 'Lead Frontend Engineer',
-    descriptionMd: 'Lead our frontend team to build next-gen UIs with React and Next.js. You will be responsible for the technical direction of the product and mentoring junior developers.',
-    location: 'Remote (Mexico)',
-    remoteAllowed: true,
-    contractType: 'Full-time',
-    seniority: 'lead',
-    status: 'published',
-    searchTags: ['react', 'nextjs', 'typescript', 'lead'],
-  },
-  {
-    id: 'job-2',
-    organizationRef: 'org-1',
-    title: 'Senior Backend Developer (Node.js)',
-    descriptionMd: 'Design and implement scalable backend services using Node.js, an ideal candidate has experience with microservices architecture and cloud-native technologies.',
-    location: 'Mexico City, MX',
-    remoteAllowed: false,
-    contractType: 'Full-time',
-    seniority: 'senior',
-    status: 'published',
-    searchTags: ['nodejs', 'postgres', 'docker', 'aws'],
-  },
-];
+export const jobs: Job[] = [];
 
 export const recommendations: Recommendation[] = [
     {
