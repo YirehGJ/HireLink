@@ -1,3 +1,4 @@
+
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { users, jobs, applications } from "@/lib/data";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
