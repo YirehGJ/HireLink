@@ -47,7 +47,7 @@ const generateJobDescriptionFlow = ai.defineFlow(
     }
     
     const llmResponse = await ai.generate({
-      prompt: `Actúa como un experto en redacción de Recursos Humanos. Tu tarea es crear una descripción de puesto de trabajo atractiva y profesional en formato Markdown.
+      prompt: `Actúa como un experto en redacción de Recursos Humanos. Tu tarea es crear una descripción de puesto de trabajo atractiva y profesional en formato Markdown para el campo 'descriptionMd'.
 
 Basándote en los siguientes detalles:
 - Título del Puesto: ${input.title}
@@ -60,7 +60,7 @@ Genera una descripción que incluya las siguientes secciones:
 - "Cualificaciones y Habilidades" (en una lista con viñetas, basándote en los datos proporcionados).
 - "Lo que Ofrecemos" (una lista con beneficios genéricos atractivos, como desarrollo profesional, buen ambiente de trabajo, etc.).
 
-Asegúrate de que el tono sea profesional pero atractivo, y que el formato sea claro y fácil de leer.`,
+Asegúrate de que el tono sea profesional pero atractivo, y que el formato sea claro y fácil de leer. El resultado debe ser un objeto JSON que contenga la clave "descriptionMd" con el texto en Markdown.`,
       output: {
         schema: GenerateJobDescriptionOutputSchema,
         format: 'json'
