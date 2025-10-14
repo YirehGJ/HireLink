@@ -5,7 +5,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
-import { Loader2, Trash2, PlusCircle } from "lucide-react";
+import { Loader2, Trash2, PlusCircle, FileUp } from "lucide-react";
 import React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -173,6 +173,22 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
           </div>
 
           <div className="lg:col-span-1 space-y-6">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Currículum Vitae (CV)</CardTitle>
+                    <CardDescription>Sube tu CV para que la IA extraiga tus habilidades y los reclutadores puedan verlo.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                     <Alert>
+                        <FileUp className="h-4 w-4" />
+                        <AlertTitle>No hay un CV subido</AlertTitle>
+                        <AlertDescription>
+                           Sube tu CV en formato PDF para completar tu perfil.
+                        </AlertDescription>
+                    </Alert>
+                    <Input id="cv-upload" type="file" accept=".pdf" />
+                </CardContent>
+            </Card>
             <Card>
                 <CardHeader>
                     <CardTitle>Guardar Cambios</CardTitle>
