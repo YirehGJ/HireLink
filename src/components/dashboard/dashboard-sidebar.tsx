@@ -22,7 +22,7 @@ import {
   LogOut,
   Users,
   FileText,
-  Building,
+  LayoutDashboard,
 } from "lucide-react";
 import { Icons } from "@/components/icons";
 import { useApp } from "@/components/providers/app-provider";
@@ -43,7 +43,9 @@ export function DashboardSidebar() {
   const { user, role, setUser, isMounted } = useApp();
 
   const isActive = (path: string) => {
-    if (path === '/dashboard') return pathname === path;
+    if (path === '/dashboard' || path === '/dashboard/jobs' || path === '/dashboard/admin/overview') {
+        return pathname === path;
+    }
     return pathname.startsWith(path);
   }
 
@@ -106,8 +108,8 @@ export function DashboardSidebar() {
   const adminNav = (
     <>
       <SidebarMenuItem>
-        <SidebarMenuButton asChild isActive={pathname === "/dashboard"} tooltip="Panel Principal">
-          <Link href="/dashboard"><Home /><span>Panel Principal</span></Link>
+        <SidebarMenuButton asChild isActive={isActive("/dashboard/admin/overview")} tooltip="Panel Principal">
+          <Link href="/dashboard/admin/overview"><LayoutDashboard /><span>Panel Principal</span></Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
@@ -155,7 +157,13 @@ export function DashboardSidebar() {
     )
   }
 
-  const dashboardHome = role === 'recruiter' ? "/dashboard/jobs" : "/dashboard";
+  const roleHomeMap = {
+    candidate: '/dashboard',
+    recruiter: '/dashboard/jobs',
+    admin: '/dashboard/admin/overview',
+  };
+
+  const dashboardHome = roleHomeMap[role] || '/dashboard';
 
   return (
     <Sidebar variant="sidebar" collapsible="icon">
