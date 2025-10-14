@@ -19,8 +19,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useAuth, useFirestore } from "@/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
-import { errorEmitter } from "@/firebase/error-emitter";
-import { FirestorePermissionError } from "@/firebase/errors";
 import { Icons } from "@/components/icons";
 import { Separator } from "@/components/ui/separator";
 
@@ -61,7 +59,7 @@ function RegisterPageContent() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
-    if (!auth || !firestore) {
+    if (!auth) {
         toast({
             title: "Error de configuración",
             description: "Los servicios de Firebase no están disponibles.",
@@ -72,30 +70,14 @@ function RegisterPageContent() {
     }
 
     try {
-        // 1. Create user in Firebase Auth. This also signs the user in.
-        const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
-        const firebaseUser = userCredential.user;
-
-        // 2. Create user profile in Firestore.
-        // The user is now authenticated, so this write should be allowed by security rules.
-        const userProfile = {
-            id: firebaseUser.uid,
-            email: values.email,
-            fullName: values.fullName,
-            role: values.role,
-            status: 'active' as const,
-            organizationRef: values.role === 'recruiter' ? 'org-1' : undefined,
-        };
-        
-        const userDocRef = doc(firestore, "users", firebaseUser.uid);
-        await setDoc(userDocRef, userProfile);
+        await createUserWithEmailAndPassword(auth, values.email, values.password);
 
         toast({
-          title: "Registro exitoso",
-          description: "¡Bienvenido a HireLink! Redirigiendo...",
+          title: "¡Registro exitoso!",
+          description: "Tu cuenta ha sido creada. Por favor, inicia sesión.",
         });
 
-        router.push("/dashboard");
+        router.push("/login");
 
     } catch (error: any) {
         console.error("Firebase Registration Error:", error);
@@ -326,5 +308,3 @@ export default function RegisterPage() {
     </Suspense>
   )
 }
-
-    

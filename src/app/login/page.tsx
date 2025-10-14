@@ -8,8 +8,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import React from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, User as FirebaseUser } from "firebase/auth";
+import { doc, setDoc, getDoc, Firestore } from "firebase/firestore";
 
 
 import { Button } from "@/components/ui/button";
@@ -21,8 +21,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth, useFirestore } from "@/firebase";
 import { Icons } from "@/components/icons";
 import { Separator } from "@/components/ui/separator";
-import { FirestorePermissionError } from "@/firebase/errors";
-import { errorEmitter } from "@/firebase/error-emitter";
+import { User } from "@/lib/types";
+
 
 const formSchema = z.object({
   email: z
@@ -55,9 +55,30 @@ export default function LoginPage() {
     },
   });
 
+  const ensureUserProfileExists = async (firebaseUser: FirebaseUser, role: User['role'] = 'candidate', fullName?: string, organizationRef?: string) => {
+    if (!firestore) return;
+    const userDocRef = doc(firestore, "users", firebaseUser.uid);
+    const userDoc = await getDoc(userDocRef);
+
+    if (!userDoc.exists()) {
+      const newUserProfile: Partial<User> = {
+        id: firebaseUser.uid,
+        email: firebaseUser.email!,
+        fullName: fullName || firebaseUser.displayName || "Nuevo Usuario",
+        role: role,
+        status: 'active',
+      };
+      if (organizationRef) {
+        newUserProfile.organizationRef = organizationRef;
+      }
+      await setDoc(userDocRef, newUserProfile);
+    }
+  };
+
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
-    if (!auth) {
+    if (!auth || !firestore) {
         toast({
             title: "Error de configuración",
             description: "La autenticación de Firebase no está disponible.",
@@ -68,7 +89,8 @@ export default function LoginPage() {
     }
     
     try {
-        await signInWithEmailAndPassword(auth, values.email, values.password);
+        const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
+        await ensureUserProfileExists(userCredential.user);
         toast({
             title: "Inicio de sesión exitoso",
             description: "Redirigiendo a tu panel...",
@@ -97,29 +119,7 @@ export default function LoginPage() {
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
-      const googleUser = result.user;
-
-      const userDocRef = doc(firestore, "users", googleUser.uid);
-      const userDoc = await getDoc(userDocRef);
-
-      if (!userDoc.exists()) {
-        const newUserProfile = {
-          id: googleUser.uid,
-          email: googleUser.email!,
-          fullName: googleUser.displayName || "Usuario de Google",
-          role: 'candidate' as const,
-          status: 'active' as const,
-        };
-        
-        setDoc(userDocRef, newUserProfile).catch(async (serverError) => {
-            const permissionError = new FirestorePermissionError({
-              path: userDocRef.path,
-              operation: 'create',
-              requestResourceData: newUserProfile,
-            });
-            errorEmitter.emit('permission-error', permissionError);
-        });
-      }
+      await ensureUserProfileExists(result.user, 'candidate');
 
       toast({ title: "Inicio de sesión con Google exitoso" });
       router.push("/dashboard");
@@ -240,7 +240,3 @@ export default function LoginPage() {
     </FormCard>
   );
 }
-
-
-
-    
