@@ -141,7 +141,7 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
                             <FormField control={form.control} name={`skills.${index}.years`} render={({ field }) => (
                                 <FormItem>
                                     <FormLabel className={index !== 0 ? "sr-only" : ""}>Años</FormLabel>
-                                    <FormControl><Input type="number" className="w-20" placeholder="3" {...field} /></FormControl>
+                                    <FormControl><Input type="number" min="0" max="60" className="w-20" placeholder="3" {...field} /></FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )} />
