@@ -18,8 +18,8 @@ import type { Organization } from "@/lib/types";
 
 const orgSchema = z.object({
   name: z.string().min(2, "El nombre de la organización es requerido."),
-  website: z.string().url("Debe ser una URL válida."),
-  description: z.string().min(20, "La descripción debe tener al menos 20 caracteres."),
+  website: z.string().url("Debe ser una URL válida.").optional().or(z.literal('')),
+  description: z.string().min(20, "La descripción debe tener al menos 20 caracteres.").optional().or(z.literal('')),
 });
 
 export function OrganizationProfileForm({ organization }: { organization: Organization | null | undefined }) {
@@ -47,17 +47,6 @@ export function OrganizationProfileForm({ organization }: { organization: Organi
         });
         setIsSubmitting(false);
     }, 1500)
-  }
-
-  if (!organization) {
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Error</CardTitle>
-                <CardDescription>No se encontró el perfil de la organización.</CardDescription>
-            </CardHeader>
-        </Card>
-    )
   }
 
   return (

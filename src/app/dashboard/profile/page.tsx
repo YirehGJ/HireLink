@@ -61,7 +61,7 @@ export default function ProfilePage() {
     }
 
     const candidateProfile = role === 'candidate' ? (getCandidateByUserId(user.id) || null) : null;
-    const organizationProfile = role === 'recruiter' && user.organizationRef ? getOrganization(user.organizationRef) : null;
+    const organizationProfile = role === 'recruiter' && user.organizationRef ? (getOrganization(user.organizationRef) || null) : null;
     
     const titles = {
         candidate: "Mi Perfil Profesional",
