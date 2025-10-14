@@ -15,8 +15,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useApp } from "@/components/providers/app-provider";
-import { users } from "@/lib/data";
+import { useAuth } from "@/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 const formSchema = z.object({
   email: z
@@ -34,7 +34,7 @@ const formSchema = z.object({
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { setUser } = useApp();
+  const auth = useAuth();
   const [showPassword, setShowPassword] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -49,31 +49,33 @@ export default function LoginPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
-    
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    
-    const loggedInUser = users.find(u => u.email === values.email);
-
-    // NOTE: This is mock authentication. In a real app, you'd validate the password hash.
-    if (!loggedInUser || values.password !== '123456') {
+    if (!auth) {
         toast({
-            title: "Error de autenticación",
-            description: "Credenciales inválidas. Por favor, inténtalo de nuevo.",
+            title: "Error de configuración",
+            description: "La autenticación de Firebase no está disponible.",
             variant: "destructive"
         });
         setIsSubmitting(false);
         return;
     }
-
-    setUser(loggedInUser);
-
-    toast({
-      title: "Inicio de sesión exitoso",
-      description: "Redirigiendo a tu panel...",
-    });
-
-    router.push("/dashboard");
+    
+    try {
+        await signInWithEmailAndPassword(auth, values.email, values.password);
+        toast({
+            title: "Inicio de sesión exitoso",
+            description: "Redirigiendo a tu panel...",
+        });
+        router.push("/dashboard");
+    } catch (error: any) {
+        console.error("Firebase Auth Error:", error);
+        toast({
+            title: "Error de autenticación",
+            description: "Credenciales inválidas o error de red. Por favor, inténtalo de nuevo.",
+            variant: "destructive"
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   }
 
   return (
