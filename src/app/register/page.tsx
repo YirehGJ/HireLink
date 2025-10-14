@@ -72,11 +72,12 @@ function RegisterPageContent() {
     }
 
     try {
-        // 1. Create user in Firebase Auth
+        // 1. Create user in Firebase Auth. This also signs the user in.
         const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
         const firebaseUser = userCredential.user;
 
-        // 2. Create user profile in Firestore
+        // 2. Create user profile in Firestore.
+        // The user is now authenticated, so this write should be allowed by security rules.
         const userProfile = {
             id: firebaseUser.uid,
             email: values.email,
@@ -129,15 +130,16 @@ function RegisterPageContent() {
       const userDoc = await getDoc(userDocRef);
 
       if (!userDoc.exists()) {
+        // Create profile only if it doesn't exist
         const newUserProfile = {
           id: googleUser.uid,
           email: googleUser.email!,
           fullName: googleUser.displayName || "Usuario de Google",
-          role: 'candidate' as const,
+          role: 'candidate' as const, // Default role for Google sign-up
           status: 'active' as const,
         };
         
-        await setDoc(userDocRef, newUserProfile)
+        await setDoc(userDocRef, newUserProfile);
       }
 
       toast({ title: "Inicio de sesión con Google exitoso" });
@@ -324,3 +326,5 @@ export default function RegisterPage() {
     </Suspense>
   )
 }
+
+    
