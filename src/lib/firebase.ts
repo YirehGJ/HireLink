@@ -1,3 +1,5 @@
+// This file is DEPRECATED and will be removed in a future step.
+// All Firebase logic is now handled in src/firebase/*
 
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApp, getApps } from "firebase/app";

@@ -1,0 +1,180 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Represents a user of the application.",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The user's email address."
+        },
+        "fullName": {
+          "type": "string",
+          "description": "The user's full name."
+        },
+        "phone": {
+          "type": "string",
+          "description": "The user's phone number."
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin", "recruiter", "candidate"],
+          "description": "The user's role in the system."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "suspended"],
+          "description": "The status of the user's account."
+        },
+        "lastSignIn": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The last time the user signed in."
+        },
+        "organizationRef": {
+          "type": "string",
+          "description": "A reference to the organization for recruiters."
+        }
+      },
+      "required": ["email", "fullName", "role", "status"]
+    },
+    "Candidate": {
+      "title": "Candidate",
+      "description": "Represents a candidate's professional profile.",
+      "type": "object",
+      "properties": {
+        "userRef": {
+          "type": "string",
+          "description": "Reference to the User entity."
+        },
+        "headline": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string"
+        },
+        "yearsOfExperience": {
+          "type": "number"
+        },
+        "available": {
+          "type": "boolean"
+        },
+        "resumeRef": {
+          "type": "string",
+          "description": "Reference to resume file in Storage."
+        }
+      },
+      "required": ["userRef", "headline", "location"]
+    },
+    "Organization": {
+      "title": "Organization",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "website": {
+          "type": "string",
+          "format": "uri"
+        },
+        "logoUrl": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": ["name"]
+    },
+    "Skill": {
+      "title": "Skill",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "level": { "type": "number" },
+        "years": { "type": "number" },
+        "source": { "type": "string" }
+      },
+      "required": ["name", "level", "years"]
+    },
+    "Job": {
+      "title": "Job",
+      "type": "object",
+      "properties": {
+        "organizationRef": { "type": "string" },
+        "title": { "type": "string" },
+        "descriptionMd": { "type": "string" },
+        "location": { "type": "string" },
+        "remoteAllowed": { "type": "boolean" },
+        "contractType": { "type": "string" },
+        "seniority": { "type": "string", "enum": ["intern", "junior", "mid", "senior", "lead"] },
+        "status": { "type": "string", "enum": ["draft", "published", "closed"] },
+        "searchTags": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["organizationRef", "title", "descriptionMd", "location", "seniority", "status"]
+    },
+    "Application": {
+      "title": "Application",
+      "type": "object",
+      "properties": {
+        "candidateRef": { "type": "string" },
+        "jobRef": { "type": "string" },
+        "status": { "type": "string", "enum": ["applied", "screening", "assessment", "interview", "offer", "hired", "rejected", "withdrawn"] },
+        "source": { "type": "string" },
+        "cvRef": { "type": "string" },
+        "appliedAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["candidateRef", "jobRef", "status", "appliedAt"]
+    },
+    "Recommendation": {
+      "title": "Recommendation",
+      "type": "object",
+      "properties": {
+        "candidateRef": { "type": "string" },
+        "jobRef": { "type": "string" },
+        "score": { "type": "number" },
+        "reasons": { "type": "array", "items": { "type": "string" } },
+        "engineVersion": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["candidateRef", "jobRef", "score", "reasons"]
+    }
+  },
+  "auth": {
+    "providers": ["email", "google.com"]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Stores public user profile information."
+    },
+    "/candidates/{candidateId}": {
+        "schema": { "$ref": "#/entities/Candidate" },
+        "description": "Stores detailed professional profiles for candidates."
+    },
+    "/candidates/{candidateId}/skills/{skillId}": {
+        "schema": { "$ref": "#/entities/Skill" },
+        "description": "Sub-collection for a candidate's skills."
+    },
+    "/organizations/{orgId}": {
+        "schema": { "$ref": "#/entities/Organization" },
+        "description": "Stores information about recruiting organizations."
+    },
+    "/jobs/{jobId}": {
+      "schema": { "$ref": "#/entities/Job" },
+      "description": "Stores job postings."
+    },
+    "/jobs/{jobId}/applications/{appId}": {
+      "schema": { "$ref": "#/entities/Application" },
+      "description": "Sub-collection for applications to a specific job."
+    },
+    "/recommendations/{recId}": {
+        "schema": { "$ref": "#/entities/Recommendation" },
+        "description": "Stores job recommendations for candidates."
+    }
+  }
+}

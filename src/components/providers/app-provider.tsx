@@ -4,59 +4,47 @@
 import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
 import type { User, UserRole } from '@/lib/types';
 import { users } from '@/lib/data';
-import { app } from '@/lib/firebase'; // Import Firebase app
+import { useUser } from '@/firebase'; // Import the new useUser hook
 
 interface AppContextType {
-  user: User | null;
+  user: User | null; // This will eventually be the Firebase User object
   role: UserRole | null;
-  setUser: (user: User | null) => void;
+  // setUser: (user: User | null) => void; // This will be handled by Firebase Auth
   isMounted: boolean;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUserState] = useState<User | null>(null);
+  // const [user, setUserState] = useState<User | null>(null);
+  const { user: firebaseUser, loading } = useUser();
   const [isMounted, setIsMounted] = useState(false);
 
-  useEffect(() => {
-    // This effect now also ensures Firebase is initialized on the client
-    const initFirebase = async () => {
-      // You can use the `app` object here if needed, for example, for Analytics
-    };
-    initFirebase();
-    
-    try {
-      const storedUser = localStorage.getItem('hirelink-user');
-      if (storedUser) {
-        setUserState(JSON.parse(storedUser));
-      } else {
-        // Default to first candidate if no user is stored
-        setUserState(users.find(u => u.role === 'candidate')!);
-      }
-    } catch (error) {
-        console.error("Failed to parse user from localStorage", error);
-        setUserState(users.find(u => u.role === 'candidate')!);
+  // TODO: This logic will be replaced with fetching user profile from Firestore
+  const user: User | null = useMemo(() => {
+    if (firebaseUser) {
+      // For now, find the mock user that matches the logged-in Firebase user's email
+      // In the future, this will be a Firestore document fetch
+      return users.find(u => u.email === firebaseUser.email) || null;
     }
+    // For local dev without auth, default to first candidate
+    if (process.env.NODE_ENV === 'development' && !firebaseUser && !loading) {
+       return users.find(u => u.role === 'candidate') || null;
+    }
+    return null;
+  }, [firebaseUser, loading]);
+  
+  useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  const handleSetUser = (newUser: User | null) => {
-    if (newUser) {
-      localStorage.setItem('hirelink-user', JSON.stringify(newUser));
-    } else {
-      localStorage.removeItem('hirelink-user');
-    }
-    setUserState(newUser);
-  };
-  
   const role = useMemo(() => user?.role || null, [user]);
 
   const value = {
     user,
     role,
-    setUser: handleSetUser,
-    isMounted
+    // setUser is removed as Firebase will handle it
+    isMounted: isMounted && !loading
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
