@@ -127,11 +127,6 @@ export function DashboardSidebar() {
           <Link href="/dashboard/admin/audit"><Shield /><span>Auditoría y Equidad</span></Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
-      <SidebarMenuItem>
-        <SidebarMenuButton asChild isActive={isActive("/dashboard/profile")} tooltip="Perfil">
-          <Link href="/dashboard/profile"><User /><span>Mi Perfil</span></Link>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
        <SidebarMenuItem>
         <SidebarMenuButton asChild isActive={isActive("/dashboard/settings")} tooltip="Configuración">
           <Link href="/dashboard/settings"><Settings /><span>Configuración</span></Link>
