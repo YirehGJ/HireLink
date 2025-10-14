@@ -292,4 +292,3 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
     </Form>
   );
 }
-
