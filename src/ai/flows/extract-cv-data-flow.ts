@@ -9,7 +9,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit/zod';
+import { z } from 'zod';
 
 // Esquema de entrada: el texto extraído de un CV.
 const CvExtractionInputSchema = z.object({
