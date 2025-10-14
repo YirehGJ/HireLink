@@ -3,36 +3,23 @@
 
 import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
 import type { User, UserRole } from '@/lib/types';
-import { users } from '@/lib/data';
-import { useUser } from '@/firebase'; // Import the new useUser hook
+import { useUser, useDoc } from '@/firebase'; // Import the new useUser and useDoc hooks
 
 interface AppContextType {
-  user: User | null; // This will eventually be the Firebase User object
+  user: User | null;
   role: UserRole | null;
-  // setUser: (user: User | null) => void; // This will be handled by Firebase Auth
   isMounted: boolean;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  // const [user, setUserState] = useState<User | null>(null);
-  const { user: firebaseUser, loading } = useUser();
+  const { user: firebaseUser, loading: authLoading } = useUser();
   const [isMounted, setIsMounted] = useState(false);
 
-  // TODO: This logic will be replaced with fetching user profile from Firestore
-  const user: User | null = useMemo(() => {
-    if (firebaseUser) {
-      // For now, find the mock user that matches the logged-in Firebase user's email
-      // In the future, this will be a Firestore document fetch
-      return users.find(u => u.email === firebaseUser.email) || null;
-    }
-    // For local dev without auth, default to first candidate
-    if (process.env.NODE_ENV === 'development' && !firebaseUser && !loading) {
-       return users.find(u => u.role === 'candidate') || null;
-    }
-    return null;
-  }, [firebaseUser, loading]);
+  // Get the user profile from Firestore using the authenticated user's UID
+  const userDocPath = firebaseUser ? `users/${firebaseUser.uid}` : '';
+  const { data: user, loading: userLoading } = useDoc<User>(userDocPath);
   
   useEffect(() => {
     setIsMounted(true);
@@ -40,11 +27,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const role = useMemo(() => user?.role || null, [user]);
 
+  const loading = authLoading || userLoading;
+
   const value = {
-    user,
+    user: user || null,
     role,
-    // setUser is removed as Firebase will handle it
-    isMounted: isMounted && !loading
+    isMounted: isMounted && !loading,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
@@ -57,3 +45,5 @@ export function useApp() {
   }
   return context;
 }
+
+    

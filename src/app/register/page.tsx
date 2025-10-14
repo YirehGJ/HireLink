@@ -8,6 +8,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import React, { Suspense } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+
 
 import { Button } from "@/components/ui/button";
 import { FormCard } from "@/components/auth/form-card";
@@ -15,8 +18,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { useApp } from "@/components/providers/app-provider";
+import { useAuth, useFirestore } from "@/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
+import { errorEmitter } from "@/firebase/error-emitter";
+import { FirestorePermissionError } from "@/firebase/errors";
 
 const formSchema = z.object({
   fullName: z
@@ -26,7 +31,7 @@ const formSchema = z.object({
   password: z
     .string()
     .min(8, { message: "La contraseña debe tener al menos 8 caracteres." }),
-  role: z.enum(["candidate", "recruiter"], {
+  role: z.enum(["candidate", "recruiter", "admin"], {
     required_error: "Debes seleccionar un tipo de cuenta.",
   }),
 });
@@ -35,9 +40,10 @@ function RegisterPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
-  const { setUser } = useApp();
-  const defaultRole =
-    searchParams.get("role") === "recruiter" ? "recruiter" : "candidate";
+  const auth = useAuth();
+  const firestore = useFirestore();
+
+  const defaultRole = searchParams.get("role") === "recruiter" ? "recruiter" : "candidate";
   const [showPassword, setShowPassword] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -53,28 +59,64 @@ function RegisterPageContent() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
-    console.log(values);
+    if (!auth || !firestore) {
+        toast({
+            title: "Error de configuración",
+            description: "Los servicios de Firebase no están disponibles.",
+            variant: "destructive"
+        });
+        setIsSubmitting(false);
+        return;
+    }
 
-    // Simulate API call and creating a new user
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    
-    const newUser = {
-        id: `user-${Math.random().toString(36).substring(7)}`,
-        email: values.email,
-        fullName: values.fullName,
-        role: values.role,
-        status: 'active' as const,
-        organizationRef: values.role === 'recruiter' ? 'org-1' : undefined,
-    };
+    try {
+        // 1. Create user in Firebase Auth
+        const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+        const firebaseUser = userCredential.user;
 
-    setUser(newUser);
+        // 2. Create user profile in Firestore
+        const userProfile = {
+            id: firebaseUser.uid,
+            email: values.email,
+            fullName: values.fullName,
+            role: values.role,
+            status: 'active' as const,
+            organizationRef: values.role === 'recruiter' ? 'org-1' : undefined,
+        };
+        
+        const userDocRef = doc(firestore, "users", firebaseUser.uid);
+        
+        setDoc(userDocRef, userProfile).catch(async (serverError) => {
+            const permissionError = new FirestorePermissionError({
+              path: userDocRef.path,
+              operation: 'create',
+              requestResourceData: userProfile,
+            });
+            errorEmitter.emit('permission-error', permissionError);
+        });
 
-    toast({
-      title: "Registro exitoso",
-      description: "¡Bienvenido a HireLink! Redirigiendo...",
-    });
 
-    router.push("/dashboard");
+        toast({
+          title: "Registro exitoso",
+          description: "¡Bienvenido a HireLink! Redirigiendo...",
+        });
+
+        router.push("/dashboard");
+
+    } catch (error: any) {
+        console.error("Firebase Registration Error:", error);
+        let description = "Ocurrió un error inesperado. Por favor, inténtalo de nuevo.";
+        if (error.code === 'auth/email-already-in-use') {
+            description = "Este correo electrónico ya está en uso. Por favor, inicia sesión o usa otro correo.";
+        }
+        toast({
+            title: "Error de registro",
+            description,
+            variant: "destructive"
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   }
 
   return (
@@ -168,6 +210,9 @@ function RegisterPageContent() {
                     <SelectItem value="recruiter">
                       Soy un reclutador (busco talento)
                     </SelectItem>
+                     <SelectItem value="admin">
+                      Soy administrador
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -229,3 +274,5 @@ export default function RegisterPage() {
     </Suspense>
   )
 }
+
+    
