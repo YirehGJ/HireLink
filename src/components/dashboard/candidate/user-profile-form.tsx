@@ -21,14 +21,14 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const skillSchema = z.object({
   name: z.string().min(1, "El nombre de la habilidad es requerido."),
-  level: z.coerce.number().min(1).max(5),
-  years: z.coerce.number().min(0).max(60),
+  level: z.coerce.number().min(1, "El nivel debe ser entre 1 y 5.").max(5, "El nivel debe ser entre 1 y 5."),
+  years: z.coerce.number().min(0, "Los años no pueden ser negativos.").max(60, "Los años no pueden exceder 60."),
 });
 
 const profileSchema = z.object({
   headline: z.string().min(5, "El titular debe tener al menos 5 caracteres."),
   location: z.string().min(2, "La ubicación es requerida."),
-  yearsOfExperience: z.coerce.number().min(0).max(60),
+  yearsOfExperience: z.coerce.number().min(0, "Los años no pueden ser negativos.").max(60, "Los años no pueden exceder 60."),
   available: z.boolean().default(true),
   skills: z.array(skillSchema),
 });
@@ -142,12 +142,14 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
                                 <FormItem>
                                     <FormLabel className={index !== 0 ? "sr-only" : ""}>Años</FormLabel>
                                     <FormControl><Input type="number" className="w-20" placeholder="3" {...field} /></FormControl>
+                                    <FormMessage />
                                 </FormItem>
                             )} />
                              <FormField control={form.control} name={`skills.${index}.level`} render={({ field }) => (
                                 <FormItem>
                                     <FormLabel className={index !== 0 ? "sr-only" : ""}>Nivel (1-5)</FormLabel>
                                     <FormControl><Input type="number" min="1" max="5" className="w-20" placeholder="4" {...field} /></FormControl>
+                                    <FormMessage />
                                 </FormItem>
                             )} />
                              <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
