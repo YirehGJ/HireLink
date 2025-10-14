@@ -87,15 +87,7 @@ function RegisterPageContent() {
         };
         
         const userDocRef = doc(firestore, "users", firebaseUser.uid);
-        
-        setDoc(userDocRef, userProfile).catch(async (serverError) => {
-            const permissionError = new FirestorePermissionError({
-              path: userDocRef.path,
-              operation: 'create',
-              requestResourceData: userProfile,
-            });
-            errorEmitter.emit('permission-error', permissionError);
-        });
+        await setDoc(userDocRef, userProfile);
 
         toast({
           title: "Registro exitoso",
@@ -145,14 +137,7 @@ function RegisterPageContent() {
           status: 'active' as const,
         };
         
-        setDoc(userDocRef, newUserProfile).catch(async (serverError) => {
-            const permissionError = new FirestorePermissionError({
-              path: userDocRef.path,
-              operation: 'create',
-              requestResourceData: newUserProfile,
-            });
-            errorEmitter.emit('permission-error', permissionError);
-        });
+        await setDoc(userDocRef, newUserProfile)
       }
 
       toast({ title: "Inicio de sesión con Google exitoso" });
@@ -339,7 +324,3 @@ export default function RegisterPage() {
     </Suspense>
   )
 }
-
-    
-
-    
