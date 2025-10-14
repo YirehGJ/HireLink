@@ -232,7 +232,7 @@ export default function LoginPage() {
             {isGoogleSubmitting ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-                <Icons.logo className="mr-2 h-4 w-4" />
+                <Icons.google className="mr-2 h-4 w-4" />
             )}{' '}
             Google
         </Button>
@@ -241,3 +241,6 @@ export default function LoginPage() {
   );
 }
 
+
+
+    
