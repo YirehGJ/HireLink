@@ -45,6 +45,27 @@ export async function extractCvData(input: CvExtractionInput): Promise<CvExtract
   return extractCvDataFlow(input);
 }
 
+
+const cvExtractionPrompt = ai.definePrompt({
+    name: 'cvExtractionPrompt',
+    input: { schema: CvExtractionInputSchema },
+    output: { schema: CvExtractionOutputSchema },
+    prompt: `Actúa como un experto en Recursos Humanos analizando un currículum. Analiza el siguiente texto extraído de un CV y extrae la información solicitada, devolviendo un objeto JSON que se ajuste al esquema.
+
+Texto del CV:
+"""
+{{{cvText}}}
+"""
+
+- headline: El titular profesional del candidato.
+- location: La ubicación del candidato.
+- yearsOfExperience: El total de años de experiencia profesional. Si no se especifica, intenta calcularlo a partir de las fechas de los trabajos.
+- skills: Una lista de las habilidades más importantes, con su nombre, un nivel de dominio estimado de 1 a 5, y los años de experiencia si es posible.
+
+Sé conciso y preciso en la extracción de datos.`,
+});
+
+
 // Define el flujo principal que orquesta la extracción
 const extractCvDataFlow = ai.defineFlow(
   {
@@ -57,29 +78,8 @@ const extractCvDataFlow = ai.defineFlow(
         throw new Error("No se proporcionó texto del CV.");
     }
     
-    const llmResponse = await ai.generate({
-      prompt: `Analiza el siguiente texto extraído de un currículum vitae (CV) y extrae la información solicitada en el formato JSON especificado.
+    const { output } = await cvExtractionPrompt(input);
 
-Texto del CV:
-"""
-${input.cvText}
-"""
-
-Extrae los siguientes campos:
-- headline: El titular profesional del candidato.
-- location: La ubicación del candidato.
-- yearsOfExperience: El total de años de experiencia profesional. Si no se especifica, intenta calcularlo a partir de las fechas de los trabajos.
-- skills: Una lista de las habilidades más importantes, con su nombre, un nivel de dominio estimado de 1 a 5, y los años de experiencia si es posible.
-
-Sé conciso y preciso.`,
-      output: {
-        schema: CvExtractionOutputSchema,
-        format: 'json'
-      },
-      model: 'googleai/gemini-2.5-flash',
-    });
-
-    const output = llmResponse.output();
     if (!output) {
       throw new Error("La IA no pudo generar una respuesta estructurada.");
     }
@@ -87,3 +87,4 @@ Sé conciso y preciso.`,
     return output;
   }
 );
+
