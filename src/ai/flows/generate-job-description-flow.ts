@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview Flujo de Genkit para generar una descripción de trabajo en Markdown.
@@ -68,8 +67,12 @@ Asegúrate de que el tono sea profesional pero atractivo, y que el formato sea c
       model: 'googleai/gemini-2.5-flash',
     });
 
-    const output = llmResponse.output();
-    if (!output) {
+    if (!llmResponse || !llmResponse.output) {
+      throw new Error('Respuesta del modelo nula.');
+    }
+
+    const output = llmResponse.output as GenerateJobDescriptionOutput;
+    if (!output.descriptionMd) {
       throw new Error("La IA no pudo generar una respuesta estructurada.");
     }
 
