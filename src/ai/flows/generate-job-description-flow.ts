@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview Flujo de Genkit para generar una descripción de trabajo en Markdown.
@@ -33,6 +34,27 @@ export async function generateJobDescription(input: GenerateJobDescriptionInput)
   return generateJobDescriptionFlow(input);
 }
 
+
+const jobDescriptionPrompt = ai.definePrompt({
+    name: 'jobDescriptionPrompt',
+    input: { schema: GenerateJobDescriptionInputSchema },
+    output: { schema: GenerateJobDescriptionOutputSchema },
+    prompt: `Actúa como un experto en redacción de Recursos Humanos. Tu tarea es crear una descripción de puesto de trabajo atractiva y profesional en formato Markdown para el campo 'descriptionMd'.
+
+Basándote en los siguientes detalles:
+- Título del Puesto: {{{title}}}
+- Nivel de Seniority: {{{seniority}}}
+- Habilidades y Tecnologías Clave: {{{searchTags}}}
+
+Genera una descripción que incluya las siguientes secciones:
+- Un breve párrafo introductorio sobre el puesto.
+- "Responsabilidades Principales" (en una lista con viñetas).
+- "Cualificaciones y Habilidades" (en una lista con viñetas, basándote en los datos proporcionados).
+- "Lo que Ofrecemos" (una lista con beneficios genéricos atractivos, como desarrollo profesional, buen ambiente de trabajo, etc.).
+
+Asegúrate de que el tono sea profesional pero atractivo, y que el formato sea claro y fácil de leer. El resultado debe ser un objeto JSON que contenga la clave "descriptionMd" con el texto en Markdown.`,
+});
+
 // Define el flujo principal que orquesta la generación
 const generateJobDescriptionFlow = ai.defineFlow(
   {
@@ -45,34 +67,9 @@ const generateJobDescriptionFlow = ai.defineFlow(
         throw new Error("El título y el seniority son requeridos.");
     }
     
-    const llmResponse = await ai.generate({
-      prompt: `Actúa como un experto en redacción de Recursos Humanos. Tu tarea es crear una descripción de puesto de trabajo atractiva y profesional en formato Markdown para el campo 'descriptionMd'.
+    const { output } = await jobDescriptionPrompt(input);
 
-Basándote en los siguientes detalles:
-- Título del Puesto: ${input.title}
-- Nivel de Seniority: ${input.seniority}
-- Habilidades y Tecnologías Clave: ${input.searchTags.join(', ')}
-
-Genera una descripción que incluya las siguientes secciones:
-- Un breve párrafo introductorio sobre el puesto.
-- "Responsabilidades Principales" (en una lista con viñetas).
-- "Cualificaciones y Habilidades" (en una lista con viñetas, basándote en los datos proporcionados).
-- "Lo que Ofrecemos" (una lista con beneficios genéricos atractivos, como desarrollo profesional, buen ambiente de trabajo, etc.).
-
-Asegúrate de que el tono sea profesional pero atractivo, y que el formato sea claro y fácil de leer. El resultado debe ser un objeto JSON que contenga la clave "descriptionMd" con el texto en Markdown.`,
-      output: {
-        schema: GenerateJobDescriptionOutputSchema,
-        format: 'json'
-      },
-      model: 'gemini-1.5-flash',
-    });
-
-    if (!llmResponse || !llmResponse.output) {
-      throw new Error('Respuesta del modelo nula.');
-    }
-
-    const output = llmResponse.output as GenerateJobDescriptionOutput;
-    if (!output.descriptionMd) {
+    if (!output) {
       throw new Error("La IA no pudo generar una respuesta estructurada.");
     }
 
