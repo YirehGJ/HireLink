@@ -80,6 +80,29 @@ const extractCvDataFlow = ai.defineFlow(
     
     const { output } = await cvExtractionPrompt(input);
 
+<<<<<<< HEAD
+=======
+Texto del CV:
+"""
+${input.cvText}
+"""
+
+Extrae los siguientes campos:
+- headline: El titular profesional del candidato.
+- location: La ubicación del candidato.
+- yearsOfExperience: El total de años de experiencia profesional. Si no se especifica, intenta calcularlo a partir de las fechas de los trabajos.
+- skills: Una lista de las habilidades más importantes, con su nombre, un nivel de dominio estimado de 1 a 5, y los años de experiencia si es posible.
+
+Sé conciso y preciso.`,
+      output: {
+        schema: CvExtractionOutputSchema,
+        format: 'json'
+      },
+      model: 'gemini-1.5-flash',
+    });
+
+    const output = llmResponse.output();
+>>>>>>> 86b0ea0 (Okay dime cual es el error que a tenido problemas con la API de la IA pa)
     if (!output) {
       throw new Error("La IA no pudo generar una respuesta estructurada.");
     }

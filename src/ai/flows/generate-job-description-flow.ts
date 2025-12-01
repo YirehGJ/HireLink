@@ -64,7 +64,7 @@ Asegúrate de que el tono sea profesional pero atractivo, y que el formato sea c
         schema: GenerateJobDescriptionOutputSchema,
         format: 'json'
       },
-      model: 'googleai/gemini-2.5-flash',
+      model: 'gemini-1.5-flash',
     });
 
     if (!llmResponse || !llmResponse.output) {
