@@ -76,10 +76,10 @@ Sé conciso y preciso.`,
         schema: CvExtractionOutputSchema,
         format: 'json'
       },
-      model: 'gemini-1.5-flash',
+      model: 'gemini-1.0-pro',
     });
 
-    const output = llmResponse.output();
+    const output = llmResponse.output;
     if (!output) {
       throw new Error("La IA no pudo generar una respuesta estructurada.");
     }
@@ -87,4 +87,3 @@ Sé conciso y preciso.`,
     return output;
   }
 );
-
