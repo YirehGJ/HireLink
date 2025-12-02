@@ -10,7 +10,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ProfileClient } from '@/components/dashboard/profile/profile-client';
-import { AdminProfileView } from '@/components/dashboard/admin/admin-profile-view';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,7 +50,6 @@ export default function ProfilePage() {
             <div className="max-w-4xl mx-auto">
                 {role === 'candidate' && <UserProfileForm profile={candidateProfile} />}
                 {role === 'recruiter' && <OrganizationProfileForm organization={organizationProfile} />}
-                {role === 'admin' && user && <AdminProfileView user={user} />}
             </div>
         </div>
     );
