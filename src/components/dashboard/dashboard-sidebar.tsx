@@ -142,7 +142,7 @@ export function DashboardSidebar() {
 
   if (!isMounted || !role || !user) {
     return (
-      <Sidebar variant="sidebar" collapsible="icon">
+      <Sidebar variant="sidebar" collapsible="none">
         <SidebarHeader>
           <Skeleton className="h-8 w-8 rounded-full" />
           <Skeleton className="h-6 w-24" />
@@ -171,7 +171,7 @@ export function DashboardSidebar() {
   const dashboardHome = roleHomeMap[role] || '/dashboard';
 
   return (
-    <Sidebar variant="sidebar" collapsible="icon">
+    <Sidebar variant="sidebar" collapsible="none">
       <SidebarHeader className="items-center justify-center text-center">
         <Link href={dashboardHome} className="flex items-center gap-2">
           <Icons.logo className="h-8 w-8 text-primary" />
