@@ -104,7 +104,12 @@ export default function Home() {
       </main>
 
       <footer className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-muted-foreground text-sm">
-        <p>&copy; {new Date().getFullYear()} HireLink. Todos los derechos reservados.</p>
+        <p>
+          <Link href="/login" className="hover:text-foreground transition-colors focus:outline-none focus:ring-1 focus:ring-ring rounded-sm" aria-label="Ingresar">
+              &copy;
+          </Link>
+          {' '}{new Date().getFullYear()} HireLink. Todos los derechos reservados.
+        </p>
       </footer>
     </div>
   );
