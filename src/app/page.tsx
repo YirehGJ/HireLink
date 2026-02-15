@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Icons } from '@/components/icons';
 import { Briefcase, Users, BrainCircuit } from 'lucide-react';
 import { ThemeSwitcher } from '@/components/theme-switcher';
+import { ClientYear } from '@/components/client-year';
 
 export default function Home() {
   return (
@@ -108,7 +109,7 @@ export default function Home() {
           <Link href="/dashboard?viewAs=admin" className="hover:text-foreground transition-colors focus:outline-none focus:ring-1 focus:ring-ring rounded-sm" aria-label="Ingresar">
               &copy;
           </Link>
-          {' '}{new Date().getFullYear()} HireLink. Todos los derechos reservados.
+          {' '}<ClientYear /> HireLink. Todos los derechos reservados.
         </p>
       </footer>
     </div>
