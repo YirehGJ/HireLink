@@ -9,7 +9,6 @@ import * as z from "zod";
 import React, { Suspense } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile } from "firebase/auth";
-import { doc, setDoc, getDoc } from "firebase/firestore";
 
 import { Button } from "@/components/ui/button";
 import { FormCard } from "@/components/auth/form-card";
@@ -20,21 +19,18 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth, useFirestore } from "@/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Icons } from "@/components/icons";
-import { Separator } from "@/components/ui/separator";
-import type { User } from "@/lib/types";
+import { userService } from "@/firebase/firestore/user-service";
 
-const formSchema = z.object({
-  fullName: z
-    .string()
-    .min(2, { message: "El nombre debe tener al menos 2 caracteres." }),
-  email: z.string().email({ message: "Formato de email inválido." }),
-  password: z
-    .string()
-    .min(8, { message: "La contraseña debe tener al menos 8 caracteres." }),
+const registerSchema = z.object({
+  fullName: z.string().min(2, "Mínimo 2 caracteres"),
+  email: z.string().email("Email inválido"),
+  password: z.string().min(8, "Mínimo 8 caracteres"),
   role: z.enum(["candidate", "recruiter", "admin"], {
-    required_error: "Debes seleccionar un tipo de cuenta.",
+    required_error: "Selecciona un tipo de cuenta",
   }),
 });
+
+type RegisterValues = z.infer<typeof registerSchema>;
 
 function RegisterPageContent() {
   const router = useRouter();
@@ -45,283 +41,88 @@ function RegisterPageContent() {
 
   const defaultRole = searchParams.get("role") === "recruiter" ? "recruiter" : "candidate";
   const [showPassword, setShowPassword] = React.useState(false);
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [isGoogleSubmitting, setIsGoogleSubmitting] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      fullName: "",
-      email: "",
-      password: "",
-      role: defaultRole,
-    },
+  const form = useForm<RegisterValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: { fullName: "", email: "", password: "", role: defaultRole as any },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true);
-    if (!auth || !firestore) {
-        toast({
-            title: "Error de configuración",
-            description: "Los servicios de Firebase no están disponibles.",
-            variant: "destructive"
-        });
-        setIsSubmitting(false);
-        return;
-    }
+  async function onRegister(values: RegisterValues) {
+    if (!auth || !firestore) return;
+    setLoading(true);
 
     try {
-        const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
-        const firebaseUser = userCredential.user;
+      const { user } = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      await updateProfile(user, { displayName: values.fullName });
+      await userService.ensureProfileExists(firestore, user.uid, values.email, values.fullName, values.role);
 
-        // Update Firebase Auth profile
-        await updateProfile(firebaseUser, { displayName: values.fullName });
-        
-        // Hardcode admin role for the specific admin email
-        const role = values.email === 'admin@test.com' ? 'admin' : values.role;
-
-        // Create user document in Firestore
-        const newUserProfile: User = {
-          id: firebaseUser.uid,
-          email: values.email,
-          fullName: values.fullName,
-          role: role,
-          status: 'active',
-        };
-        await setDoc(doc(firestore, "users", firebaseUser.uid), newUserProfile);
-
-        toast({
-          title: "¡Registro exitoso!",
-          description: "Tu cuenta ha sido creada. Serás redirigido.",
-        });
-
-        router.push("/dashboard");
-
-    } catch (error: any) {
-        console.error("Firebase Registration Error:", error);
-        let description = "Ocurrió un error inesperado. Por favor, inténtalo de nuevo.";
-        if (error.code === 'auth/email-already-in-use') {
-            description = "Este correo electrónico ya está en uso. Por favor, inicia sesión o usa otro correo.";
-        }
-        toast({
-            title: "Error de registro",
-            description,
-            variant: "destructive"
-        });
-    } finally {
-        setIsSubmitting(false);
-    }
-  }
-
-  async function handleGoogleSignIn() {
-    setIsGoogleSubmitting(true);
-    if (!auth || !firestore) {
-        toast({ title: "Error", description: "Firebase no está configurado.", variant: "destructive" });
-        setIsGoogleSubmitting(false);
-        return;
-    }
-
-    try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const googleUser = result.user;
-
-      const userDocRef = doc(firestore, "users", googleUser.uid);
-      const userDoc = await getDoc(userDocRef);
-
-      if (!userDoc.exists()) {
-        const role = googleUser.email === 'admin@test.com' ? 'admin' : 'candidate';
-        const newUserProfile: User = {
-          id: googleUser.uid,
-          email: googleUser.email!,
-          fullName: googleUser.displayName || "Usuario de Google",
-          role: role,
-          status: 'active',
-        };
-        
-        await setDoc(userDocRef, newUserProfile);
-      }
-
-      toast({ title: "Inicio de sesión con Google exitoso" });
+      toast({ title: "¡Cuenta creada!", description: "Bienvenido a HireLink." });
       router.push("/dashboard");
-
     } catch (error: any) {
-      console.error("Error con Google Sign-In:", error);
-      toast({ title: "Error", description: "No se pudo iniciar sesión con Google.", variant: "destructive"});
+      console.error("Register Error:", error);
+      toast({
+        title: "Error de registro",
+        description: error.code === 'auth/email-already-in-use' ? "Email ya registrado." : "Inténtalo de nuevo.",
+        variant: "destructive"
+      });
     } finally {
-      setIsGoogleSubmitting(false);
+      setLoading(false);
     }
   }
 
   return (
     <FormCard
-      title="Crear una cuenta"
-      description="Únete a la plataforma líder en gestión de talento."
-      footerContent={
-        <>
-          ¿Ya tienes una cuenta?{' '}
-           <Button variant="link" asChild className="p-0 h-auto font-semibold">
-            <Link href="/login">Inicia sesión</Link>
-          </Button>
-        </>
-      }
+      title="Únete a HireLink"
+      description="Crea tu perfil y empieza hoy mismo."
+      footerContent={<>¿Ya tienes cuenta? <Button variant="link" asChild className="p-0 h-auto"><Link href="/login">Inicia sesión</Link></Button></>}
     >
-      <div className="space-y-4">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="fullName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nombre completo</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Tu nombre y apellido" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="tu@email.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Contraseña</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input
-                          type={showPassword ? "text" : "password"}
-                          placeholder="Mínimo 8 caracteres"
-                          {...field}
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:bg-transparent"
-                          onClick={() => setShowPassword((prev) => !prev)}
-                        >
-                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </Button>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="role"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tipo de cuenta</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Busco empleo o busco contratar" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="candidate">
-                          Soy un candidato (busco empleo)
-                        </SelectItem>
-                        <SelectItem value="recruiter">
-                          Soy un reclutador (busco talento)
-                        </SelectItem>
-                        <SelectItem value="admin">
-                          Soy administrador
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full" disabled={isSubmitting || isGoogleSubmitting}>
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Crear cuenta
-              </Button>
-            </form>
-          </Form>
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">O continúa con</span>
-            </div>
-          </div>
-           <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isSubmitting || isGoogleSubmitting}>
-            {isGoogleSubmitting ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-                <Icons.google className="mr-2 h-4 w-4" />
-            )}{' '}
-            Google
-        </Button>
-      </div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onRegister)} className="space-y-4">
+          <FormField control={form.control} name="fullName" render={({ field }) => (
+            <FormItem><FormLabel>Nombre completo</FormLabel><FormControl><Input placeholder="Juan Pérez" {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
+          <FormField control={form.control} name="email" render={({ field }) => (
+            <FormItem><FormLabel>Email</FormLabel><FormControl><Input placeholder="tu@email.com" {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
+          <FormField control={form.control} name="password" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Contraseña</FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <Input type={showPassword ? "text" : "password"} placeholder="********" {...field} />
+                  <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="role" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo de cuenta</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="candidate">Candidato (Busco empleo)</SelectItem>
+                  <SelectItem value="recruiter">Reclutador (Busco talento)</SelectItem>
+                  <SelectItem value="admin">Administrador</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <Button type="submit" className="w-full" disabled={loading}>{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Crear cuenta</Button>
+        </form>
+      </Form>
     </FormCard>
   );
 }
 
-
-function RegisterPageLoading() {
-  return (
-    <FormCard
-      title="Crear una cuenta"
-      description="Únete a la plataforma líder en gestión de talento."
-      footerContent={
-        <>
-          ¿Ya tienes una cuenta?{' '}
-           <Button variant="link" asChild className="p-0 h-auto font-semibold">
-            <Link href="/login">Inicia sesión</Link>
-          </Button>
-        </>
-      }
-    >
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-24"/>
-          <Skeleton className="h-10 w-full"/>
-        </div>
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-24"/>
-          <Skeleton className="h-10 w-full"/>
-        </div>
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-24"/>
-          <Skeleton className="h-10 w-full"/>
-        </div>
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-24"/>
-          <Skeleton className="h-10 w-full"/>
-        </div>
-        <Skeleton className="h-10 w-full"/>
-      </div>
-    </FormCard>
-  )
-}
-
 export default function RegisterPage() {
   return (
-    <Suspense fallback={<RegisterPageLoading />}>
+    <Suspense fallback={<div className="p-8 text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto"/></div>}>
       <RegisterPageContent />
     </Suspense>
   )

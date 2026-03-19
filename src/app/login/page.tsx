@@ -8,9 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import React from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, User as FirebaseUser } from "firebase/auth";
-import { doc, setDoc, getDoc } from "firebase/firestore";
-
+import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
 
 import { Button } from "@/components/ui/button";
 import { FormCard } from "@/components/auth/form-card";
@@ -20,47 +18,15 @@ import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth, useFirestore } from "@/firebase";
 import { Icons } from "@/components/icons";
-import { Separator } from "@/components/ui/separator";
-import type { User } from "@/lib/types";
+import { userService } from "@/firebase/firestore/user-service";
 
-
-const formSchema = z.object({
-  email: z
-    .string()
-    .min(1, { message: "El email es requerido." })
-    .email({ message: "Formato de email inválido." }),
-  password: z
-    .string()
-    .min(1, { message: "La contraseña es requerida." })
-    .min(6, { message: "La contraseña debe tener al menos 6 caracteres." }),
-  rememberMe: z.boolean().default(false).optional(),
+const loginSchema = z.object({
+  email: z.string().min(1, "El email es requerido").email("Email inválido"),
+  password: z.string().min(1, "La contraseña es requerida").min(6, "Mínimo 6 caracteres"),
+  rememberMe: z.boolean().default(false),
 });
 
-const ensureUserProfileExists = async (
-  firestore: ReturnType<typeof useFirestore>,
-  firebaseUser: FirebaseUser,
-  defaults: Partial<User> = {}
-) => {
-  if (!firestore) return;
-  const userDocRef = doc(firestore, "users", firebaseUser.uid);
-  const userDoc = await getDoc(userDocRef);
-
-  if (!userDoc.exists()) {
-    // Hardcode admin role for the specific admin email
-    const role = firebaseUser.email === 'admin@test.com' ? 'admin' : (defaults.role || 'candidate');
-
-    const newUserProfile: User = {
-      id: firebaseUser.uid,
-      email: firebaseUser.email!,
-      fullName: firebaseUser.displayName || defaults.fullName || "Nuevo Usuario",
-      role: role,
-      status: "active",
-      ...defaults,
-    };
-    await setDoc(userDocRef, newUserProfile);
-  }
-};
-
+type LoginValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
@@ -68,83 +34,60 @@ export default function LoginPage() {
   const auth = useAuth();
   const firestore = useFirestore();
   const [showPassword, setShowPassword] = React.useState(false);
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [isGoogleSubmitting, setIsGoogleSubmitting] = React.useState(false);
+  const [loadingType, setLoadingType] = React.useState<'email' | 'google' | null>(null);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      rememberMe: false,
-    },
+  const form = useForm<LoginValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "", rememberMe: false },
   });
 
+  const handleAuthError = (error: any) => {
+    console.error("Auth Error:", error);
+    toast({
+      title: "Error de acceso",
+      description: "Credenciales inválidas o problema de conexión.",
+      variant: "destructive"
+    });
+  };
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true);
-    if (!auth || !firestore) {
-        toast({
-            title: "Error de configuración",
-            description: "La autenticación de Firebase no está disponible.",
-            variant: "destructive"
-        });
-        setIsSubmitting(false);
-        return;
-    }
+  async function onEmailLogin(values: LoginValues) {
+    if (!auth || !firestore) return;
+    setLoadingType('email');
     
     try {
-        const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
-        await ensureUserProfileExists(firestore, userCredential.user, { fullName: values.email.split('@')[0] });
-        toast({
-            title: "Inicio de sesión exitoso",
-            description: "Redirigiendo a tu panel...",
-        });
-        router.push("/dashboard");
-    } catch (error: any) {
-        console.error("Firebase Auth Error:", error);
-        toast({
-            title: "Error de autenticación",
-            description: "Credenciales inválidas o error de red. Por favor, inténtalo de nuevo.",
-            variant: "destructive"
-        });
+      const { user } = await signInWithEmailAndPassword(auth, values.email, values.password);
+      await userService.ensureProfileExists(firestore, user.uid, user.email!, user.displayName || values.email.split('@')[0]);
+      router.push("/dashboard");
+    } catch (error) {
+      handleAuthError(error);
     } finally {
-        setIsSubmitting(false);
+      setLoadingType(null);
     }
   }
 
-  async function handleGoogleSignIn() {
-    setIsGoogleSubmitting(true);
-    if (!auth || !firestore) {
-        toast({ title: "Error", description: "Firebase no está configurado.", variant: "destructive" });
-        setIsGoogleSubmitting(false);
-        return;
-    }
+  async function onGoogleLogin() {
+    if (!auth || !firestore) return;
+    setLoadingType('google');
 
     try {
       const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      await ensureUserProfileExists(firestore, result.user, { role: 'candidate' });
-
-      toast({ title: "Inicio de sesión con Google exitoso" });
+      const { user } = await signInWithPopup(auth, provider);
+      await userService.ensureProfileExists(firestore, user.uid, user.email!, user.displayName || "Usuario Google");
       router.push("/dashboard");
-
-    } catch (error: any) {
-      console.error("Error con Google Sign-In:", error);
-      toast({ title: "Error", description: "No se pudo iniciar sesión con Google.", variant: "destructive"});
+    } catch (error) {
+      handleAuthError(error);
     } finally {
-      setIsGoogleSubmitting(false);
+      setLoadingType(null);
     }
   }
-
 
   return (
     <FormCard
       title="Iniciar Sesión"
-      description="Introduce tus credenciales para acceder a tu cuenta."
+      description="Bienvenido de nuevo a HireLink."
       footerContent={
         <>
-          ¿No tienes cuenta?{' '}
+          ¿Aún no tienes cuenta?{' '}
           <Button variant="link" asChild className="p-0 h-auto font-semibold">
             <Link href="/register">Regístrate</Link>
           </Button>
@@ -153,16 +96,14 @@ export default function LoginPage() {
     >
       <div className="space-y-4">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onEmailLogin)} className="space-y-4">
             <FormField
               control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="tu@email.com" {...field} />
-                  </FormControl>
+                  <FormControl><Input placeholder="tu@email.com" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -175,17 +116,13 @@ export default function LoginPage() {
                   <FormLabel>Contraseña</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <Input
-                        type={showPassword ? 'text' : 'password'}
-                        placeholder="********"
-                        {...field}
-                      />
+                      <Input type={showPassword ? 'text' : 'password'} placeholder="********" {...field} />
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:bg-transparent"
-                        onClick={() => setShowPassword((prev) => !prev)}
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                        onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </Button>
@@ -195,51 +132,29 @@ export default function LoginPage() {
                 </FormItem>
               )}
             />
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center justify-between">
               <FormField
                 control={form.control}
                 name="rememberMe"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormLabel className="cursor-pointer font-normal text-sm">Recuérdame</FormLabel>
+                  <FormItem className="flex items-center space-x-2 space-y-0">
+                    <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+                    <FormLabel className="font-normal text-xs">Recuérdame</FormLabel>
                   </FormItem>
                 )}
               />
-              <Button
-                variant="link"
-                asChild
-                className="p-0 h-auto text-sm font-medium"
-              >
-                <Link href="/forgot-password">¿Olvidaste tu contraseña?</Link>
-              </Button>
+              <Button variant="link" asChild className="p-0 h-auto text-xs"><Link href="/forgot-password">¿Olvidaste tu contraseña?</Link></Button>
             </div>
-            <Button type="submit" className="w-full" disabled={isSubmitting || isGoogleSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button type="submit" className="w-full" disabled={!!loadingType}>
+              {loadingType === 'email' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Entrar
             </Button>
           </form>
         </Form>
-        <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">O continúa con</span>
-            </div>
-        </div>
-        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isSubmitting || isGoogleSubmitting}>
-            {isGoogleSubmitting ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-                <Icons.google className="mr-2 h-4 w-4" />
-            )}{' '}
-            Google
+        <div className="relative"><div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div><div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">O continúa con</span></div></div>
+        <Button variant="outline" className="w-full" onClick={onGoogleLogin} disabled={!!loadingType}>
+          {loadingType === 'google' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Icons.google className="mr-2 h-4 w-4" />}
+          Google
         </Button>
       </div>
     </FormCard>
