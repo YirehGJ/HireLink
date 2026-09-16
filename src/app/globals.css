@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%; /* #FFFFFF */
+    --foreground: 224 71.4% 4.1%; /* #0F172A */
+    --card: 0 0% 100%;
+    --card-foreground: 224 71.4% 4.1%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71.4% 4.1%;
+    --primary: 258 69% 50%; /* #6D28D9 */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 271 83% 54%; /* #9333EA */
+    --secondary-foreground: 210 40% 98%;
+    --muted: 220 14.3% 95.9%; /* #F1F2F5 -> Similar to #F3F4F6 */
+    --muted-foreground: 220 8.9% 46.1%; /* #6B7280 */
+    --accent: 259 81% 94%; /* #E9D5FF */
+    --accent-foreground: 258 69% 30%; /* Darker purple for text on accent */
+    --destructive: 0 84.2% 60.2%; /* #EF4444 */
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 258 69% 50%; /* #6D28D9 */
+    --radius: 1rem;
+  }
+
+  .dark {
+    --background: 222.9 30.3% 8.6%; /* #0F172A */
+    --foreground: 215 20.2% 98.2%; /* #F9FAFB */
+    --card: 220 13% 12%; /* #1F2937 */
+    --card-foreground: 215 20.2% 98.2%;
+    --popover: 220 13% 12%;
+    --popover-foreground: 215 20.2% 98.2%;
+    --primary: 258 69% 60%; /* Lighter purple for dark mode */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 271 83% 64%; /* Lighter purple for dark mode */
+    --secondary-foreground: 210 40% 98%;
+    --muted: 220 13% 12%; /* #1F2937 */
+    --muted-foreground: 220 8.9% 46.1%; /* #9CA3AF */
+    --accent: 259 50% 20%; /* Darker lilac for dark mode */
+    --accent-foreground: 259 81% 94%; /* #E9D5FF */
+    --destructive: 0 72.2% 50.6%; /* #EF4444 */
+    --destructive-foreground: 210 40% 98%;
+    --border: 220 13% 22%; /* #374151 */
+    --input: 220 13% 22%;
+    --ring: 258 69% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}

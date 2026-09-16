@@ -1,0 +1,123 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isRole(role) {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == role;
+    }
+
+    function isRecruiterForOrg(orgId) {
+        return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationRef == orgId;
+    }
+    
+    // USERS
+    match /users/{userId} {
+      // Anyone can create their own user document (on sign up)
+      allow create: if isSignedIn() && isOwner(userId);
+      // Users can read their own profile, Admins can read any
+      allow get: if isSignedIn() && (isOwner(userId) || isRole('admin'));
+      // Users can update their own profile
+      allow update: if isSignedIn() && isOwner(userId);
+      // Only admins can delete users (for now)
+      allow delete: if isSignedIn() && isRole('admin');
+      // Only admins can list all users
+      allow list: if isSignedIn() && isRole('admin');
+
+      // SETTINGS (e.g. notification preferences) — fully owned by the user
+      match /settings/{settingId} {
+        allow read, write: if isSignedIn() && isOwner(userId);
+      }
+
+      // NOTIFICATIONS (system-generated, server-only writes via Admin SDK)
+      match /notifications/{notifId} {
+        allow get, list: if isSignedIn() && isOwner(userId);
+        // Owner may only toggle the `read` flag; everything else is server-only.
+        allow update: if isSignedIn() && isOwner(userId) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+        allow create, delete: if false;
+      }
+    }
+
+    // CANDIDATES
+    match /candidates/{candidateId} {
+        // A user can create their own candidate profile (candidateId must equal their uid)
+        allow create: if isSignedIn() && isOwner(candidateId);
+        // Recruiters and admins can view candidate profiles. Candidates can view their own.
+        allow get: if isSignedIn() && (isRole('recruiter') || isRole('admin') || isOwner(candidateId));
+        // Candidates can update their own profile
+        allow update: if isSignedIn() && isOwner(candidateId);
+        // Only admins can delete
+        allow delete: if isSignedIn() && isRole('admin');
+        // Recruiters and admins can list candidates
+        allow list: if isSignedIn() && (isRole('recruiter') || isRole('admin'));
+
+        match /skills/{skillId} {
+            // Owner of the parent candidate profile can manage skills
+            allow read, write: if isSignedIn() && isOwner(candidateId);
+        }
+    }
+
+    // ORGANIZATIONS
+    match /organizations/{orgId} {
+      // Any authenticated user can read organization details
+      allow get: if isSignedIn();
+      // Recruiters can update their own organization's profile
+      allow update: if isSignedIn() && isRecruiterForOrg(orgId);
+      // Admins can create any org; a recruiter without one yet can create their own
+      // (they must then link it to their user doc via `organizationRef`).
+      allow create: if isSignedIn() && (
+        isRole('admin') ||
+        (isRole('recruiter') && !('organizationRef' in get(/databases/$(database)/documents/users/$(request.auth.uid)).data))
+      );
+      allow delete: if isSignedIn() && isRole('admin');
+      // Allow listing for authenticated users to find companies
+      allow list: if isSignedIn();
+    }
+
+    // JOBS
+    match /jobs/{jobId} {
+      // Any authenticated user can view published job listings
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      // Only recruiters belonging to the organization can create a job for it
+      allow create: if isSignedIn() && isRole('recruiter') && isRecruiterForOrg(request.resource.data.organizationRef);
+      // Only recruiters from that org or admins can update/close jobs
+      allow update: if isSignedIn() && (isRole('admin') || (isRole('recruiter') && isRecruiterForOrg(resource.data.organizationRef)));
+      // Only admins can delete
+      allow delete: if isSignedIn() && isRole('admin');
+
+        // APPLICATIONS
+        match /applications/{appId} {
+            // Candidates can create an application for themselves
+            allow create: if isSignedIn() && request.auth.uid == request.resource.data.candidateRef;
+            // Candidates can see their own applications. Recruiters for the org can see applications for their jobs.
+            allow get, list: if isSignedIn() && (
+                isOwner(resource.data.candidateRef) ||
+                isRecruiterForOrg(get(/databases/$(database)/documents/jobs/$(jobId)).data.organizationRef)
+            );
+            // Recruiters can update the status
+            allow update: if isSignedIn() && isRecruiterForOrg(get(/databases/$(database)/documents/jobs/$(jobId)).data.organizationRef);
+            // Candidate can withdraw their application (delete)
+            allow delete: if isSignedIn() && isOwner(resource.data.candidateRef);
+        }
+    }
+    
+    // RECOMMENDATIONS
+    match /recommendations/{recId} {
+      // Only the specific candidate can see their recommendations
+      allow get, list: if isSignedIn() && request.auth.uid == resource.data.candidateRef;
+      // Recommendations are system-generated (via Admin SDK), so no client-side writes
+      allow create, update, delete: if false;
+    }
+  }
+}
