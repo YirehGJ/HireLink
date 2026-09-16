@@ -45,5 +45,12 @@ firebase-debug.log
 firestore-debug.log
 service-account.json
 serviceAccountKey.json
+deploy-rules.mjs
+list-releases.mjs
+deploy-indexes.mjs
+append-admin-env.mjs
+check-jobs.mjs
+check-deployed-rules.mjs
+check-notifications.mjs
 # claude code session runtime state
 .claude/*.lock

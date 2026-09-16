@@ -55,7 +55,7 @@ export async function POST(request: Request) {
         jobRef: jobDoc.id,
         score: match.score,
         reasons: match.reasons,
-        engineVersion: "gemini-1.0-pro",
+        engineVersion: "gemini-2.5-flash",
         createdAt: existing.exists ? existing.data()!.createdAt : FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
       });

@@ -24,9 +24,11 @@ import {
   FileText,
   LayoutDashboard,
 } from "lucide-react";
+import { signOut } from "firebase/auth";
 import { Icons } from "@/components/icons";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
 import { useApp } from "@/components/providers/app-provider";
+import { useAuth } from "@/firebase";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { UserRole } from "@/lib/types";
@@ -68,6 +70,7 @@ const NAV_CONFIG: Record<UserRole, NavItem[]> = {
 export function DashboardSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const auth = useAuth();
   const { user, role, setUser, isMounted } = useApp();
 
   const isActive = (path: string) => {
@@ -77,8 +80,9 @@ export function DashboardSidebar() {
     return pathname.startsWith(path);
   }
 
-  const handleLogout = (e: React.MouseEvent) => {
+  const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault();
+    if (auth) await signOut(auth);
     setUser(null);
     router.push('/');
   }

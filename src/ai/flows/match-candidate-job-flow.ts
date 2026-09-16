@@ -70,7 +70,7 @@ Calcula un puntaje de compatibilidad (0.0 a 1.0) basado en qué tanto las habili
         schema: MatchOutputSchema,
         format: 'json',
       },
-      model: 'gemini-1.0-pro',
+      model: 'gemini-2.5-flash',
     });
 
     const output = llmResponse.output;

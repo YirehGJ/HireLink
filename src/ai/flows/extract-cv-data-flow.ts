@@ -76,7 +76,7 @@ Sé conciso y preciso.`,
         schema: CvExtractionOutputSchema,
         format: 'json'
       },
-      model: 'gemini-1.0-pro',
+      model: 'gemini-2.5-flash',
     });
 
     const output = llmResponse.output;

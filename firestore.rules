@@ -117,6 +117,18 @@ service cloud.firestore {
         }
     }
     
+    // APPLICATIONS (collection group) — a nested `match` under /jobs/{jobId}
+    // only covers direct queries scoped to one job; a candidate's "my
+    // applications" screen uses a collectionGroup('applications') query that
+    // spans every job, which Firestore only allows if there's a rule written
+    // with the {path=**} wildcard, separate from the nested one above.
+    match /{path=**}/applications/{appId} {
+      allow get, list: if isSignedIn() && (
+        isOwner(resource.data.candidateRef) ||
+        isRecruiterForOrg(get(/databases/$(database)/documents/jobs/$(resource.data.jobRef)).data.organizationRef)
+      );
+    }
+
     // RECOMMENDATIONS
     match /recommendations/{recId} {
       // Only the specific candidate can see their recommendations

@@ -7,7 +7,7 @@ import { z } from "zod";
 import React from "react";
 import { Loader2 } from "lucide-react";
 import { useApp } from "@/components/providers/app-provider";
-import { updateProfile } from "firebase/auth";
+import { updateProfile, EmailAuthProvider, reauthenticateWithCredential, updatePassword } from "firebase/auth";
 import { doc, updateDoc } from "firebase/firestore";
 import { useAuth, useFirestore } from "@/firebase";
 
@@ -109,17 +109,13 @@ export function AccountSettings() {
         updatedUserData.fullName = data.fullName;
       }
       
-      // TODO: Handle email change (requires re-authentication)
-      if (data.email !== user.email) {
-          console.warn("El cambio de email no está implementado todavía.");
-      }
-
-      // TODO: Handle password change
-      if (data.newPassword) {
-        console.warn("El cambio de contraseña no está implementado todavía.");
-      }
-      
       await Promise.all(updates);
+
+      if (data.newPassword && data.currentPassword) {
+        const credential = EmailAuthProvider.credential(user.email, data.currentPassword);
+        await reauthenticateWithCredential(auth.currentUser, credential);
+        await updatePassword(auth.currentUser, data.newPassword);
+      }
 
       // Update local app state
       setUser(prevUser => prevUser ? { ...prevUser, ...updatedUserData } : null);
@@ -129,11 +125,14 @@ export function AccountSettings() {
         description: "La información de tu cuenta ha sido guardada exitosamente.",
       });
 
-    } catch (error) {
+    } catch (error: any) {
        console.error("Error updating profile:", error);
+       const isWrongPassword = error?.code === 'auth/invalid-credential' || error?.code === 'auth/wrong-password';
        toast({
         title: "Error",
-        description: "No se pudo actualizar el perfil.",
+        description: isWrongPassword
+          ? "Tu contraseña actual es incorrecta."
+          : "No se pudo actualizar el perfil.",
         variant: "destructive",
       });
     } finally {
