@@ -15,14 +15,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import type { Candidate, Skill } from "@/lib/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { extractCvData } from "@/ai/flows/extract-cv-data-flow";
-import { useAuth, useFirestore, useStorage } from "@/firebase";
+import { useAuth, useFirestore } from "@/firebase";
 import { candidateService } from "@/firebase/firestore/candidate-service";
-import { uploadResume } from "@/firebase/storage/upload-resume";
 import { callAuthedApi } from "@/lib/api-client";
 
 
@@ -45,11 +43,8 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
   const { toast } = useToast();
   const auth = useAuth();
   const firestore = useFirestore();
-  const storage = useStorage();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isParsingCv, setIsParsingCv] = React.useState(false);
-  const [uploadProgress, setUploadProgress] = React.useState<number | null>(null);
-  const [resumeRef, setResumeRef] = React.useState<string | undefined>(profile?.resumeRef);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
@@ -83,7 +78,6 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
         available: profile.available ?? true,
         skills: profile.skills?.map(s => ({ ...s, source: undefined })) || [],
       });
-      setResumeRef(profile.resumeRef);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile]);
@@ -96,7 +90,6 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
       await candidateService.saveProfile(firestore, auth.currentUser.uid, {
         ...values,
         skills: values.skills.map((s) => ({ ...s, source: "manual" })),
-        resumeRef,
       });
 
       toast({
@@ -138,27 +131,6 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
         title: "Procesando CV...",
         description: "La IA está extrayendo tu información. Esto puede tardar un momento.",
     });
-
-    // Sube el archivo original a Storage en paralelo (no bloqueante): el usuario
-    // puede seguir viendo el progreso mientras la IA analiza el texto abajo.
-    if (storage && auth && auth.currentUser) {
-        setUploadProgress(0);
-        const { promise } = uploadResume(storage, auth.currentUser.uid, file, setUploadProgress);
-        promise
-            .then((path) => {
-                setResumeRef(path);
-                setUploadProgress(null);
-            })
-            .catch((err) => {
-                console.error("Error uploading resume:", err);
-                setUploadProgress(null);
-                toast({
-                    title: "Error al subir el CV",
-                    description: "El archivo no se pudo guardar en la nube.",
-                    variant: "destructive",
-                });
-            });
-    }
 
     try {
         const reader = new FileReader();
@@ -335,15 +307,6 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
                         disabled={isParsingCv}
                         ref={fileInputRef}
                     />
-                    {uploadProgress !== null && (
-                        <div className="space-y-1">
-                            <Progress value={uploadProgress} />
-                            <p className="text-xs text-muted-foreground">Subiendo archivo... {uploadProgress.toFixed(0)}%</p>
-                        </div>
-                    )}
-                    {resumeRef && uploadProgress === null && (
-                        <p className="text-xs text-muted-foreground">CV guardado en la nube ✓</p>
-                    )}
                 </CardContent>
             </Card>
             <Card>

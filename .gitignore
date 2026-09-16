@@ -52,5 +52,7 @@ append-admin-env.mjs
 check-jobs.mjs
 check-deployed-rules.mjs
 check-notifications.mjs
+set-cors.mjs
+list-buckets.mjs
 # claude code session runtime state
 .claude/*.lock
