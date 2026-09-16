@@ -9,6 +9,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 import { z } from 'zod';
 
 // Esquema de entrada: el texto extraído de un CV.
@@ -76,7 +77,7 @@ Sé conciso y preciso.`,
         schema: CvExtractionOutputSchema,
         format: 'json'
       },
-      model: 'gemini-2.5-flash',
+      model: googleAI.model('gemini-2.5-flash'),
     });
 
     const output = llmResponse.output;

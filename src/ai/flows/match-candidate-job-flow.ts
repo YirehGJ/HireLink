@@ -7,6 +7,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 import { z } from 'zod';
 
 const SkillInputSchema = z.object({
@@ -70,7 +71,7 @@ Calcula un puntaje de compatibilidad (0.0 a 1.0) basado en qué tanto las habili
         schema: MatchOutputSchema,
         format: 'json',
       },
-      model: 'gemini-2.5-flash',
+      model: googleAI.model('gemini-2.5-flash'),
     });
 
     const output = llmResponse.output;
