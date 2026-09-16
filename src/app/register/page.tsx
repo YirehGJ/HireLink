@@ -25,7 +25,7 @@ const registerSchema = z.object({
   fullName: z.string().min(2, "Mínimo 2 caracteres"),
   email: z.string().email("Email inválido"),
   password: z.string().min(8, "Mínimo 8 caracteres"),
-  role: z.enum(["candidate", "recruiter", "admin"], {
+  role: z.enum(["candidate", "recruiter"], {
     required_error: "Selecciona un tipo de cuenta",
   }),
 });
@@ -107,7 +107,6 @@ function RegisterPageContent() {
                 <SelectContent>
                   <SelectItem value="candidate">Candidato (Busco empleo)</SelectItem>
                   <SelectItem value="recruiter">Reclutador (Busco talento)</SelectItem>
-                  <SelectItem value="admin">Administrador</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />

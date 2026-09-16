@@ -22,12 +22,17 @@ service cloud.firestore {
     
     // USERS
     match /users/{userId} {
-      // Anyone can create their own user document (on sign up)
-      allow create: if isSignedIn() && isOwner(userId);
+      // Anyone can create their own user document (on sign up), but never as admin —
+      // that role can only be granted later by an existing admin via update.
+      allow create: if isSignedIn() && isOwner(userId) &&
+        request.resource.data.role in ['candidate', 'recruiter'];
       // Users can read their own profile, Admins can read any
       allow get: if isSignedIn() && (isOwner(userId) || isRole('admin'));
-      // Users can update their own profile
-      allow update: if isSignedIn() && isOwner(userId);
+      // Users can update their own profile but not their own role; admins can update anyone.
+      allow update: if isSignedIn() && (
+        (isOwner(userId) && request.resource.data.role == resource.data.role) ||
+        isRole('admin')
+      );
       // Only admins can delete users (for now)
       allow delete: if isSignedIn() && isRole('admin');
       // Only admins can list all users

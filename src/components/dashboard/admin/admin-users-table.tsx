@@ -1,26 +1,17 @@
 
 "use client"
 import * as React from "react";
-import { users as initialUsers } from "@/lib/data";
+import { useCollection, useFirestore } from "@/firebase";
+import { doc, updateDoc } from "firebase/firestore";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Search, Trash2, UserX } from "lucide-react";
+import { MoreHorizontal, Search, UserX } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast";
 import type { User } from "@/lib/types";
 import Link from "next/link";
@@ -39,26 +30,42 @@ const roleTextMap: Record<User['role'], string> = {
 
 export function AdminUsersTable() {
   const [filter, setFilter] = React.useState("");
-  const [users, setUsers] = React.useState(initialUsers);
+  const { data: users, loading } = useCollection<User>("users");
+  const firestore = useFirestore();
   const { toast } = useToast();
 
-  const handleSuspend = (userId: string) => {
-    setUsers(currentUsers => currentUsers.map(user => 
-      user.id === userId ? { ...user, status: user.status === 'active' ? 'suspended' : 'active' } : user
-    ));
-    toast({ title: "Estado de usuario actualizado" });
+  const handleSuspend = async (userId: string, currentStatus: User['status']) => {
+    if (!firestore) return;
+    try {
+      await updateDoc(doc(firestore, "users", userId), {
+        status: currentStatus === 'active' ? 'suspended' : 'active',
+      });
+      toast({ title: "Estado de usuario actualizado" });
+    } catch (error) {
+      console.error("Error updating user status:", error);
+      toast({ title: "Error al actualizar", variant: "destructive" });
+    }
   };
 
-  const handleDelete = (userId: string) => {
-    setUsers(currentUsers => currentUsers.filter(user => user.id !== userId));
-    toast({ title: "Usuario eliminado", variant: "destructive" });
-  };
-  
-  const filteredUsers = users.filter(user => 
+  const filteredUsers = (users ?? []).filter(user =>
     user.fullName.toLowerCase().includes(filter.toLowerCase()) ||
     user.email.toLowerCase().includes(filter.toLowerCase()) ||
     user.role.toLowerCase().includes(filter.toLowerCase())
   );
+
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Todos los Usuarios</CardTitle>
+          <CardDescription>Cargando usuarios...</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-14 w-full" />)}
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -110,49 +117,24 @@ export function AdminUsersTable() {
                      <Badge variant={user.status === 'active' ? 'secondary' : 'outline'} className="capitalize">{user.status}</Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <AlertDialog>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <span className="sr-only">Abrir menú</span>
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                             <DropdownMenuItem asChild>
-                                <Link href={`/dashboard/users/${user.id}`}>Ver Perfil</Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleSuspend(user.id)}>
-                                <UserX className="mr-2 h-4 w-4" />
-                                {user.status === 'active' ? 'Suspender' : 'Reactivar'}
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <AlertDialogTrigger asChild>
-                                <DropdownMenuItem className="text-destructive" onSelect={(e) => e.preventDefault()}>
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    <span>Eliminar Usuario</span>
-                                </DropdownMenuItem>
-                            </AlertDialogTrigger>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    Esta acción no se puede deshacer. Esto eliminará permanentemente al usuario
-                                    <span className="font-medium"> {user.fullName} </span>
-                                    de la plataforma.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDelete(user.id)} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">
-                                    Sí, eliminar usuario
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Abrir menú</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                         <DropdownMenuItem asChild>
+                            <Link href={`/dashboard/users/${user.id}`}>Ver Perfil</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleSuspend(user.id, user.status)}>
+                            <UserX className="mr-2 h-4 w-4" />
+                            {user.status === 'active' ? 'Suspender' : 'Reactivar'}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))}

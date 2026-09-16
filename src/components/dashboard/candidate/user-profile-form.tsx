@@ -72,6 +72,22 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
     name: "skills",
   });
 
+  // react-hook-form only reads `defaultValues` once at mount, so if `profile`
+  // arrives (or changes) after that, re-sync the form fields explicitly.
+  React.useEffect(() => {
+    if (profile) {
+      form.reset({
+        headline: profile.headline || "",
+        location: profile.location || "",
+        yearsOfExperience: profile.yearsOfExperience || 0,
+        available: profile.available ?? true,
+        skills: profile.skills?.map(s => ({ ...s, source: undefined })) || [],
+      });
+      setResumeRef(profile.resumeRef);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile]);
+
   async function onSubmit(values: z.infer<typeof profileSchema>) {
     if (!firestore || !auth || !auth.currentUser) return;
     setIsSubmitting(true);
