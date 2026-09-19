@@ -138,6 +138,13 @@ export function ApplicantDetailsDialog({ open, onOpenChange, app, candidate, rec
             )}
           </div>
 
+          {candidate?.cvSummary && (
+            <div className="rounded-lg bg-muted/50 p-4 text-sm">
+              <p className="font-medium mb-1">Resumen del CV (IA)</p>
+              <p className="text-muted-foreground">{candidate.cvSummary}</p>
+            </div>
+          )}
+
           {recommendation && (
             <div className="rounded-lg border p-4 space-y-2">
               <div className="flex items-center gap-2 font-semibold">

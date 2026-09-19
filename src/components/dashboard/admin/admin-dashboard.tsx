@@ -25,6 +25,9 @@ const ACTION_TEXT: Record<string, string> = {
   application_created: "Postulación creada",
   application_status_changed: "Cambió estado de postulación",
   interview_scheduled: "Agendó entrevista",
+  match_accepted: "Aceptó un match",
+  match_rejected_by_recruiter: "Rechazó un match (empresa)",
+  match_rejected_by_candidate: "Rechazó un match (candidato)",
 };
 
 const STATUS_STEPS: { key: string; label: string }[] = [

@@ -32,6 +32,7 @@ const CvExtractionOutputSchema = z.object({
     location: z.string().describe("La ciudad y país de residencia del candidato. Ej: 'Ciudad de México, México'."),
     yearsOfExperience: z.coerce.number().describe("El número total de años de experiencia profesional relevante que se puedan inferir del CV."),
     skills: z.array(SkillSchema).describe("Una lista de las habilidades técnicas y blandas más relevantes del candidato."),
+    summary: z.string().describe("Resumen profesional de 2 a 4 oraciones en español: trayectoria, experiencia clave, educación y fortalezas. Lo leerá un reclutador."),
 });
 export type CvExtractionOutput = z.infer<typeof CvExtractionOutputSchema>;
 
@@ -70,6 +71,7 @@ Extrae los siguientes campos:
 - location: La ubicación del candidato.
 - yearsOfExperience: El total de años de experiencia profesional. Si no se especifica, intenta calcularlo a partir de las fechas de los trabajos.
 - skills: Una lista de las habilidades más importantes, con su nombre, un nivel de dominio estimado de 1 a 5, y los años de experiencia si es posible.
+- summary: Un resumen profesional de 2 a 4 oraciones en español (trayectoria, experiencia clave, educación, fortalezas).
 
 Sé conciso y preciso.`,
       output: {

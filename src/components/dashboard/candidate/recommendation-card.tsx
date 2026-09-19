@@ -4,6 +4,7 @@ import type { Recommendation, Job } from "@/lib/types";
 import { MapPin, Briefcase, Zap, CheckCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ApplyButton } from "./apply-button";
+import { RejectMatchButton } from "./reject-match-button";
 
 interface RecommendationCardProps {
   recommendation: Recommendation;
@@ -61,8 +62,18 @@ export function RecommendationCard({ recommendation, job }: RecommendationCardPr
             </div>
         </div>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex flex-col gap-2 items-stretch">
+        {recommendation.score >= 0.6 && (
+          <Badge variant={recommendation.status === "accepted" ? "default" : "outline"} className="self-start">
+            {recommendation.status === "accepted"
+              ? "¡La empresa aceptó tu match!"
+              : recommendation.status === "rejected_by_recruiter"
+                ? "La empresa no avanzó con este match"
+                : "Match en espera de la empresa"}
+          </Badge>
+        )}
         <ApplyButton job={job} className="w-full" />
+        <RejectMatchButton recommendationId={recommendation.id} jobTitle={job.title} />
       </CardFooter>
     </Card>
   );

@@ -19,6 +19,8 @@ const MatchInputSchema = z.object({
   candidateHeadline: z.string(),
   candidateSkills: z.array(SkillInputSchema),
   candidateYearsOfExperience: z.number(),
+  candidateCvSummary: z.string().optional(),
+  candidateCvText: z.string().optional(),
   jobTitle: z.string(),
   jobDescriptionMd: z.string(),
   jobSearchTags: z.array(z.string()),
@@ -58,6 +60,8 @@ CANDIDATO:
 - Titular: ${input.candidateHeadline}
 - Años de experiencia: ${input.candidateYearsOfExperience}
 - Habilidades: ${skillsList}
+${input.candidateCvSummary ? `- Resumen del CV (analizado por IA): ${input.candidateCvSummary}` : ''}
+${input.candidateCvText ? `- Extracto del CV:\n"""\n${input.candidateCvText.slice(0, 4000)}\n"""` : ''}
 
 VACANTE:
 - Título: ${input.jobTitle}
@@ -65,7 +69,7 @@ VACANTE:
 - Palabras clave / requisitos: ${input.jobSearchTags.join(', ')}
 - Descripción: ${input.jobDescriptionMd}
 
-Calcula un puntaje de compatibilidad (0.0 a 1.0) basado en qué tanto las habilidades y experiencia del candidato cubren los requisitos de la vacante, y da hasta 5 razones cortas y concretas (ej. "Experiencia sólida en React", "Seniority acorde al puesto").`,
+Calcula un puntaje de compatibilidad (0.0 a 1.0) basado en qué tanto las habilidades, la experiencia y el contenido del CV del candidato cubren los requisitos de la vacante, y da hasta 5 razones cortas y concretas (ej. "Experiencia sólida en React", "Seniority acorde al puesto").`,
       output: {
         schema: MatchOutputSchema,
         format: 'json',

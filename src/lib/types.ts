@@ -31,6 +31,10 @@ export interface Candidate {
   available: boolean;
   skills: Skill[];
   resumeRef?: string;
+  /** Resumen del CV generado por la IA (se muestra al reclutador). */
+  cvSummary?: string;
+  /** Texto del CV analizado, usado por la IA para calcular compatibilidad. */
+  cvText?: string;
 }
 
 export interface Organization {
@@ -104,10 +108,14 @@ export interface AuditLog {
   createdAt: Timestamp | Date;
 }
 
+export type MatchStatus = 'pending' | 'accepted' | 'rejected_by_recruiter' | 'rejected_by_candidate';
+
 export interface Recommendation {
   id: string;
   candidateRef: string;
   jobRef: string;
+  /** Ciclo de vida del match: en espera → aceptado / rechazado por cualquiera de las partes. */
+  status?: MatchStatus;
   score: number; // 0-1
   reasons: string[];
   engineVersion: string;

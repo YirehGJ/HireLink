@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { adminDb, verifyRequestUser } from "@/firebase/admin";
-import { matchCandidateToJob } from "@/ai/flows/match-candidate-job-flow";
-import { FieldValue } from "firebase-admin/firestore";
+import { evaluateMatch } from "@/lib/server/matching";
 
 // Tope para mantener acotado el costo/tiempo de una sola llamada.
 const MAX_CANDIDATES = 40;
@@ -43,38 +42,7 @@ export async function POST(request: Request) {
     const candidate = c.data();
     if (!candidate.skills?.length && !candidate.headline) continue;
     try {
-      const match = await matchCandidateToJob({
-        candidateHeadline: candidate.headline ?? "",
-        candidateSkills: candidate.skills ?? [],
-        candidateYearsOfExperience: candidate.yearsOfExperience ?? 0,
-        jobTitle: job.title,
-        jobDescriptionMd: job.descriptionMd,
-        jobSearchTags: job.searchTags ?? [],
-        jobSeniority: job.seniority,
-      });
-
-      const recRef = db.collection("recommendations").doc(`${c.id}_${jobId}`);
-      const existing = await recRef.get();
-      await recRef.set({
-        candidateRef: c.id,
-        jobRef: jobId,
-        score: match.score,
-        reasons: match.reasons,
-        engineVersion: "groq-gpt-oss-120b",
-        createdAt: existing.exists ? existing.data()!.createdAt : FieldValue.serverTimestamp(),
-        updatedAt: FieldValue.serverTimestamp(),
-      });
-
-      if (!existing.exists && match.score >= 0.6) {
-        await db.collection("users").doc(c.id).collection("notifications").add({
-          type: "new_recommendation",
-          title: "Nueva recomendación de empleo",
-          body: `${job.title} — ${(match.score * 100).toFixed(0)}% de compatibilidad`,
-          href: `/dashboard/jobs/${jobId}`,
-          read: false,
-          createdAt: FieldValue.serverTimestamp(),
-        });
-      }
+      await evaluateMatch(db, c.id, candidate, jobId, job);
       processed++;
     } catch (err) {
       console.error(`Error calculando match de ${c.id} para ${jobId}:`, err);

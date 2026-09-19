@@ -47,6 +47,7 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
   const { user: appUser } = useApp();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isParsingCv, setIsParsingCv] = React.useState(false);
+  const [cvAnalysis, setCvAnalysis] = React.useState<{ summary: string; text: string } | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
@@ -93,6 +94,7 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
         ...values,
         fullName: appUser?.fullName,
         email: appUser?.email,
+        ...(cvAnalysis ? { cvSummary: cvAnalysis.summary, cvText: cvAnalysis.text } : {}),
         skills: values.skills.map((s) => ({ ...s, source: "manual" })),
       });
 
@@ -137,36 +139,39 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
     });
 
     try {
-        const reader = new FileReader();
-        reader.readAsArrayBuffer(file);
-        reader.onload = async () => {
-            const pdfData = new Uint8Array(reader.result as ArrayBuffer);
-            const doc = await pdfjsLib.getDocument({ data: pdfData }).promise;
-            let text = '';
-            for (let i = 1; i <= doc.numPages; i++) {
-                const page = await doc.getPage(i);
-                const content = await page.getTextContent();
-                text += content.items.map((item: any) => item.str).join(' ');
-            }
-            
-            const cleanedText = text.replace(/\s\s+/g, ' ').replace(/\n\s*\n/g, '\n').trim();
+        const pdfData = new Uint8Array(await file.arrayBuffer());
+        const doc = await pdfjsLib.getDocument({ data: pdfData }).promise;
+        let text = '';
+        for (let i = 1; i <= doc.numPages; i++) {
+            const page = await doc.getPage(i);
+            const content = await page.getTextContent();
+            text += content.items.map((item: any) => item.str).join(' ') + '\n';
+        }
 
-            const extractedData = await extractCvData({ cvText: cleanedText });
+        const cleanedText = text.replace(/[ \t]+/g, ' ').replace(/\n\s*\n/g, '\n').trim();
+        if (cleanedText.length < 30) {
+            throw new Error("El PDF no contiene texto legible (¿es una imagen escaneada?).");
+        }
 
-            if (extractedData) {
-                form.setValue('headline', extractedData.headline, { shouldValidate: true });
-                form.setValue('location', extractedData.location, { shouldValidate: true });
-                form.setValue('yearsOfExperience', extractedData.yearsOfExperience, { shouldValidate: true });
-                
-                replace(extractedData.skills);
+        const extractedData = await extractCvData({ cvText: cleanedText });
 
-                toast({
-                    title: "¡Información extraída!",
-                    description: "Tu formulario ha sido actualizado con los datos de tu CV.",
-                });
-            } else {
-                 throw new Error("No data extracted");
-            }
+        if (extractedData) {
+            form.setValue('headline', extractedData.headline, { shouldValidate: true });
+            form.setValue('location', extractedData.location, { shouldValidate: true });
+            form.setValue('yearsOfExperience', extractedData.yearsOfExperience, { shouldValidate: true });
+
+            replace(extractedData.skills);
+
+            // El texto y el resumen del CV se guardan con el perfil para que la IA
+            // los use al calcular la compatibilidad con cada vacante.
+            setCvAnalysis({ summary: extractedData.summary, text: cleanedText.slice(0, 8000) });
+
+            toast({
+                title: "¡CV analizado por la IA!",
+                description: "Revisa los datos sugeridos y pulsa \"Guardar Perfil\" para confirmarlos.",
+            });
+        } else {
+             throw new Error("No data extracted");
         }
     } catch (error) {
         console.error("Error parsing CV:", error);
@@ -194,6 +199,16 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
                     <CardDescription>Estos son los datos que los reclutadores verán primero. Puedes subier tu CV para autocompletar.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                    {(cvAnalysis?.summary || profile?.cvSummary) && (
+                        <Alert>
+                            <BrainCircuit className="h-4 w-4" />
+                            <AlertTitle>Resumen de tu CV (analizado por la IA)</AlertTitle>
+                            <AlertDescription>
+                                {cvAnalysis?.summary || profile?.cvSummary}
+                                {cvAnalysis && <span className="block mt-2 font-medium">Revisa que sea correcto y pulsa "Guardar Perfil" para que la IA lo use al buscar vacantes.</span>}
+                            </AlertDescription>
+                        </Alert>
+                    )}
                     <FormField control={form.control} name="headline" render={({ field }) => (
                         <FormItem>
                             <FormLabel>Titular Profesional</FormLabel>

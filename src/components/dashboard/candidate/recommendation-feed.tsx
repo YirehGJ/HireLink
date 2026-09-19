@@ -21,7 +21,9 @@ export function RecommendationFeed() {
     { where: user ? ['candidateRef', '==', user.id] : undefined }
   );
   const recommendations = rawRecommendations
-    ? [...rawRecommendations].sort((a, b) => b.score - a.score)
+    ? [...rawRecommendations]
+        .filter((r) => r.status !== 'rejected_by_candidate')
+        .sort((a, b) => b.score - a.score)
     : null;
 
   if (loading) {
