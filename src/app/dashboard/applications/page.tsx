@@ -3,6 +3,7 @@
 
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { ApplicationsTable } from "@/components/dashboard/candidate/applications-table";
+import { InterviewsCalendar } from "@/components/dashboard/recruiter/interviews-calendar";
 import { useApp } from "@/components/providers/app-provider";
 import { useCandidateApplications } from "@/firebase/firestore/use-candidate-applications";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -25,9 +26,13 @@ export default function ApplicationsPage() {
             <DashboardHeader
                 greeting="Tu Historial"
                 title="Mis Postulaciones"
-                description="Sigue el estado de las vacantes a las que has aplicado."
+                description="Sigue el estado de las vacantes a las que has aplicado y tus entrevistas agendadas."
             />
             <ApplicationsTable applications={applications ?? []} />
+            <div className="space-y-4">
+                <h2 className="text-xl font-semibold font-headline">Mis Entrevistas</h2>
+                <InterviewsCalendar candidateUid={user.id} />
+            </div>
         </div>
     );
 }

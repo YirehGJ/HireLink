@@ -1,9 +1,9 @@
-import { addDoc, collection, doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, setDoc, serverTimestamp } from "firebase/firestore";
 import type { Firestore } from "firebase/firestore";
-import type { Job } from "@/lib/types";
+import type { Job, JobStatus } from "@/lib/types";
 
 /**
- * @fileOverview Servicio para publicar y editar vacantes.
+ * @fileOverview Servicio para publicar, editar, cerrar y eliminar vacantes.
  */
 
 export type JobInput = Pick<
@@ -26,5 +26,15 @@ export const jobService = {
   async updateJob(firestore: Firestore, jobId: string, data: Partial<JobInput>) {
     const ref = doc(firestore, "jobs", jobId);
     await setDoc(ref, { ...data, updatedAt: serverTimestamp() }, { merge: true });
+  },
+
+  /** Cierre/reapertura lógica: la vacante se conserva, solo cambia su estado. */
+  async setStatus(firestore: Firestore, jobId: string, status: JobStatus) {
+    const ref = doc(firestore, "jobs", jobId);
+    await setDoc(ref, { status, updatedAt: serverTimestamp() }, { merge: true });
+  },
+
+  async deleteJob(firestore: Firestore, jobId: string) {
+    await deleteDoc(doc(firestore, "jobs", jobId));
   },
 };

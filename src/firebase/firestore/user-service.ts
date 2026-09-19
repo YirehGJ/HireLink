@@ -25,8 +25,8 @@ export const userService = {
       return { id: uid, ...userDoc.data() } as User;
     }
 
-    // Lógica de negocio: emails específicos son admin
-    const role: UserRole = email === 'admin@test.com' ? 'admin' : requestedRole;
+    // El rol admin nunca se asigna en el registro; solo otro admin puede otorgarlo.
+    const role: UserRole = requestedRole === 'recruiter' ? 'recruiter' : 'candidate';
 
     const newUserProfile: User = {
       id: uid,

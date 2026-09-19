@@ -23,6 +23,8 @@ import {
   Users,
   FileText,
   LayoutDashboard,
+  Search,
+  Building2,
 } from "lucide-react";
 import { signOut } from "firebase/auth";
 import { Icons } from "@/components/icons";
@@ -47,6 +49,7 @@ interface NavItem {
 const NAV_CONFIG: Record<UserRole, NavItem[]> = {
   candidate: [
     { label: "Inicio", icon: Home, href: "/dashboard" },
+    { label: "Explorar Vacantes", icon: Search, href: "/dashboard/explore" },
     { label: "Mi Perfil", icon: User, href: "/dashboard/profile" },
     { label: "Mis Postulaciones", icon: FileText, href: "/dashboard/applications" },
     { label: "Configuración", icon: Settings, href: "/dashboard/settings" },
@@ -60,6 +63,7 @@ const NAV_CONFIG: Record<UserRole, NavItem[]> = {
   admin: [
     { label: "Panel Principal", icon: LayoutDashboard, href: "/dashboard/admin/overview" },
     { label: "Gestión Usuarios", icon: Users, href: "/dashboard/admin/users" },
+    { label: "Organizaciones", icon: Building2, href: "/dashboard/admin/organizations" },
     { label: "Gestión Vacantes", icon: Briefcase, href: "/dashboard/admin/jobs" },
     { label: "Auditoría", icon: Shield, href: "/dashboard/admin/audit" },
     { label: "Mi Perfil", icon: User, href: "/dashboard/profile" },
@@ -71,7 +75,7 @@ export function DashboardSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const auth = useAuth();
-  const { user, role, setUser, isMounted } = useApp();
+  const { user, role, setUser, isMounted, readOnly } = useApp();
 
   const isActive = (path: string) => {
     if (["/dashboard", "/dashboard/jobs", "/dashboard/admin/overview"].includes(path)) {
@@ -109,7 +113,7 @@ export function DashboardSidebar() {
           <Icons.logo className="h-8 w-8 text-primary" />
           <span className="text-xl font-bold font-headline tracking-tighter">HireLink</span>
         </Link>
-        <NotificationBell uid={user.id} />
+        {!readOnly && <NotificationBell uid={user.id} />}
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu className="px-2">

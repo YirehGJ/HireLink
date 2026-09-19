@@ -106,7 +106,7 @@ export default function Home() {
 
       <footer className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-muted-foreground text-sm">
         <p>
-          <Link href="/dashboard?viewAs=admin" className="hover:text-foreground transition-colors focus:outline-none focus:ring-1 focus:ring-ring rounded-sm" aria-label="Ingresar">
+          <Link href="/login" className="hover:text-foreground transition-colors focus:outline-none focus:ring-1 focus:ring-ring rounded-sm" aria-label="Ingresar">
               &copy;
           </Link>
           {' '}<ClientYear /> HireLink. Todos los derechos reservados.

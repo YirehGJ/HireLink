@@ -55,11 +55,11 @@ function toJsDate(v: FireTime): Date {
 }
 
 function ApplicationRow({ app }: { app: Application }) {
-  const { data: job } = useDoc<Job>(`jobs/${app.jobRef}`);
+  const { data: job, loading } = useDoc<Job>(`jobs/${app.jobRef}`);
 
   return (
     <TableRow>
-        <TableCell className="font-medium">{job?.title ?? 'Cargando...'}</TableCell>
+        <TableCell className="font-medium">{job?.title ?? (loading ? 'Cargando...' : 'Vacante eliminada')}</TableCell>
         <TableCell className="text-muted-foreground hidden md:table-cell">{job?.location ?? 'N/A'}</TableCell>
         <TableCell className="text-muted-foreground hidden sm:table-cell">{format(toJsDate(app.appliedAt), 'dd/MM/yyyy')}</TableCell>
         <TableCell>
@@ -68,12 +68,14 @@ function ApplicationRow({ app }: { app: Application }) {
             </Badge>
         </TableCell>
         <TableCell className="text-right">
-            <Button variant="ghost" size="sm" asChild>
-                <Link href={`/dashboard/jobs/${app.jobRef}`}>
-                    Ver Vacante
-                    <ExternalLink className="h-3 w-3 ml-2"/>
-                </Link>
-            </Button>
+            {job ? (
+              <Button variant="ghost" size="sm" asChild>
+                  <Link href={`/dashboard/jobs/${app.jobRef}`}>
+                      Ver Vacante
+                      <ExternalLink className="h-3 w-3 ml-2"/>
+                  </Link>
+              </Button>
+            ) : null}
         </TableCell>
     </TableRow>
   );
@@ -87,7 +89,7 @@ export function ApplicationsTable({ applications }: ApplicationsTableProps) {
         <h3 className="text-xl font-semibold mt-4">Aún no has aplicado a ninguna vacante</h3>
         <p className="text-muted-foreground mt-2">Explora tus recomendaciones y encuentra tu próxima oportunidad.</p>
         <Button asChild className="mt-4">
-            <Link href="/dashboard">Ver Recomendaciones</Link>
+            <Link href="/dashboard/explore">Explorar Vacantes</Link>
         </Button>
       </div>
     );

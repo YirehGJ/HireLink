@@ -17,7 +17,9 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import type { Job } from "@/lib/types";
 import { generateJobDescription } from "@/ai/flows/generate-job-description-flow";
-import { useFirestore } from "@/firebase";
+import { useAuth, useFirestore } from "@/firebase";
+import { logAudit } from "@/lib/audit-client";
+import { callAuthedApi } from "@/lib/api-client";
 import { useApp } from "@/components/providers/app-provider";
 import { jobService } from "@/firebase/firestore/job-service";
 
@@ -34,7 +36,8 @@ export function JobForm({ job }: { job?: Job }) {
   const router = useRouter();
   const { toast } = useToast();
   const firestore = useFirestore();
-  const { user } = useApp();
+  const auth = useAuth();
+  const { user, readOnly } = useApp();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isGenerating, setIsGenerating] = React.useState(false);
   
@@ -88,7 +91,7 @@ export function JobForm({ job }: { job?: Job }) {
   }
 
   async function onSubmit(values: z.infer<typeof jobSchema>) {
-    if (!firestore || !user || !user.organizationRef) {
+    if (!firestore || !user || (!job && !user.organizationRef)) {
       toast({
         title: "Falta el perfil de la empresa",
         description: "Completa el perfil de tu organización antes de publicar vacantes.",
@@ -104,10 +107,24 @@ export function JobForm({ job }: { job?: Job }) {
     };
 
     try {
+      let jobId = job?.id;
       if (job) {
         await jobService.updateJob(firestore, job.id, payload);
       } else {
-        await jobService.createJob(firestore, user.organizationRef, payload);
+        jobId = await jobService.createJob(firestore, user.organizationRef!, payload);
+      }
+
+      logAudit(auth, {
+        action: job ? "job_updated" : "job_created",
+        targetType: "job",
+        targetId: jobId!,
+        details: payload.title,
+      });
+      // Calcula en segundo plano qué candidatos encajan con la vacante.
+      if (auth && jobId) {
+        callAuthedApi(auth, "/api/recommendations/generate-for-job", { jobId }).catch((err) =>
+          console.error("No se pudieron calcular candidatos recomendados:", err)
+        );
       }
 
       toast({
@@ -211,7 +228,7 @@ export function JobForm({ job }: { job?: Job }) {
 
             <div className="flex justify-end gap-2 pt-4">
                 <Button variant="ghost" type="button" onClick={() => router.back()}>Cancelar</Button>
-                <Button type="submit" disabled={isSubmitting || isGenerating}>
+                <Button type="submit" disabled={isSubmitting || isGenerating || readOnly}>
                     {(isSubmitting) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {job ? "Guardar Cambios" : "Crear Vacante"}
                 </Button>

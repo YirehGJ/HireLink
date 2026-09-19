@@ -19,6 +19,7 @@ import { useAuth, useFirestore } from "@/firebase";
 import { useApp } from "@/components/providers/app-provider";
 import { organizationService } from "@/firebase/firestore/organization-service";
 import { userService } from "@/firebase/firestore/user-service";
+import { logAudit } from "@/lib/audit-client";
 
 const orgSchema = z.object({
   name: z.string().min(2, "El nombre de la organización es requerido."),
@@ -31,7 +32,7 @@ export function OrganizationProfileForm({ organization }: { organization: Organi
   const { toast } = useToast();
   const auth = useAuth();
   const firestore = useFirestore();
-  const { user } = useApp();
+  const { user, readOnly } = useApp();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const form = useForm<z.infer<typeof orgSchema>>({
@@ -44,15 +45,17 @@ export function OrganizationProfileForm({ organization }: { organization: Organi
   });
 
   async function onSubmit(values: z.infer<typeof orgSchema>) {
-    if (!firestore || !auth || !auth.currentUser || !user) return;
+    if (!firestore || !auth || !auth.currentUser || !user || readOnly) return;
     setIsSubmitting(true);
 
     try {
       if (user.organizationRef) {
         await organizationService.updateOrganization(firestore, user.organizationRef, values);
+        logAudit(auth, { action: "organization_updated", targetType: "organization", targetId: user.organizationRef, details: values.name });
       } else {
         const orgId = await organizationService.createOrganization(firestore, values);
         await userService.setOrganizationRef(firestore, auth.currentUser.uid, orgId);
+        logAudit(auth, { action: "organization_created", targetType: "organization", targetId: orgId, details: values.name });
       }
 
       toast({
@@ -105,7 +108,7 @@ export function OrganizationProfileForm({ organization }: { organization: Organi
             </CardContent>
              <CardFooter className="flex justify-end gap-2">
                 <Button variant="ghost" type="button" onClick={() => router.back()}>Cancelar</Button>
-                <Button type="submit" disabled={isSubmitting}>
+                <Button type="submit" disabled={isSubmitting || readOnly}>
                     {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Guardar Cambios
                 </Button>

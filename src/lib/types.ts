@@ -23,6 +23,8 @@ export interface User {
 export interface Candidate {
   id: string;
   userRef: string;
+  fullName?: string;
+  email?: string;
   headline: string;
   location: string;
   yearsOfExperience: number;
@@ -60,6 +62,7 @@ export interface Job {
   salaryMax?: number;
   currency?: string;
   searchTags: string[];
+  createdAt?: Timestamp | Date;
 }
 
 export interface Application {
@@ -71,18 +74,34 @@ export interface Application {
   cvRef: string;
   appliedAt: Timestamp | Date;
   updatedAt: Timestamp | Date;
+  shortlisted?: boolean;
+  recruiterNotes?: string;
 }
 
 export interface Interview {
-  id:string;
-  applicationRef: string;
+  id: string;
+  jobRef: string;
+  organizationRef: string;
+  candidateRef: string;
   interviewerRef: string;
   type: InterviewType;
   scheduledStart: Timestamp | Date;
-  scheduledEnd: Timestamp | Date;
   location: string;
-  result?: string;
-  feedbackNotes?: string;
+  notes?: string;
+  candidateName?: string;
+  jobTitle?: string;
+}
+
+export interface AuditLog {
+  id: string;
+  actorUid: string;
+  actorEmail: string;
+  actorRole: UserRole;
+  action: string;
+  targetType: string;
+  targetId: string;
+  details: string;
+  createdAt: Timestamp | Date;
 }
 
 export interface Recommendation {

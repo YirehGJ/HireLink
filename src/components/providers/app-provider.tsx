@@ -1,78 +1,84 @@
 
 "use client";
 
-import React, { createContext, useContext, useState, useMemo, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import React, { createContext, useContext, useState, useMemo, useEffect, useCallback } from 'react';
 import type { User, UserRole } from '@/lib/types';
 import { useUser, useDoc } from '@/firebase';
-import { users } from '@/lib/data';
+
+const VIEW_AS_KEY = 'hirelink:viewAs';
 
 interface AppContextType {
   user: User | null;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
   role: UserRole | null;
   isMounted: boolean;
+  /** true cuando un admin está viendo la app como otro usuario (solo lectura). */
+  readOnly: boolean;
+  startViewAs: (uid: string) => void;
+  stopViewAs: () => void;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
 
-
-function AppProviderContent({ children }: { children: React.ReactNode }) {
+export function AppProvider({ children }: { children: React.ReactNode }) {
   const { user: firebaseUser, loading: authLoading } = useUser();
   const [userState, setUserState] = useState<User | null>(null);
   const [isMounted, setIsMounted] = useState(false);
-  
-  const searchParams = useSearchParams();
-  const viewAs = searchParams.get('viewAs');
+  const [viewAsUid, setViewAsUid] = useState<string | null>(null);
 
-  const userDocPath = firebaseUser ? `users/${firebaseUser.uid}` : '';
+  const userDocPath = firebaseUser ? `users/${firebaseUser.uid}` : null;
   const { data: userFromFirestore, loading: userLoading } = useDoc<User>(userDocPath);
-  
+
   useEffect(() => {
     setIsMounted(true);
+    try {
+      setViewAsUid(sessionStorage.getItem(VIEW_AS_KEY));
+    } catch {
+      /* sessionStorage no disponible */
+    }
   }, []);
 
   useEffect(() => {
-    // Bypass auth for demo mode
-    if (viewAs) {
-      const demoUser = users.find(u => u.role === viewAs);
-      if (demoUser) {
-        setUserState(demoUser);
-        return; // In demo mode, don't proceed with firebase auth
-      }
-    }
-    
-    // Regular auth flow
     if (userFromFirestore) {
       setUserState(userFromFirestore);
     } else if (!authLoading && !userLoading && !firebaseUser) {
-      // Clear user state on logout or if no user is found
       setUserState(null);
     }
-  }, [userFromFirestore, viewAs, authLoading, userLoading, firebaseUser]);
+  }, [userFromFirestore, authLoading, userLoading, firebaseUser]);
 
+  // "Ver como": solo un admin real puede asumir la vista de otro usuario, y siempre en solo lectura.
+  const impersonating = userState?.role === 'admin' && !!viewAsUid && viewAsUid !== userState.id;
+  const { data: viewedUser, loading: viewedLoading } = useDoc<User>(
+    impersonating ? `users/${viewAsUid}` : null
+  );
 
-  const role = useMemo(() => userState?.role || null, [userState]);
+  const startViewAs = useCallback((uid: string) => {
+    try { sessionStorage.setItem(VIEW_AS_KEY, uid); } catch { /* noop */ }
+    setViewAsUid(uid);
+  }, []);
 
-  // In demo mode, we don't care about firebase loading states
-  const loading = viewAs ? false : (authLoading || userLoading);
+  const stopViewAs = useCallback(() => {
+    try { sessionStorage.removeItem(VIEW_AS_KEY); } catch { /* noop */ }
+    setViewAsUid(null);
+  }, []);
 
-  const value = {
-    user: userState,
+  const effectiveUser: User | null =
+    impersonating && viewedUser ? { ...viewedUser, id: viewAsUid! } : userState;
+
+  const role = useMemo(() => effectiveUser?.role || null, [effectiveUser]);
+  const loading = authLoading || userLoading || (impersonating && viewedLoading);
+
+  const value: AppContextType = {
+    user: effectiveUser,
     setUser: setUserState,
     role,
     isMounted: isMounted && !loading,
+    readOnly: impersonating && !!viewedUser,
+    startViewAs,
+    stopViewAs,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
-}
-
-export function AppProvider({ children }: { children: React.ReactNode }) {
-  return (
-    <Suspense>
-      <AppProviderContent>{children}</AppProviderContent>
-    </Suspense>
-  )
 }
 
 export function useApp() {

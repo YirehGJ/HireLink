@@ -19,7 +19,7 @@ service cloud.firestore {
     function isRecruiterForOrg(orgId) {
         return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationRef == orgId;
     }
-    
+
     // USERS
     match /users/{userId} {
       // Anyone can create their own user document (on sign up), but never as admin —
@@ -51,6 +51,18 @@ service cloud.firestore {
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
         allow create, delete: if false;
       }
+
+      // APPLICATIONS MIRROR — copia por candidato de sus postulaciones para poder
+      // listarlas en tiempo real sin consultas collection-group. El candidato la
+      // crea al postular (siempre en estado "applied"); los cambios de estado los
+      // escribe el servidor (Admin SDK).
+      match /applications/{jobId} {
+        allow get, list: if isSignedIn() && (isOwner(userId) || isRole('admin'));
+        allow create: if isSignedIn() && isOwner(userId) &&
+          request.resource.data.candidateRef == userId &&
+          request.resource.data.status == 'applied';
+        allow update, delete: if false;
+      }
     }
 
     // CANDIDATES
@@ -76,8 +88,8 @@ service cloud.firestore {
     match /organizations/{orgId} {
       // Any authenticated user can read organization details
       allow get: if isSignedIn();
-      // Recruiters can update their own organization's profile
-      allow update: if isSignedIn() && isRecruiterForOrg(orgId);
+      // Recruiters can update their own organization's profile; admins any
+      allow update: if isSignedIn() && (isRole('admin') || isRecruiterForOrg(orgId));
       // Admins can create any org; a recruiter without one yet can create their own
       // (they must then link it to their user doc via `organizationRef`).
       allow create: if isSignedIn() && (
@@ -98,8 +110,8 @@ service cloud.firestore {
       allow create: if isSignedIn() && isRole('recruiter') && isRecruiterForOrg(request.resource.data.organizationRef);
       // Only recruiters from that org or admins can update/close jobs
       allow update: if isSignedIn() && (isRole('admin') || (isRole('recruiter') && isRecruiterForOrg(resource.data.organizationRef)));
-      // Only admins can delete
-      allow delete: if isSignedIn() && isRole('admin');
+      // Admins or the owning organization's recruiters can delete
+      allow delete: if isSignedIn() && (isRole('admin') || (isRole('recruiter') && isRecruiterForOrg(resource.data.organizationRef)));
 
         // APPLICATIONS
         match /applications/{appId} {
@@ -108,32 +120,59 @@ service cloud.firestore {
             // Candidates can see their own applications. Recruiters for the org can see applications for their jobs.
             allow get, list: if isSignedIn() && (
                 isOwner(resource.data.candidateRef) ||
+                isRole('admin') ||
                 isRecruiterForOrg(get(/databases/$(database)/documents/jobs/$(jobId)).data.organizationRef)
             );
-            // Recruiters can update the status
-            allow update: if isSignedIn() && isRecruiterForOrg(get(/databases/$(database)/documents/jobs/$(jobId)).data.organizationRef);
+            // Recruiters (or admins) update status, shortlist and notes
+            allow update: if isSignedIn() && (
+                isRole('admin') ||
+                isRecruiterForOrg(get(/databases/$(database)/documents/jobs/$(jobId)).data.organizationRef)
+            );
             // Candidate can withdraw their application (delete)
             allow delete: if isSignedIn() && isOwner(resource.data.candidateRef);
         }
     }
-    
-    // APPLICATIONS (collection group) — a nested `match` under /jobs/{jobId}
-    // only covers direct queries scoped to one job; a candidate's "my
-    // applications" screen uses a collectionGroup('applications') query that
-    // spans every job, which Firestore only allows if there's a rule written
-    // with the {path=**} wildcard, separate from the nested one above.
+
+    // APPLICATIONS (collection group) — usado por el panel del admin para métricas
+    // globales; los candidatos leen su copia en users/{uid}/applications.
     match /{path=**}/applications/{appId} {
       allow get, list: if isSignedIn() && (
-        isOwner(resource.data.candidateRef) ||
-        isRecruiterForOrg(get(/databases/$(database)/documents/jobs/$(resource.data.jobRef)).data.organizationRef)
+        isRole('admin') ||
+        (resource.data.keys().hasAny(['jobRef']) &&
+          isRecruiterForOrg(get(/databases/$(database)/documents/jobs/$(resource.data.jobRef)).data.organizationRef))
       );
+    }
+
+    // INTERVIEWS — agendadas por el reclutador de la organización; el candidato
+    // las lee para ver su agenda.
+    match /interviews/{interviewId} {
+      allow get, list: if isSignedIn() && (
+        isOwner(resource.data.candidateRef) ||
+        isRole('admin') ||
+        isRecruiterForOrg(resource.data.organizationRef)
+      );
+      allow create: if isSignedIn() && isRole('recruiter') &&
+        isRecruiterForOrg(request.resource.data.organizationRef);
+      allow update, delete: if isSignedIn() && isRole('recruiter') &&
+        isRecruiterForOrg(resource.data.organizationRef);
     }
 
     // RECOMMENDATIONS
     match /recommendations/{recId} {
-      // Only the specific candidate can see their recommendations
-      allow get, list: if isSignedIn() && request.auth.uid == resource.data.candidateRef;
+      // The candidate sees their own; recruiters of the job's org and admins see
+      // the ranking for their vacancies ("Candidatos recomendados").
+      allow get, list: if isSignedIn() && (
+        request.auth.uid == resource.data.candidateRef ||
+        isRole('admin') ||
+        isRecruiterForOrg(get(/databases/$(database)/documents/jobs/$(resource.data.jobRef)).data.organizationRef)
+      );
       // Recommendations are system-generated (via Admin SDK), so no client-side writes
+      allow create, update, delete: if false;
+    }
+
+    // AUDIT LOGS — escritos solo por el servidor (Admin SDK); lectura solo admin.
+    match /auditLogs/{logId} {
+      allow get, list: if isSignedIn() && isRole('admin');
       allow create, update, delete: if false;
     }
   }

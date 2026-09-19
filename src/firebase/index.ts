@@ -24,3 +24,5 @@ export { FirebaseClientProvider } from './client-provider';
 export { useUser } from './auth/use-user';
 export { useCollection } from './firestore/use-collection';
 export { useDoc } from './firestore/use-doc';
+export { useCandidateApplications } from './firestore/use-candidate-applications';
+export { useAllApplications } from './firestore/use-all-applications';

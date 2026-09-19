@@ -1,5 +1,7 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
+import { ReadOnlyBanner } from "@/components/dashboard/read-only-banner";
+import { AccountGuard } from "@/components/dashboard/account-guard";
 
 export default function DashboardLayout({
   children,
@@ -10,7 +12,8 @@ export default function DashboardLayout({
     <SidebarProvider>
       <DashboardSidebar />
       <main className="flex-1 bg-muted/50 dark:bg-background/90">
-        {children}
+        <ReadOnlyBanner />
+        <AccountGuard>{children}</AccountGuard>
       </main>
     </SidebarProvider>
   );

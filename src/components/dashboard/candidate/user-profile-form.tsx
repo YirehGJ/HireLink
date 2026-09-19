@@ -22,6 +22,7 @@ import { extractCvData } from "@/ai/flows/extract-cv-data-flow";
 import { useAuth, useFirestore } from "@/firebase";
 import { candidateService } from "@/firebase/firestore/candidate-service";
 import { callAuthedApi } from "@/lib/api-client";
+import { useApp } from "@/components/providers/app-provider";
 
 
 const skillSchema = z.object({
@@ -43,6 +44,7 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
   const { toast } = useToast();
   const auth = useAuth();
   const firestore = useFirestore();
+  const { user: appUser } = useApp();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isParsingCv, setIsParsingCv] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -89,6 +91,8 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
     try {
       await candidateService.saveProfile(firestore, auth.currentUser.uid, {
         ...values,
+        fullName: appUser?.fullName,
+        email: appUser?.email,
         skills: values.skills.map((s) => ({ ...s, source: "manual" })),
       });
 

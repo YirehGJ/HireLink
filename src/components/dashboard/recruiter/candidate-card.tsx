@@ -16,9 +16,10 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
       <CardContent className="pt-6 flex flex-col items-center text-center">
         <Avatar className="h-24 w-24 mb-4 border-4 border-primary/20">
             <AvatarImage data-ai-hint="person portrait" src={`https://picsum.photos/seed/${candidate.id}/200/200`} />
-            <AvatarFallback>{candidate.headline.charAt(0)}</AvatarFallback>
+            <AvatarFallback>{(candidate.fullName || candidate.headline || '?').charAt(0)}</AvatarFallback>
         </Avatar>
-        <CardTitle className="font-headline text-xl text-primary dark:text-primary-foreground/90">{candidate.headline}</CardTitle>
+        <CardTitle className="font-headline text-xl text-primary dark:text-primary-foreground/90">{candidate.fullName || candidate.headline}</CardTitle>
+        {candidate.fullName && <p className="text-sm text-muted-foreground mt-1">{candidate.headline}</p>}
         <CardDescription className="flex items-center gap-2 mt-2 flex-wrap justify-center">
             <span className="flex items-center"><MapPin className="h-4 w-4 mr-1.5" /> {candidate.location}</span>
             <span className="flex items-center"><Briefcase className="h-4 w-4 mr-1.5 ml-2" /> {candidate.yearsOfExperience} años exp.</span>
@@ -26,20 +27,29 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
         
         <div className="mt-4 w-full">
             <div className="flex flex-wrap gap-2 justify-center">
-                {candidate.skills.slice(0, 4).map((skill, i) => (
+                {(candidate.skills ?? []).slice(0, 4).map((skill, i) => (
                     <Badge key={i} variant="lilac">
                         {skill.name}
                     </Badge>
                 ))}
-                {candidate.skills.length > 4 && <Badge variant="outline">+{candidate.skills.length - 4}</Badge>}
+                {(candidate.skills?.length ?? 0) > 4 && <Badge variant="outline">+{candidate.skills.length - 4}</Badge>}
             </div>
         </div>
       </CardContent>
       <CardFooter className="mt-auto">
-        <Button className="w-full">
+        {candidate.email ? (
+          <Button className="w-full" asChild>
+            <a href={`mailto:${candidate.email}`}>
+              <Mail className="mr-2 h-4 w-4" />
+              Contactar
+            </a>
+          </Button>
+        ) : (
+          <Button className="w-full" disabled title="El candidato aún no ha actualizado su perfil">
             <Mail className="mr-2 h-4 w-4" />
-            Contactar
-        </Button>
+            Sin correo disponible
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

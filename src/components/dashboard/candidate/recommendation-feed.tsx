@@ -9,16 +9,20 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 function RecommendationCardLoader({ recommendation }: { recommendation: Recommendation }) {
   const { data: job } = useDoc<Job>(`jobs/${recommendation.jobRef}`);
-  if (!job) return null;
+  if (!job || job.status !== 'published') return null;
   return <RecommendationCard recommendation={recommendation} job={{ ...job, id: recommendation.jobRef }} />;
 }
 
 export function RecommendationFeed() {
   const { user } = useApp();
-  const { data: recommendations, loading } = useCollection<Recommendation>('recommendations', {
-    where: user ? ['candidateRef', '==', user.id] : undefined,
-    orderBy: ['score', 'desc'],
-  });
+  // Se ordena en el cliente para no depender de un índice compuesto en Firestore.
+  const { data: rawRecommendations, loading } = useCollection<Recommendation>(
+    user ? 'recommendations' : null,
+    { where: user ? ['candidateRef', '==', user.id] : undefined }
+  );
+  const recommendations = rawRecommendations
+    ? [...rawRecommendations].sort((a, b) => b.score - a.score)
+    : null;
 
   if (loading) {
     return (

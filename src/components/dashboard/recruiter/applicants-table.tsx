@@ -1,42 +1,29 @@
 
-
 "use client"
 import * as React from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import type { Application, ApplicationStatus, Candidate } from "@/lib/types";
-import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import type { Application, ApplicationStatus, Candidate, Recommendation } from "@/lib/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, Loader2 } from "lucide-react";
+import { FileText, Loader2, Star, Zap } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAuth, useFirestore, useDoc } from "@/firebase";
+import { useAuth, useFirestore, useDoc, useCollection } from "@/firebase";
 import { applicationService } from "@/firebase/firestore/application-service";
 import { callAuthedApi } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
-
-// Normaliza cualquier fecha que pueda venir de Firestore (Timestamp, {seconds}, string, number) a Date
-type FireTime =
-  | Date
-  | { toDate?: () => Date; seconds?: number; nanoseconds?: number }
-  | string
-  | number
-  | null
-  | undefined;
-
-function toJsDate(v: FireTime): Date {
-  if (v instanceof Date) return v;
-  if (!v) return new Date(NaN); // muestra "Invalid Date" si viene vacío
-  const anyV = v as any;
-  if (typeof anyV?.toDate === 'function') return anyV.toDate(); // Timestamp
-  if (typeof anyV?.seconds === 'number') return new Date(anyV.seconds * 1000); // objeto serializado
-  return new Date(anyV as string | number); // string o number
-}
+import { useApp } from "@/components/providers/app-provider";
+import { formatDate } from "@/lib/firestore-time";
+import { ApplicantDetailsDialog } from "./applicant-details-dialog";
 
 interface ApplicantsTableProps {
   applicants: Application[];
   jobId: string;
   jobTitle: string;
+  organizationRef: string;
 }
 
 const statusVariantMap: Record<Application['status'], "default" | "secondary" | "destructive" | "outline" | "lilac"> = {
@@ -50,7 +37,7 @@ const statusVariantMap: Record<Application['status'], "default" | "secondary" | 
     withdrawn: 'outline'
 };
 
-const statusTextMap: Record<Application['status'], string> = {
+export const applicationStatusText: Record<Application['status'], string> = {
     applied: 'Postulado',
     screening: 'En Revisión',
     assessment: 'Evaluación',
@@ -61,20 +48,30 @@ const statusTextMap: Record<Application['status'], string> = {
     withdrawn: 'Retirado'
 };
 
-function ApplicantRow({ app, jobId, jobTitle }: { app: Application; jobId: string; jobTitle: string }) {
+function ApplicantRow({
+  app,
+  job,
+  recommendation,
+}: {
+  app: Application;
+  job: { id: string; title: string; organizationRef: string };
+  recommendation?: Recommendation;
+}) {
   const auth = useAuth();
   const firestore = useFirestore();
   const { toast } = useToast();
+  const { readOnly } = useApp();
   const { data: candidate } = useDoc<Candidate>(`candidates/${app.candidateRef}`);
   const [isUpdating, setIsUpdating] = React.useState(false);
+  const [detailsOpen, setDetailsOpen] = React.useState(false);
 
   async function handleStatusChange(status: ApplicationStatus) {
     if (!firestore || !auth) return;
     setIsUpdating(true);
     try {
-      await applicationService.updateStatus(firestore, jobId, app.id, status);
+      await applicationService.updateStatus(firestore, job.id, app.id, status);
       await callAuthedApi(auth, "/api/applications/notify-status", {
-        jobId,
+        jobId: job.id,
         candidateUid: app.candidateRef,
         newStatus: status,
       });
@@ -90,43 +87,103 @@ function ApplicantRow({ app, jobId, jobTitle }: { app: Application; jobId: strin
     }
   }
 
+  async function toggleShortlist() {
+    if (!firestore) return;
+    try {
+      await applicationService.updateRecruiterFields(firestore, job.id, app.id, {
+        shortlisted: !app.shortlisted,
+      });
+    } catch (e) {
+      console.error(e);
+      toast({ title: "No se pudo actualizar la shortlist", variant: "destructive" });
+    }
+  }
+
+  const name = candidate?.fullName || candidate?.headline || 'Cargando...';
+
   return (
+    <>
     <TableRow>
         <TableCell className="font-medium">
             <div className="flex items-center gap-3">
                 <Avatar>
                     <AvatarImage data-ai-hint="person" src={`https://picsum.photos/seed/${app.candidateRef}/100/100`} />
-                    <AvatarFallback>{candidate?.headline?.charAt(0) ?? '?'}</AvatarFallback>
+                    <AvatarFallback>{name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
-                    <p>{candidate?.headline ?? 'Cargando...'}</p>
-                    <p className="text-sm text-muted-foreground">{candidate?.location}</p>
+                    <button type="button" className="text-left hover:underline" onClick={() => setDetailsOpen(true)}>{name}</button>
+                    <p className="text-sm text-muted-foreground">{candidate?.headline}{candidate?.location ? ` · ${candidate.location}` : ''}</p>
                 </div>
             </div>
         </TableCell>
-        <TableCell className="text-muted-foreground hidden md:table-cell">{format(toJsDate(app.appliedAt as any), 'dd/MM/yyyy')}</TableCell>
+        <TableCell className="hidden lg:table-cell">
+            {recommendation ? (
+              <Badge variant="secondary" className="font-bold"><Zap className="h-3 w-3 mr-1" />{(recommendation.score * 100).toFixed(0)}%</Badge>
+            ) : (
+              <span className="text-xs text-muted-foreground">—</span>
+            )}
+        </TableCell>
+        <TableCell className="text-muted-foreground hidden md:table-cell">{formatDate(app.appliedAt)}</TableCell>
         <TableCell>
             <Badge variant={statusVariantMap[app.status] || 'outline'} className="capitalize">
-                {statusTextMap[app.status]}
+                {applicationStatusText[app.status]}
             </Badge>
         </TableCell>
         <TableCell className="text-right">
-            <Select value={app.status} onValueChange={(v) => handleStatusChange(v as ApplicationStatus)} disabled={isUpdating}>
-                <SelectTrigger className="w-[160px] ml-auto">
-                    {isUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : <SelectValue />}
-                </SelectTrigger>
-                <SelectContent>
-                    {Object.entries(statusTextMap).map(([value, label]) => (
-                        <SelectItem key={value} value={value}>{label}</SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
+            <div className="flex items-center justify-end gap-2">
+                <Button variant="ghost" size="icon" onClick={toggleShortlist} disabled={readOnly} aria-label={app.shortlisted ? "Quitar de shortlist" : "Agregar a shortlist"} title="Shortlist">
+                    <Star className={`h-4 w-4 ${app.shortlisted ? 'fill-yellow-400 text-yellow-500' : ''}`} />
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setDetailsOpen(true)}>Detalles</Button>
+                <Select value={app.status} onValueChange={(v) => handleStatusChange(v as ApplicationStatus)} disabled={isUpdating || readOnly}>
+                    <SelectTrigger className="w-[150px]">
+                        {isUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : <SelectValue />}
+                    </SelectTrigger>
+                    <SelectContent>
+                        {Object.entries(applicationStatusText).map(([value, label]) => (
+                            <SelectItem key={value} value={value}>{label}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
         </TableCell>
     </TableRow>
+    <ApplicantDetailsDialog
+      open={detailsOpen}
+      onOpenChange={setDetailsOpen}
+      app={app}
+      candidate={candidate}
+      recommendation={recommendation}
+      job={job}
+    />
+    </>
   );
 }
 
-export function ApplicantsTable({ applicants, jobId, jobTitle }: ApplicantsTableProps) {
+export function ApplicantsTable({ applicants, jobId, jobTitle, organizationRef }: ApplicantsTableProps) {
+  const [onlyShortlist, setOnlyShortlist] = React.useState(false);
+  const [statusFilter, setStatusFilter] = React.useState<string>("all");
+  const { data: recs } = useCollection<Recommendation>("recommendations", {
+    where: ["jobRef", "==", jobId],
+  });
+
+  const scoreByCandidate = React.useMemo(() => {
+    const map = new Map<string, Recommendation>();
+    (recs ?? []).forEach((r) => map.set(r.candidateRef, r));
+    return map;
+  }, [recs]);
+
+  const visible = React.useMemo(() => {
+    return applicants
+      .filter((a) => (onlyShortlist ? a.shortlisted : true))
+      .filter((a) => (statusFilter === "all" ? true : a.status === statusFilter))
+      .sort(
+        (a, b) =>
+          (scoreByCandidate.get(b.candidateRef)?.score ?? -1) -
+          (scoreByCandidate.get(a.candidateRef)?.score ?? -1)
+      );
+  }, [applicants, onlyShortlist, statusFilter, scoreByCandidate]);
+
   if (applicants.length === 0) {
     return (
       <Card className="text-center py-16">
@@ -137,11 +194,28 @@ export function ApplicantsTable({ applicants, jobId, jobTitle }: ApplicantsTable
     );
   }
 
+  const job = { id: jobId, title: jobTitle, organizationRef };
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Candidatos Postulados</CardTitle>
-        <CardDescription>Gestiona los candidatos que han aplicado a esta vacante.</CardDescription>
+        <CardDescription>Ordenados por compatibilidad con la IA. Marca tu shortlist, deja notas y agenda entrevistas.</CardDescription>
+        <div className="flex flex-wrap items-center gap-4 pt-4">
+          <div className="flex items-center gap-2">
+            <Switch id="only-shortlist" checked={onlyShortlist} onCheckedChange={setOnlyShortlist} />
+            <Label htmlFor="only-shortlist">Solo shortlist</Label>
+          </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[180px]"><SelectValue placeholder="Estado" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos los estados</SelectItem>
+              {Object.entries(applicationStatusText).map(([value, label]) => (
+                <SelectItem key={value} value={value}>{label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="border rounded-lg overflow-hidden">
@@ -149,15 +223,24 @@ export function ApplicantsTable({ applicants, jobId, jobTitle }: ApplicantsTable
                 <TableHeader>
                     <TableRow>
                         <TableHead>Candidato</TableHead>
+                        <TableHead className="hidden lg:table-cell">Match IA</TableHead>
                         <TableHead className="hidden md:table-cell">Postuló</TableHead>
                         <TableHead>Estado</TableHead>
-                        <TableHead className="text-right">Cambiar Estado</TableHead>
+                        <TableHead className="text-right">Acciones</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {applicants.map(app => (
-                        <ApplicantRow key={app.id} app={app} jobId={jobId} jobTitle={jobTitle} />
-                    ))}
+                    {visible.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                          Ningún candidato coincide con los filtros.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      visible.map(app => (
+                        <ApplicantRow key={app.id} app={app} job={job} recommendation={scoreByCandidate.get(app.candidateRef)} />
+                      ))
+                    )}
                 </TableBody>
             </Table>
         </div>

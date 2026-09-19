@@ -1,48 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { collectionGroup, query, where, orderBy, onSnapshot } from "firebase/firestore";
+import { useMemo } from "react";
 import type { Application } from "@/lib/types";
-import { useFirestore } from "../provider";
+import { useCollection } from "./use-collection";
+
+function toMillis(v: any): number {
+  if (!v) return 0;
+  if (typeof v.toMillis === "function") return v.toMillis();
+  if (typeof v.seconds === "number") return v.seconds * 1000;
+  return new Date(v).getTime() || 0;
+}
 
 /**
- * Hook para escuchar en tiempo real todas las postulaciones de un candidato,
- * sin importar bajo qué vacante estén anidadas (usa una collectionGroup query).
+ * Escucha en tiempo real las postulaciones de un candidato leyendo su copia en
+ * /users/{uid}/applications (no requiere índices), ordenadas de la más reciente.
  */
 export function useCandidateApplications(candidateUid: string | null) {
-  const firestore = useFirestore();
-  const [data, setData] = useState<Application[] | null>(null);
-  const [loading, setLoading] = useState(!!candidateUid);
-  const [error, setError] = useState<Error | null>(null);
+  const { data, loading, error } = useCollection<Application>(
+    candidateUid ? `users/${candidateUid}/applications` : null
+  );
 
-  useEffect(() => {
-    if (!firestore || !candidateUid) {
-      setData(null);
-      setLoading(false);
-      return;
-    }
+  const sorted = useMemo(
+    () => (data ? [...data].sort((a, b) => toMillis(b.appliedAt) - toMillis(a.appliedAt)) : null),
+    [data]
+  );
 
-    const q = query(
-      collectionGroup(firestore, "applications"),
-      where("candidateRef", "==", candidateUid),
-      orderBy("appliedAt", "desc")
-    );
-
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        setData(snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Application)));
-        setLoading(false);
-      },
-      (err) => {
-        console.error("Error fetching candidate applications:", err);
-        setError(err);
-        setLoading(false);
-      }
-    );
-
-    return () => unsubscribe();
-  }, [firestore, candidateUid]);
-
-  return { data, loading, error };
+  return { data: sorted, loading, error };
 }

@@ -7,7 +7,7 @@ import { useAuth, useFirestore, useDoc } from "@/firebase";
 import { applicationService } from "@/firebase/firestore/application-service";
 import type { Application, Candidate, Job } from "@/lib/types";
 import { Loader2, CheckCircle } from "lucide-react";
-
+import { callAuthedApi } from "@/lib/api-client";
 export function ApplyButton({ job, className }: { job: Job; className?: string }) {
   const { toast } = useToast();
   const auth = useAuth();
@@ -27,6 +27,12 @@ export function ApplyButton({ job, className }: { job: Job; className?: string }
     setIsApplying(true);
     try {
       await applicationService.applyToJob(firestore, job.id, uid, candidate?.resumeRef);
+      // Avisa a los reclutadores de la empresa (en segundo plano, no bloquea).
+      if (auth) {
+        callAuthedApi(auth, "/api/applications/notify-new", { jobId: job.id }).catch((err) =>
+          console.error("No se pudo notificar a la empresa:", err)
+        );
+      }
       toast({
         title: "¡Postulación enviada!",
         description: `Has aplicado exitosamente a la vacante de ${job.title}.`,
@@ -47,6 +53,14 @@ export function ApplyButton({ job, className }: { job: Job; className?: string }
     return (
       <Button disabled variant="secondary" className={className}>
         <CheckCircle className="mr-2 h-4 w-4" /> Ya postulaste
+      </Button>
+    );
+  }
+
+  if (job.status !== "published") {
+    return (
+      <Button disabled variant="outline" className={className}>
+        Vacante cerrada
       </Button>
     );
   }
