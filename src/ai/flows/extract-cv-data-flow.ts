@@ -8,8 +8,7 @@
  * - CvExtractionOutput: El tipo de salida del flujo (datos estructurados del perfil).
  */
 
-import { ai } from '@/ai/genkit';
-import { googleAI } from '@genkit-ai/google-genai';
+import { ai, GROQ_MODEL } from '@/ai/genkit';
 import { z } from 'zod';
 
 // Esquema de entrada: el texto extraído de un CV.
@@ -77,7 +76,7 @@ Sé conciso y preciso.`,
         schema: CvExtractionOutputSchema,
         format: 'json'
       },
-      model: googleAI.model('gemini-2.5-flash'),
+      model: GROQ_MODEL,
     });
 
     const output = llmResponse.output;

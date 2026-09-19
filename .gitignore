@@ -55,5 +55,6 @@ check-notifications.mjs
 set-cors.mjs
 list-buckets.mjs
 test-gemini.mjs
+rename-test-accounts.mjs
 # claude code session runtime state
 .claude/*.lock
