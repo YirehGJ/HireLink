@@ -3,6 +3,7 @@ import { FieldValue } from "firebase-admin/firestore";
 import { matchCandidateToJob } from "@/ai/flows/match-candidate-job-flow";
 
 import { MATCH_THRESHOLD } from "@/lib/constants";
+import { runAi } from "@/lib/server/ai-runner";
 
 const ENGINE_VERSION = "groq-gpt-oss-120b";
 
@@ -20,17 +21,19 @@ export async function evaluateMatch(
   jobId: string,
   job: FirebaseFirestore.DocumentData
 ) {
-  const match = await matchCandidateToJob({
-    candidateHeadline: candidate.headline ?? "",
-    candidateSkills: candidate.skills ?? [],
-    candidateYearsOfExperience: candidate.yearsOfExperience ?? 0,
-    candidateCvSummary: candidate.cvSummary,
-    candidateCvText: candidate.cvText,
-    jobTitle: job.title,
-    jobDescriptionMd: job.descriptionMd,
-    jobSearchTags: job.searchTags ?? [],
-    jobSeniority: job.seniority,
-  });
+  const match = await runAi(() =>
+    matchCandidateToJob({
+      candidateHeadline: candidate.headline ?? "",
+      candidateSkills: candidate.skills ?? [],
+      candidateYearsOfExperience: candidate.yearsOfExperience ?? 0,
+      candidateCvSummary: candidate.cvSummary,
+      candidateCvText: candidate.cvText,
+      jobTitle: job.title,
+      jobDescriptionMd: job.descriptionMd,
+      jobSearchTags: job.searchTags ?? [],
+      jobSeniority: job.seniority,
+    })
+  );
 
   const recRef = db.collection("recommendations").doc(`${candidateUid}_${jobId}`);
   const existing = await recRef.get();

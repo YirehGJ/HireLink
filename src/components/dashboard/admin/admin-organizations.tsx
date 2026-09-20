@@ -47,7 +47,7 @@ export function AdminOrganizations() {
     try {
       const data = { name: name.trim(), website: website.trim(), description: description.trim() };
       if (editing === "new") {
-        const id = await organizationService.createOrganization(firestore, data);
+        const id = await organizationService.createOrganization(firestore, data, auth?.currentUser?.uid ?? "");
         logAudit(auth, { action: "organization_created", targetType: "organization", targetId: id, details: data.name });
       } else {
         await organizationService.updateOrganization(firestore, editing.id, data);

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { adminDb, verifyRequestUser } from "@/firebase/admin";
+import { adminDb } from "@/firebase/admin";
 import { writeAuditLog } from "@/firebase/admin-audit";
+import { enforceRateLimit, errorResponse, HttpError, requireUser } from "@/lib/server/guard";
 import { FieldValue } from "firebase-admin/firestore";
 
 /**
@@ -14,24 +15,30 @@ import { FieldValue } from "firebase-admin/firestore";
  * que responde antes de aplicar el cambio.
  */
 export async function POST(request: Request) {
-  let uid: string;
   try {
-    uid = (await verifyRequestUser(request)).uid;
-  } catch {
-    return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+    return await handle(request);
+  } catch (e) {
+    return errorResponse(e);
   }
+}
 
-  const { recId, action } = await request.json();
-  if (!recId || !["accept", "reject"].includes(action)) {
-    return NextResponse.json({ error: "Parámetros inválidos" }, { status: 400 });
-  }
-
+async function handle(request: Request) {
+  const authed = await requireUser(request);
+  const uid = authed.uid;
+  const caller = authed.data;
   const db = adminDb();
+  await enforceRateLimit(db, uid, "match-respond", 120, 3600);
+
+  const body = await request.json().catch(() => null);
+  const recId = body?.recId;
+  const action = body?.action;
+  if (typeof recId !== "string" || !recId || !["accept", "reject"].includes(action)) {
+    throw new HttpError(400, "Parámetros inválidos");
+  }
+
   const recRef = db.collection("recommendations").doc(recId);
-  const [recSnap, callerSnap] = await Promise.all([recRef.get(), db.collection("users").doc(uid).get()]);
-  const rec = recSnap.data();
-  const caller = callerSnap.data();
-  if (!rec || !caller) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
+  const rec = (await recRef.get()).data();
+  if (!rec) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
 
   const jobSnap = await db.collection("jobs").doc(rec.jobRef).get();
   const job = jobSnap.data();

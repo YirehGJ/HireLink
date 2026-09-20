@@ -1,7 +1,6 @@
-
-'use server';
 /**
  * @fileOverview Flujo de Genkit para generar una descripción de trabajo en Markdown.
+ * SOLO se usa desde Route Handlers autenticados (nunca como Server Action pública).
  *
  * - generateJobDescription: Llama al flujo principal para generar la descripción.
  * - GenerateJobDescriptionInput: El tipo de entrada para el flujo.
@@ -13,9 +12,9 @@ import { z } from 'zod';
 
 // Esquema de entrada
 const GenerateJobDescriptionInputSchema = z.object({
-  title: z.string().describe("El título del puesto de trabajo. Ej: 'Ingeniero de Software Senior'."),
-  seniority: z.string().describe("El nivel de experiencia requerido. Ej: 'Senior', 'Junior'."),
-  searchTags: z.array(z.string()).describe("Una lista de habilidades clave, tecnologías o palabras clave relevantes. Ej: ['React', 'Node.js', 'Liderazgo']"),
+  title: z.string().max(200).describe("El título del puesto de trabajo. Ej: 'Ingeniero de Software Senior'."),
+  seniority: z.string().max(30).describe("El nivel de experiencia requerido. Ej: 'Senior', 'Junior'."),
+  searchTags: z.array(z.string().max(60)).max(40).describe("Una lista de habilidades clave, tecnologías o palabras clave relevantes. Ej: ['React', 'Node.js', 'Liderazgo']"),
 });
 export type GenerateJobDescriptionInput = z.infer<typeof GenerateJobDescriptionInputSchema>;
 

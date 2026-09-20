@@ -25,6 +25,9 @@ export const ai = genkit({
         const model = defineCompatOpenAIModel({
           name,
           client,
+          // Con pluginOptions.name el helper recorta el prefijo "groq/" y envía a la
+          // API el id real del modelo (p. ej. "openai/gpt-oss-120b").
+          pluginOptions: { name: 'groq' } as any,
           modelRef: compatOaiModelRef({ name }),
         });
         definedModels.set(actionName, model);

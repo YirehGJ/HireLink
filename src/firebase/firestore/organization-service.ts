@@ -25,9 +25,12 @@ export const organizationService = {
    * Crea una organización nueva (para un reclutador que aún no tiene una)
    * y devuelve su id para enlazarla al usuario vía `organizationRef`.
    */
-  async createOrganization(firestore: Firestore, data: OrganizationInput) {
+  async createOrganization(firestore: Firestore, data: OrganizationInput, ownerUid: string) {
+    // `ownerUid` es lo que permite a este reclutador enlazarse a la organización
+    // que acaba de crear (y solo a esa) según las reglas de seguridad.
     const ref = await addDoc(collection(firestore, "organizations"), {
       ...data,
+      ownerUid,
       createdAt: serverTimestamp(),
     });
     return ref.id;

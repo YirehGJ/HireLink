@@ -53,7 +53,7 @@ export function OrganizationProfileForm({ organization }: { organization: Organi
         await organizationService.updateOrganization(firestore, user.organizationRef, values);
         logAudit(auth, { action: "organization_updated", targetType: "organization", targetId: user.organizationRef, details: values.name });
       } else {
-        const orgId = await organizationService.createOrganization(firestore, values);
+        const orgId = await organizationService.createOrganization(firestore, values, auth.currentUser.uid);
         await userService.setOrganizationRef(firestore, auth.currentUser.uid, orgId);
         logAudit(auth, { action: "organization_created", targetType: "organization", targetId: orgId, details: values.name });
       }

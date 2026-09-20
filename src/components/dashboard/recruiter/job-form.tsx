@@ -16,7 +16,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import type { Job } from "@/lib/types";
-import { generateJobDescription } from "@/ai/flows/generate-job-description-flow";
 import { useAuth, useFirestore } from "@/firebase";
 import { logAudit } from "@/lib/audit-client";
 import { callAuthedApi } from "@/lib/api-client";
@@ -66,7 +65,8 @@ export function JobForm({ job }: { job?: Job }) {
 
     setIsGenerating(true);
     try {
-        const result = await generateJobDescription({
+        if (!auth) throw new Error("No hay sesión activa.");
+        const result = await callAuthedApi(auth, "/api/ai/generate-description", {
             title,
             seniority,
             searchTags: searchTags.split(',').map(tag => tag.trim()),

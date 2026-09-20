@@ -18,7 +18,6 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import type { Candidate, Skill } from "@/lib/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { extractCvData } from "@/ai/flows/extract-cv-data-flow";
 import { useAuth, useFirestore } from "@/firebase";
 import { candidateService } from "@/firebase/firestore/candidate-service";
 import { callAuthedApi } from "@/lib/api-client";
@@ -140,7 +139,10 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
 
     try {
         const pdfData = new Uint8Array(await file.arrayBuffer());
-        const doc = await pdfjsLib.getDocument({ data: pdfData }).promise;
+        // isEvalSupported:false neutraliza la vulnerabilidad de ejecución de código de
+        // pdf.js (CVE-2024-4367) al abrir PDFs maliciosos; también se limita el tamaño.
+        if (file.size > 5 * 1024 * 1024) throw new Error("El PDF supera los 5 MB.");
+        const doc = await pdfjsLib.getDocument({ data: pdfData, isEvalSupported: false } as any).promise;
         let text = '';
         for (let i = 1; i <= doc.numPages; i++) {
             const page = await doc.getPage(i);
@@ -153,7 +155,8 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
             throw new Error("El PDF no contiene texto legible (¿es una imagen escaneada?).");
         }
 
-        const extractedData = await extractCvData({ cvText: cleanedText });
+        if (!auth) throw new Error("No hay sesión activa.");
+        const extractedData = await callAuthedApi(auth, "/api/ai/extract-cv", { cvText: cleanedText.slice(0, 20000) });
 
         if (extractedData) {
             form.setValue('headline', extractedData.headline, { shouldValidate: true });
