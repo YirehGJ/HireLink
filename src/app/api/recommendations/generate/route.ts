@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { adminDb, verifyRequestUser } from "@/firebase/admin";
 import { evaluateMatch } from "@/lib/server/matching";
+import { mapWithConcurrency } from "@/lib/server/concurrency";
+
+// Máximo permitido en el plan gratuito de Vercel; evita que la función se corte a la mitad.
+export const maxDuration = 60;
 
 /**
  * @fileOverview Módulo de Sistemas Inteligentes + Sistemas Distribuidos.
@@ -30,16 +34,16 @@ export async function POST(request: Request) {
 
   const jobsSnap = await db.collection("jobs").where("status", "==", "published").get();
 
-  const results: { jobId: string; score: number }[] = [];
-
-  for (const jobDoc of jobsSnap.docs) {
+  const evaluated = await mapWithConcurrency(jobsSnap.docs, 4, async (jobDoc) => {
     try {
       const match = await evaluateMatch(db, uid, candidate, jobDoc.id, jobDoc.data());
-      results.push({ jobId: jobDoc.id, score: match.score });
+      return { jobId: jobDoc.id, score: match.score };
     } catch (err) {
       console.error(`Error calculando match para job ${jobDoc.id}:`, err);
+      return null;
     }
-  }
+  });
+  const results = evaluated.filter((r): r is { jobId: string; score: number } => r !== null);
 
   return NextResponse.json({ processed: results.length, results });
 }

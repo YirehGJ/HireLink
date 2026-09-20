@@ -2,8 +2,7 @@ import type { Firestore } from "firebase-admin/firestore";
 import { FieldValue } from "firebase-admin/firestore";
 import { matchCandidateToJob } from "@/ai/flows/match-candidate-job-flow";
 
-/** Puntaje mínimo para considerar que hay un "match" que el reclutador debe revisar. */
-export const MATCH_THRESHOLD = 0.6;
+import { MATCH_THRESHOLD } from "@/lib/constants";
 
 const ENGINE_VERSION = "groq-gpt-oss-120b";
 

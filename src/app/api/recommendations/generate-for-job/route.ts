@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { adminDb, verifyRequestUser } from "@/firebase/admin";
 import { evaluateMatch } from "@/lib/server/matching";
+import { mapWithConcurrency } from "@/lib/server/concurrency";
+
+// Máximo permitido en el plan gratuito de Vercel; evita que la función se corte a la mitad.
+export const maxDuration = 60;
 
 // Tope para mantener acotado el costo/tiempo de una sola llamada.
 const MAX_CANDIDATES = 40;
@@ -38,16 +42,16 @@ export async function POST(request: Request) {
   const candidatesSnap = await db.collection("candidates").limit(MAX_CANDIDATES).get();
   let processed = 0;
 
-  for (const c of candidatesSnap.docs) {
+  await mapWithConcurrency(candidatesSnap.docs, 4, async (c) => {
     const candidate = c.data();
-    if (!candidate.skills?.length && !candidate.headline) continue;
+    if (!candidate.skills?.length && !candidate.headline) return;
     try {
       await evaluateMatch(db, c.id, candidate, jobId, job);
       processed++;
     } catch (err) {
       console.error(`Error calculando match de ${c.id} para ${jobId}:`, err);
     }
-  }
+  });
 
   return NextResponse.json({ processed });
 }

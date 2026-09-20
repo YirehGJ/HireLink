@@ -13,8 +13,7 @@ import { useApp } from "@/components/providers/app-provider";
 import { useToast } from "@/hooks/use-toast";
 import type { Candidate, MatchStatus, Recommendation } from "@/lib/types";
 
-/** Puntaje mínimo para que la IA considere que hay un match (igual que en el servidor). */
-const MATCH_THRESHOLD = 0.6;
+import { MATCH_THRESHOLD } from "@/lib/constants";
 
 const statusOf = (r: Recommendation): MatchStatus => r.status ?? "pending";
 

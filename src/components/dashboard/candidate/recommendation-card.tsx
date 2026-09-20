@@ -5,6 +5,7 @@ import { MapPin, Briefcase, Zap, CheckCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ApplyButton } from "./apply-button";
 import { RejectMatchButton } from "./reject-match-button";
+import { MATCH_THRESHOLD } from "@/lib/constants";
 
 interface RecommendationCardProps {
   recommendation: Recommendation;
@@ -63,7 +64,7 @@ export function RecommendationCard({ recommendation, job }: RecommendationCardPr
         </div>
       </CardContent>
       <CardFooter className="flex flex-col gap-2 items-stretch">
-        {recommendation.score >= 0.6 && (
+        {recommendation.score >= MATCH_THRESHOLD && (
           <Badge variant={recommendation.status === "accepted" ? "default" : "outline"} className="self-start">
             {recommendation.status === "accepted"
               ? "¡La empresa aceptó tu match!"

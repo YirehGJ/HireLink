@@ -6,6 +6,9 @@ import openAICompatible, {
 
 export const GROQ_MODEL = 'groq/openai/gpt-oss-120b';
 
+// Evita registrar el mismo modelo varias veces cuando hay llamadas en paralelo.
+const definedModels = new Map<string, ReturnType<typeof defineCompatOpenAIModel>>();
+
 export const ai = genkit({
   plugins: [
     openAICompatible({
@@ -16,12 +19,16 @@ export const ai = genkit({
       // recorta hasta el primer "/", así que anteponemos un prefijo ficticio.
       resolver: (client, actionType, actionName) => {
         if (actionType !== 'model') return undefined;
+        const cached = definedModels.get(actionName);
+        if (cached) return cached;
         const name = `groq/${actionName}`;
-        return defineCompatOpenAIModel({
+        const model = defineCompatOpenAIModel({
           name,
           client,
           modelRef: compatOaiModelRef({ name }),
         });
+        definedModels.set(actionName, model);
+        return model;
       },
     }),
   ],
