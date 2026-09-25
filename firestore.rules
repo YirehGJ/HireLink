@@ -46,6 +46,8 @@ service cloud.firestore {
         && d.get('fullName', '').size() <= 120
         && d.get('email', '').size() <= 200
         && d.get('skills', []).size() <= 60
+        && d.get('experience', []).size() <= 20
+        && d.get('education', []).size() <= 15
         && d.get('cvSummary', '').size() <= 2500
         && d.get('cvText', '').size() <= 9000
         && d.get('userRef', candidateId) == candidateId;

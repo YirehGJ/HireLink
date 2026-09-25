@@ -35,6 +35,28 @@ export interface Candidate {
   cvSummary?: string;
   /** Texto del CV analizado, usado por la IA para calcular compatibilidad. */
   cvText?: string;
+  /** Experiencia laboral, sugerida por la IA al analizar el CV o cargada a mano. */
+  experience?: ExperienceEntry[];
+  /** Educación, sugerida por la IA al analizar el CV o cargada a mano. */
+  education?: EducationEntry[];
+}
+
+export interface ExperienceEntry {
+  title: string;
+  company: string;
+  /** Texto libre, ej. "2021" o "Ene 2021"; no se valida como fecha real. */
+  startDate: string;
+  /** Vacío o "Presente" si es el empleo actual. */
+  endDate: string;
+  description: string;
+}
+
+export interface EducationEntry {
+  institution: string;
+  degree: string;
+  field: string;
+  startDate: string;
+  endDate: string;
 }
 
 export interface Organization {

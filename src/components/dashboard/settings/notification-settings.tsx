@@ -91,9 +91,9 @@ export function NotificationSettings() {
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
-                    <FormLabel className="text-base">Nuevas vacantes</FormLabel>
+                    <FormLabel className="text-base">Coincidencias de la IA</FormLabel>
                     <FormDescription>
-                      Recibir correos sobre nuevas recomendaciones de empleo que coincidan con tu perfil.
+                      Candidatos: nuevas recomendaciones de empleo. Reclutadores: nuevos candidatos compatibles con tus vacantes.
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -113,7 +113,7 @@ export function NotificationSettings() {
                   <div className="space-y-0.5">
                     <FormLabel className="text-base">Actualizaciones de Postulaciones</FormLabel>
                     <FormDescription>
-                      Recibir correos sobre cambios en el estado de tus postulaciones.
+                      Candidatos: cambios de estado y entrevistas agendadas. Reclutadores: nuevas postulaciones y respuestas a un match.
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -133,7 +133,7 @@ export function NotificationSettings() {
                   <div className="space-y-0.5">
                     <FormLabel className="text-base">Noticias y Marketing</FormLabel>
                     <FormDescription>
-                        Recibir correos sobre nuevos productos, funciones y ofertas especiales de HireLink.
+                        Recibir correos sobre nuevos productos, funciones y ofertas especiales de HireLink. (Próximamente)
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -153,7 +153,7 @@ export function NotificationSettings() {
                   <div className="space-y-0.5">
                     <FormLabel className="text-base">Alertas de Seguridad</FormLabel>
                     <FormDescription>
-                        Recibir correos sobre actividad inusual y cambios en tu cuenta. No se puede desactivar.
+                        Recibir correos sobre actividad inusual y cambios en tu cuenta. No se puede desactivar. (Próximamente)
                     </FormDescription>
                   </div>
                   <FormControl>

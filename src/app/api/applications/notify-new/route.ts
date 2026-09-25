@@ -3,6 +3,7 @@ import { adminDb } from "@/firebase/admin";
 import { writeAuditLog } from "@/firebase/admin-audit";
 import { FieldValue } from "firebase-admin/firestore";
 import { enforceRateLimit, errorResponse, HttpError, requireUser } from "@/lib/server/guard";
+import { notifyUser } from "@/lib/server/notify";
 
 /**
  * @fileOverview Cuando un candidato postula, avisa en tiempo real a todos los
@@ -46,13 +47,11 @@ export async function POST(request: Request) {
 
     await Promise.all(
       recruiters.docs.map((r) =>
-        r.ref.collection("notifications").add({
+        notifyUser(db, r.id, {
           type: "new_application",
           title: "Nueva postulación",
           body: `${candidateName} aplicó a "${job.title}"`,
           href: `/dashboard/jobs/${jobId}`,
-          read: false,
-          createdAt: FieldValue.serverTimestamp(),
         })
       )
     );

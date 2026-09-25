@@ -37,12 +37,12 @@ Leyenda: ✅ hecho y verificado · 🟡 parcial · ❌ no hecho · ➖ cambió p
 | S16 | Perfil de candidato | ✅ | Guarda y recarga; solo el dueño edita |
 | S17 | Postulaciones | ✅ | Aplicar, "Mis postulaciones", lista por vacante, estados editables |
 | S18 | Reglas y guards | ✅ | Reglas endurecidas (12 vulnerabilidades corregidas), guards por rol, 59/59 pruebas |
-| S19 | CV upload + extracción | ➖ | El texto se extrae en el navegador y se guarda (`cvText`); **el archivo no se sube** a Storage |
-| S20 | Asistente de CV con IA | 🟡 | Analiza, autollena y muestra resumen con aviso de revisar. Falta vista previa separada de experiencia/educación |
+| S19 | CV upload + extracción | ✅ | El texto se extrae en el navegador y se guarda (`cvText`); decisión de no subir el archivo, documentada en [DECISION_STORAGE_CV.md](DECISION_STORAGE_CV.md) |
+| S20 | Asistente de CV con IA | ✅ | Vista previa de skills, experiencia y educación antes de aplicar sugerencias; el candidato decide "Aplicar" o "Descartar" |
 | S21 | Recomendaciones | ✅ | Match con IA (perfil + CV), "candidatos recomendados" por vacante y "vacantes recomendadas" al candidato |
 | S22 | Organizaciones / multi-tenant | ✅ | Alta/edición desde admin, asignación de reclutadores, aislamiento probado |
 | S23 | Herramientas admin | ✅ | Cambio de rol, suspender (con bloqueo real), métricas reales, "ver como" en solo lectura |
-| S24 | Notificaciones | 🟡 | Tiempo real ✅. Correo electrónico (modelo "preparado") ❌ |
+| S24 | Notificaciones | ✅ | Tiempo real + correo real vía Resend (apagado hasta poner `RESEND_API_KEY`, ver [EMAIL_SETUP.md](EMAIL_SETUP.md)) |
 | S25 | Auditoría y observabilidad | 🟡 | `auditLogs` y pantalla de admin ✅. Error tracking (Sentry) ❌ |
 | S26 | Búsqueda avanzada | 🟡 | Vacantes y candidatos con filtros ✅. Faltan filtro por fecha, "seniority objetivo" y documentar la decisión cliente vs Algolia |
 | S27 | Performance y DX | ❌ | Sin trabajo dedicado. La página de perfil pesa 90 kB y hay 100 vulnerabilidades de dependencias |

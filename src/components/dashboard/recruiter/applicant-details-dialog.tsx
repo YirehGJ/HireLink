@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { CalendarPlus, Loader2, Mail, MapPin, Briefcase, Zap } from "lucide-react";
+import { CalendarPlus, Loader2, Mail, MapPin, Briefcase, GraduationCap, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -169,6 +169,35 @@ export function ApplicantDetailsDialog({ open, onOpenChange, app, candidate, rec
               ))}
             </div>
           </div>
+
+          {(candidate?.experience?.length ?? 0) > 0 && (
+            <div>
+              <h4 className="text-sm font-semibold mb-2 flex items-center gap-1.5"><Briefcase className="h-4 w-4" />Experiencia</h4>
+              <ul className="space-y-2">
+                {candidate!.experience!.map((e, i) => (
+                  <li key={i} className="text-sm">
+                    <p className="font-medium">{e.title} · {e.company}</p>
+                    <p className="text-xs text-muted-foreground">{e.startDate} – {e.endDate || "Presente"}</p>
+                    {e.description && <p className="text-muted-foreground">{e.description}</p>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {(candidate?.education?.length ?? 0) > 0 && (
+            <div>
+              <h4 className="text-sm font-semibold mb-2 flex items-center gap-1.5"><GraduationCap className="h-4 w-4" />Educación</h4>
+              <ul className="space-y-2">
+                {candidate!.education!.map((e, i) => (
+                  <li key={i} className="text-sm">
+                    <p className="font-medium">{e.degree || e.field} · {e.institution}</p>
+                    <p className="text-xs text-muted-foreground">{e.startDate} – {e.endDate || "En curso"}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="notes">Notas privadas del reclutador</Label>

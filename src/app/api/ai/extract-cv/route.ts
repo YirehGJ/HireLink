@@ -19,7 +19,9 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => null);
     const cvText = typeof body?.cvText === "string" ? body.cvText.trim() : "";
     if (cvText.length < 30) throw new HttpError(400, "El CV no contiene texto suficiente.");
-    if (cvText.length > 20000) throw new HttpError(413, "El CV es demasiado largo.");
+    // 8000 caracteres cubre cualquier CV real (1-3 páginas) y evita agotar el
+    // presupuesto de tokens por minuto de la cuenta de Groq con un solo análisis.
+    if (cvText.length > 8000) throw new HttpError(413, "El CV es demasiado largo.");
 
     const data = await runAi(() => extractCvData({ cvText }));
     return NextResponse.json(data);

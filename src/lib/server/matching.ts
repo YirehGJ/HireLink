@@ -4,6 +4,7 @@ import { matchCandidateToJob } from "@/ai/flows/match-candidate-job-flow";
 
 import { MATCH_THRESHOLD } from "@/lib/constants";
 import { runAi } from "@/lib/server/ai-runner";
+import { notifyUser } from "@/lib/server/notify";
 
 const ENGINE_VERSION = "groq-gpt-oss-120b";
 
@@ -59,13 +60,11 @@ export async function evaluateMatch(
 
     if (match.score >= MATCH_THRESHOLD) {
       const pct = `${(match.score * 100).toFixed(0)}%`;
-      await db.collection("users").doc(candidateUid).collection("notifications").add({
+      await notifyUser(db, candidateUid, {
         type: "new_recommendation",
         title: "Nueva recomendación de empleo",
         body: `${job.title} — ${pct} de compatibilidad. Está en espera de la revisión de la empresa.`,
         href: `/dashboard/jobs/${jobId}`,
-        read: false,
-        createdAt: FieldValue.serverTimestamp(),
       });
 
       const recruiters = await db
@@ -76,13 +75,11 @@ export async function evaluateMatch(
       const name = candidate.fullName || candidate.headline || "Un candidato";
       await Promise.all(
         recruiters.docs.map((r) =>
-          r.ref.collection("notifications").add({
+          notifyUser(db, r.id, {
             type: "new_match",
             title: "Nuevo match en espera",
             body: `${name} es ${pct} compatible con "${job.title}". Acepta o rechaza el match.`,
             href: `/dashboard/jobs/${jobId}`,
-            read: false,
-            createdAt: FieldValue.serverTimestamp(),
           })
         )
       );

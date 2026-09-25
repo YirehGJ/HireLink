@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { adminDb } from "@/firebase/admin";
 import { writeAuditLog } from "@/firebase/admin-audit";
 import { enforceRateLimit, errorResponse, HttpError, requireUser } from "@/lib/server/guard";
+import { notifyUser } from "@/lib/server/notify";
 import { FieldValue } from "firebase-admin/firestore";
 
 /**
@@ -56,8 +57,6 @@ async function handle(request: Request) {
 
   const current: string = rec.status ?? "pending";
   const now = FieldValue.serverTimestamp();
-  const notify = (userId: string, data: { type: string; title: string; body: string; href: string }) =>
-    db.collection("users").doc(userId).collection("notifications").add({ ...data, read: false, createdAt: now });
 
   const appRef = db.collection("jobs").doc(rec.jobRef).collection("applications").doc(candidateUid);
   const mirrorRef = db.collection("users").doc(candidateUid).collection("applications").doc(rec.jobRef);
@@ -85,7 +84,7 @@ async function handle(request: Request) {
       .get();
     await Promise.all(
       recruiters.docs.map((r) =>
-        notify(r.id, {
+        notifyUser(db, r.id, {
           type: "match_rejected_by_candidate",
           title: "Un candidato rechazó el match",
           body: `${name} rechazó el match con "${job.title}".`,
@@ -109,7 +108,7 @@ async function handle(request: Request) {
 
   if (action === "reject") {
     await recRef.update({ status: "rejected_by_recruiter", updatedAt: now });
-    await notify(candidateUid, {
+    await notifyUser(db, candidateUid, {
       type: "match_rejected",
       title: "Actualización de tu match",
       body: `La empresa decidió no avanzar con tu match para "${job.title}".`,
@@ -143,7 +142,7 @@ async function handle(request: Request) {
     if ((await mirrorRef.get()).exists) await mirrorRef.update({ status: "screening", updatedAt: now });
   }
 
-  await notify(candidateUid, {
+  await notifyUser(db, candidateUid, {
     type: "match_accepted",
     title: "¡La empresa aceptó tu match!",
     body: `"${job.title}" quiere avanzar contigo. Revisa tus postulaciones.`,

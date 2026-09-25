@@ -5,18 +5,19 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
-import { Loader2, Trash2, PlusCircle, FileUp, BrainCircuit } from "lucide-react";
+import { Loader2, Trash2, PlusCircle, FileUp, BrainCircuit, Sparkles, Briefcase, GraduationCap } from "lucide-react";
 import React from "react";
 import * as pdfjsLib from "pdfjs-dist";
 
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import type { Candidate, Skill } from "@/lib/types";
+import type { Candidate } from "@/lib/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuth, useFirestore } from "@/firebase";
 import { candidateService } from "@/firebase/firestore/candidate-service";
@@ -30,13 +31,44 @@ const skillSchema = z.object({
   years: z.coerce.number().min(0, "Los años no pueden ser negativos.").max(60, "Los años no pueden exceder 60."),
 });
 
+const experienceSchema = z.object({
+  title: z.string().min(1, "El puesto es requerido."),
+  company: z.string().min(1, "La empresa es requerida."),
+  startDate: z.string().max(40).default(""),
+  endDate: z.string().max(40).default(""),
+  description: z.string().max(500).default(""),
+});
+
+const educationSchema = z.object({
+  institution: z.string().min(1, "La institución es requerida."),
+  degree: z.string().max(150).default(""),
+  field: z.string().max(150).default(""),
+  startDate: z.string().max(40).default(""),
+  endDate: z.string().max(40).default(""),
+});
+
 const profileSchema = z.object({
   headline: z.string().min(5, "El titular debe tener al menos 5 caracteres."),
   location: z.string().min(2, "La ubicación es requerida."),
   yearsOfExperience: z.coerce.number().min(0, "Los años no pueden ser negativos.").max(60, "Los años no pueden exceder 60."),
   available: z.boolean().default(true),
-  skills: z.array(skillSchema),
+  skills: z.array(skillSchema).max(60),
+  experience: z.array(experienceSchema).max(20),
+  education: z.array(educationSchema).max(15),
 });
+
+type ProfileFormValues = z.infer<typeof profileSchema>;
+
+// Forma que devuelve /api/ai/extract-cv (ver extract-cv-data-flow.ts).
+interface CvSuggestions {
+  headline: string;
+  location: string;
+  yearsOfExperience: number;
+  skills: ProfileFormValues["skills"];
+  experience: ProfileFormValues["experience"];
+  education: ProfileFormValues["education"];
+  summary: string;
+}
 
 export function UserProfileForm({ profile }: { profile: Candidate | null }) {
   const router = useRouter();
@@ -46,6 +78,9 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
   const { user: appUser } = useApp();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isParsingCv, setIsParsingCv] = React.useState(false);
+  // Sugerencias sin aplicar aún: el candidato las revisa antes de que toquen el formulario.
+  const [suggestions, setSuggestions] = React.useState<CvSuggestions | null>(null);
+  const [pendingCvText, setPendingCvText] = React.useState("");
   const [cvAnalysis, setCvAnalysis] = React.useState<{ summary: string; text: string } | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -53,7 +88,7 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
     pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
   }, []);
 
-  const form = useForm<z.infer<typeof profileSchema>>({
+  const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       headline: profile?.headline || "",
@@ -61,13 +96,14 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
       yearsOfExperience: profile?.yearsOfExperience || 0,
       available: profile?.available || true,
       skills: profile?.skills?.map(s => ({...s, source: undefined})) || [],
+      experience: profile?.experience || [],
+      education: profile?.education || [],
     },
   });
 
-  const { fields, append, remove, replace } = useFieldArray({
-    control: form.control,
-    name: "skills",
-  });
+  const { fields, append, remove, replace } = useFieldArray({ control: form.control, name: "skills" });
+  const expArray = useFieldArray({ control: form.control, name: "experience" });
+  const eduArray = useFieldArray({ control: form.control, name: "education" });
 
   // react-hook-form only reads `defaultValues` once at mount, so if `profile`
   // arrives (or changes) after that, re-sync the form fields explicitly.
@@ -79,12 +115,14 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
         yearsOfExperience: profile.yearsOfExperience || 0,
         available: profile.available ?? true,
         skills: profile.skills?.map(s => ({ ...s, source: undefined })) || [],
+        experience: profile.experience || [],
+        education: profile.education || [],
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile]);
 
-  async function onSubmit(values: z.infer<typeof profileSchema>) {
+  async function onSubmit(values: ProfileFormValues) {
     if (!firestore || !auth || !auth.currentUser) return;
     setIsSubmitting(true);
 
@@ -130,8 +168,9 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
         });
         return;
     }
-    
+
     setIsParsingCv(true);
+    setSuggestions(null);
     toast({
         title: "Procesando CV...",
         description: "La IA está extrayendo tu información. Esto puede tardar un momento.",
@@ -156,22 +195,20 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
         }
 
         if (!auth) throw new Error("No hay sesión activa.");
-        const extractedData = await callAuthedApi(auth, "/api/ai/extract-cv", { cvText: cleanedText.slice(0, 20000) });
+        // 8000 caracteres alcanza para cualquier CV real y evita agotar el
+        // presupuesto de tokens por minuto de la cuenta compartida de Groq.
+        const trimmedText = cleanedText.slice(0, 8000);
+        const extractedData: CvSuggestions = await callAuthedApi(auth, "/api/ai/extract-cv", { cvText: trimmedText });
 
         if (extractedData) {
-            form.setValue('headline', extractedData.headline, { shouldValidate: true });
-            form.setValue('location', extractedData.location, { shouldValidate: true });
-            form.setValue('yearsOfExperience', extractedData.yearsOfExperience, { shouldValidate: true });
-
-            replace(extractedData.skills);
-
-            // El texto y el resumen del CV se guardan con el perfil para que la IA
-            // los use al calcular la compatibilidad con cada vacante.
-            setCvAnalysis({ summary: extractedData.summary, text: cleanedText.slice(0, 8000) });
+            // No se toca el formulario todavía: el candidato revisa la vista previa
+            // (skills, experiencia, educación) y decide si aplicar las sugerencias.
+            setSuggestions(extractedData);
+            setPendingCvText(trimmedText);
 
             toast({
                 title: "¡CV analizado por la IA!",
-                description: "Revisa los datos sugeridos y pulsa \"Guardar Perfil\" para confirmarlos.",
+                description: "Revisa la vista previa y pulsa \"Aplicar sugerencias\" para llenar tu perfil.",
             });
         } else {
              throw new Error("No data extracted");
@@ -180,7 +217,7 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
         console.error("Error parsing CV:", error);
         toast({
             title: "Error al procesar CV",
-            description: "No se pudo extraer la información. Por favor, intenta de nuevo o llena el formulario manualmente.",
+            description: error instanceof Error ? error.message : "No se pudo extraer la información. Intenta de nuevo o llena el formulario manualmente.",
             variant: "destructive"
         });
     } finally {
@@ -191,15 +228,96 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
     }
   }
 
+  function applySuggestions() {
+    if (!suggestions) return;
+    form.setValue('headline', suggestions.headline, { shouldValidate: true });
+    form.setValue('location', suggestions.location, { shouldValidate: true });
+    form.setValue('yearsOfExperience', suggestions.yearsOfExperience, { shouldValidate: true });
+    replace(suggestions.skills ?? []);
+    expArray.replace(suggestions.experience ?? []);
+    eduArray.replace(suggestions.education ?? []);
+
+    // El texto y el resumen del CV se guardan con el perfil para que la IA
+    // los use al calcular la compatibilidad con cada vacante.
+    setCvAnalysis({ summary: suggestions.summary, text: pendingCvText });
+    setSuggestions(null);
+
+    toast({
+        title: "Sugerencias aplicadas",
+        description: "Revisa los campos del formulario y pulsa \"Guardar Perfil\" para confirmarlos.",
+    });
+  }
+
+  function discardSuggestions() {
+    setSuggestions(null);
+    setPendingCvText("");
+  }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
+
+            {suggestions && (
+                <Card className="border-primary">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-primary" />Vista previa: sugerencias de la IA</CardTitle>
+                        <CardDescription>
+                            Esto es lo que la IA leyó en tu CV. No se ha guardado nada todavía: revisa y decide si aplicarlo a tu perfil.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                            <div><p className="font-medium">Titular</p><p className="text-muted-foreground">{suggestions.headline || "—"}</p></div>
+                            <div><p className="font-medium">Ubicación</p><p className="text-muted-foreground">{suggestions.location || "—"}</p></div>
+                            <div><p className="font-medium">Años de experiencia</p><p className="text-muted-foreground">{suggestions.yearsOfExperience}</p></div>
+                        </div>
+                        <div>
+                            <p className="font-medium text-sm mb-1.5">Habilidades ({suggestions.skills?.length ?? 0})</p>
+                            <div className="flex flex-wrap gap-2">
+                                {(suggestions.skills ?? []).length === 0 && <p className="text-sm text-muted-foreground">Ninguna detectada.</p>}
+                                {(suggestions.skills ?? []).map((s, i) => <Badge key={i} variant="secondary">{s.name} · {s.level}/5</Badge>)}
+                            </div>
+                        </div>
+                        <div>
+                            <p className="font-medium text-sm mb-1.5 flex items-center gap-1.5"><Briefcase className="h-4 w-4" />Experiencia ({suggestions.experience?.length ?? 0})</p>
+                            {(suggestions.experience ?? []).length === 0 && <p className="text-sm text-muted-foreground">Ninguna detectada.</p>}
+                            <ul className="space-y-1">
+                                {(suggestions.experience ?? []).map((e, i) => (
+                                    <li key={i} className="text-sm text-muted-foreground">
+                                        <span className="text-foreground font-medium">{e.title}</span> en {e.company} ({e.startDate} – {e.endDate || "Presente"})
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                        <div>
+                            <p className="font-medium text-sm mb-1.5 flex items-center gap-1.5"><GraduationCap className="h-4 w-4" />Educación ({suggestions.education?.length ?? 0})</p>
+                            {(suggestions.education ?? []).length === 0 && <p className="text-sm text-muted-foreground">Ninguna detectada.</p>}
+                            <ul className="space-y-1">
+                                {(suggestions.education ?? []).map((e, i) => (
+                                    <li key={i} className="text-sm text-muted-foreground">
+                                        <span className="text-foreground font-medium">{e.degree || e.field}</span> en {e.institution} ({e.startDate} – {e.endDate || "En curso"})
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                        <Alert>
+                            <BrainCircuit className="h-4 w-4" />
+                            <AlertDescription>{suggestions.summary}</AlertDescription>
+                        </Alert>
+                    </CardContent>
+                    <CardFooter className="gap-2">
+                        <Button type="button" onClick={applySuggestions}>Aplicar sugerencias</Button>
+                        <Button type="button" variant="ghost" onClick={discardSuggestions}>Descartar</Button>
+                    </CardFooter>
+                </Card>
+            )}
+
             <Card>
                 <CardHeader>
                     <CardTitle>Información Principal</CardTitle>
-                    <CardDescription>Estos son los datos que los reclutadores verán primero. Puedes subier tu CV para autocompletar.</CardDescription>
+                    <CardDescription>Estos son los datos que los reclutadores verán primero. Puedes subir tu CV para autocompletar.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     {(cvAnalysis?.summary || profile?.cvSummary) && (
@@ -305,6 +423,106 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
                     </Button>
                 </CardContent>
             </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><Briefcase className="h-5 w-5" />Experiencia Laboral</CardTitle>
+                    <CardDescription>Tus puestos anteriores. La IA los sugiere al analizar tu CV; también puedes editarlos a mano.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    {expArray.fields.length === 0 && (
+                        <p className="text-sm text-muted-foreground">Aún no has agregado experiencia laboral.</p>
+                    )}
+                    {expArray.fields.map((field, index) => (
+                        <div key={field.id} className="space-y-3 p-3 border rounded-lg">
+                            <div className="flex justify-end">
+                                <Button type="button" variant="ghost" size="icon" onClick={() => expArray.remove(index)}>
+                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                    <span className="sr-only">Eliminar experiencia</span>
+                                </Button>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <FormField control={form.control} name={`experience.${index}.title`} render={({ field }) => (
+                                    <FormItem><FormLabel>Puesto</FormLabel><FormControl><Input placeholder="Ej. Desarrollador Backend" {...field} /></FormControl><FormMessage /></FormItem>
+                                )} />
+                                <FormField control={form.control} name={`experience.${index}.company`} render={({ field }) => (
+                                    <FormItem><FormLabel>Empresa</FormLabel><FormControl><Input placeholder="Ej. Acme Inc." {...field} /></FormControl><FormMessage /></FormItem>
+                                )} />
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <FormField control={form.control} name={`experience.${index}.startDate`} render={({ field }) => (
+                                    <FormItem><FormLabel>Inicio</FormLabel><FormControl><Input placeholder="Ene 2021" {...field} /></FormControl></FormItem>
+                                )} />
+                                <FormField control={form.control} name={`experience.${index}.endDate`} render={({ field }) => (
+                                    <FormItem><FormLabel>Fin</FormLabel><FormControl><Input placeholder="Presente" {...field} /></FormControl></FormItem>
+                                )} />
+                            </div>
+                            <FormField control={form.control} name={`experience.${index}.description`} render={({ field }) => (
+                                <FormItem><FormLabel>Descripción</FormLabel><FormControl><Textarea rows={2} placeholder="Responsabilidades o logros principales" {...field} /></FormControl></FormItem>
+                            )} />
+                        </div>
+                    ))}
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => expArray.append({ title: "", company: "", startDate: "", endDate: "", description: "" })}
+                    >
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Añadir Experiencia
+                    </Button>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><GraduationCap className="h-5 w-5" />Educación</CardTitle>
+                    <CardDescription>Tus estudios. La IA los sugiere al analizar tu CV; también puedes editarlos a mano.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    {eduArray.fields.length === 0 && (
+                        <p className="text-sm text-muted-foreground">Aún no has agregado educación.</p>
+                    )}
+                    {eduArray.fields.map((field, index) => (
+                        <div key={field.id} className="space-y-3 p-3 border rounded-lg">
+                            <div className="flex justify-end">
+                                <Button type="button" variant="ghost" size="icon" onClick={() => eduArray.remove(index)}>
+                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                    <span className="sr-only">Eliminar educación</span>
+                                </Button>
+                            </div>
+                            <FormField control={form.control} name={`education.${index}.institution`} render={({ field }) => (
+                                <FormItem><FormLabel>Institución</FormLabel><FormControl><Input placeholder="Ej. Universidad UNE" {...field} /></FormControl><FormMessage /></FormItem>
+                            )} />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <FormField control={form.control} name={`education.${index}.degree`} render={({ field }) => (
+                                    <FormItem><FormLabel>Título</FormLabel><FormControl><Input placeholder="Ej. Ingeniería en Sistemas" {...field} /></FormControl></FormItem>
+                                )} />
+                                <FormField control={form.control} name={`education.${index}.field`} render={({ field }) => (
+                                    <FormItem><FormLabel>Área</FormLabel><FormControl><Input placeholder="Ej. Computación" {...field} /></FormControl></FormItem>
+                                )} />
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <FormField control={form.control} name={`education.${index}.startDate`} render={({ field }) => (
+                                    <FormItem><FormLabel>Inicio</FormLabel><FormControl><Input placeholder="2018" {...field} /></FormControl></FormItem>
+                                )} />
+                                <FormField control={form.control} name={`education.${index}.endDate`} render={({ field }) => (
+                                    <FormItem><FormLabel>Fin</FormLabel><FormControl><Input placeholder="2022" {...field} /></FormControl></FormItem>
+                                )} />
+                            </div>
+                        </div>
+                    ))}
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => eduArray.append({ institution: "", degree: "", field: "", startDate: "", endDate: "" })}
+                    >
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Añadir Educación
+                    </Button>
+                </CardContent>
+            </Card>
           </div>
 
           <div className="lg:col-span-1 space-y-6">
@@ -318,7 +536,7 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
                         <FileUp className="h-4 w-4" />
                         <AlertTitle>Sube tu CV</AlertTitle>
                         <AlertDescription>
-                           Selecciona tu CV en formato PDF para autocompletar tu perfil.
+                           Selecciona tu CV en formato PDF. La IA solo lee su contenido para sugerir tu perfil: el archivo no se almacena.
                         </AlertDescription>
                     </Alert>
                     <Input
@@ -329,6 +547,11 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
                         disabled={isParsingCv}
                         ref={fileInputRef}
                     />
+                    {isParsingCv && (
+                        <p className="text-sm text-muted-foreground flex items-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />Analizando con IA…
+                        </p>
+                    )}
                 </CardContent>
             </Card>
             <Card>

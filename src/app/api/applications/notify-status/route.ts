@@ -3,6 +3,7 @@ import { adminDb } from "@/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
 import { writeAuditLog } from "@/firebase/admin-audit";
 import { enforceRateLimit, errorResponse, HttpError, requireUser } from "@/lib/server/guard";
+import { notifyUser } from "@/lib/server/notify";
 
 const INTERVIEW_TYPE_LABEL: Record<string, string> = {
   phone: "llamada",
@@ -76,13 +77,11 @@ export async function POST(request: Request) {
       ? `${job.title}: te agendaron una entrevista (${INTERVIEW_TYPE_LABEL[interviewType] ?? "entrevista"}) el ${interviewDate.toLocaleString("es-MX", { dateStyle: "long", timeStyle: "short" })}`
       : null;
 
-    await db.collection("users").doc(candidateUid).collection("notifications").add({
+    await notifyUser(db, candidateUid, {
       type: interviewBody ? "interview_scheduled" : "application_status_changed",
       title: interviewBody ? "Entrevista agendada" : "Actualización de tu postulación",
       body: interviewBody ?? `${job.title}: ahora está en estado "${STATUS_LABEL[newStatus]}"`,
       href: `/dashboard/applications`,
-      read: false,
-      createdAt: FieldValue.serverTimestamp(),
     });
 
     await writeAuditLog(db, caller.uid, {

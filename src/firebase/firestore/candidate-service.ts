@@ -10,7 +10,7 @@ import type { Candidate } from "@/lib/types";
 
 export type CandidateProfileInput = Pick<
   Candidate,
-  "headline" | "location" | "yearsOfExperience" | "available" | "skills"
+  "headline" | "location" | "yearsOfExperience" | "available" | "skills" | "experience" | "education"
 > & { resumeRef?: string; fullName?: string; email?: string; cvSummary?: string; cvText?: string };
 
 export const candidateService = {
@@ -18,7 +18,7 @@ export const candidateService = {
     const ref = doc(firestore, "candidates", uid);
     // Firestore's setDoc rejects `undefined` field values, so drop resumeRef
     // entirely when no CV has been uploaded yet instead of sending it as undefined.
-    const { resumeRef, fullName, email, cvSummary, cvText, ...rest } = data;
+    const { resumeRef, fullName, email, cvSummary, cvText, experience, education, ...rest } = data;
     await setDoc(
       ref,
       {
@@ -28,6 +28,9 @@ export const candidateService = {
         ...(email ? { email } : {}),
         ...(cvSummary ? { cvSummary } : {}),
         ...(cvText ? { cvText } : {}),
+        // Firestore no acepta `undefined`; una lista vacía es válida y borra lo anterior.
+        experience: experience ?? [],
+        education: education ?? [],
         ...rest,
         ...(resumeRef !== undefined ? { resumeRef } : {}),
         updatedAt: serverTimestamp(),
