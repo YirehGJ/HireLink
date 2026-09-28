@@ -45,5 +45,11 @@ export async function verifyRequestUser(request: Request) {
   if (!token) {
     throw new Error('UNAUTHENTICATED');
   }
-  return adminAuth().verifyIdToken(token);
+  try {
+    return await adminAuth().verifyIdToken(token);
+  } catch (e) {
+    // Deja la causa real en los logs del servidor (Vercel → Logs) sin exponerla al cliente.
+    console.error("verifyIdToken falló:", (e as Error)?.message);
+    throw e;
+  }
 }

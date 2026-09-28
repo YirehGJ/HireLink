@@ -58,3 +58,6 @@ test-gemini.mjs
 rename-test-accounts.mjs
 # claude code session runtime state
 .claude/*.lock
+
+# scratch working directory (Word document build scripts, unrelated to the app)
+/scratch
