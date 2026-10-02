@@ -29,6 +29,8 @@ export interface Candidate {
   location: string;
   yearsOfExperience: number;
   available: boolean;
+  /** Nivel de seniority que el candidato busca (filtro de los reclutadores), independiente de yearsOfExperience. */
+  targetSeniority?: JobSeniority;
   skills: Skill[];
   resumeRef?: string;
   /** Resumen del CV generado por la IA (se muestra al reclutador). */

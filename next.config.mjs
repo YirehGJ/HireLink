@@ -1,3 +1,5 @@
+import { withSentryConfig } from '@sentry/nextjs/config';
+
 /** @type {import('next').NextConfig} */
 
 // Cabeceras de seguridad para todas las rutas.
@@ -18,6 +20,8 @@ const securityHeaders = [
 const nextConfig = {
   poweredByHeader: false, // no revela que se usa Next.js
   reactStrictMode: true,
+  // Habilita instrumentation.ts, que inicializa Sentry en el servidor/edge.
+  experimental: { instrumentationHook: true },
   async headers() {
     return [
       { source: '/:path*', headers: securityHeaders },
@@ -27,4 +31,13 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+// Sin SENTRY_AUTH_TOKEN (no configurado por defecto) el plugin no sube
+// source maps ni requiere cuenta de Sentry: el build funciona igual.
+export default withSentryConfig(nextConfig, {
+  silent: true,
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  widenClientFileUpload: false,
+  disableLogger: true,
+});

@@ -20,12 +20,16 @@ export default function ExploreJobsPage() {
     const [search, setSearch] = useState("");
     const [seniority, setSeniority] = useState("all");
     const [mode, setMode] = useState("all");
+    const [postedWithin, setPostedWithin] = useState("all");
 
     const filtered = useMemo(() => {
         const term = search.trim().toLowerCase();
+        const maxAgeMs = postedWithin === "all" ? null : Number(postedWithin) * 24 * 60 * 60 * 1000;
+        const now = Date.now();
         return (jobs ?? [])
             .filter(j => seniority === "all" || j.seniority === seniority)
             .filter(j => mode === "all" || (mode === "remote" ? j.remoteAllowed : !j.remoteAllowed))
+            .filter(j => !maxAgeMs || now - toMillis(j.createdAt as any) <= maxAgeMs)
             .filter(j =>
                 !term ||
                 j.title.toLowerCase().includes(term) ||
@@ -33,7 +37,7 @@ export default function ExploreJobsPage() {
                 (j.searchTags ?? []).some(t => t.toLowerCase().includes(term))
             )
             .sort((a, b) => toMillis(b.createdAt as any) - toMillis(a.createdAt as any));
-    }, [jobs, search, seniority, mode]);
+    }, [jobs, search, seniority, mode, postedWithin]);
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 space-y-8">
@@ -64,6 +68,15 @@ export default function ExploreJobsPage() {
                         <SelectItem value="all">Toda modalidad</SelectItem>
                         <SelectItem value="remote">Remoto permitido</SelectItem>
                         <SelectItem value="onsite">Solo presencial</SelectItem>
+                    </SelectContent>
+                </Select>
+                <Select value={postedWithin} onValueChange={setPostedWithin}>
+                    <SelectTrigger className="w-[170px]"><SelectValue placeholder="Fecha" /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">Cualquier fecha</SelectItem>
+                        <SelectItem value="1">Últimas 24 horas</SelectItem>
+                        <SelectItem value="7">Últimos 7 días</SelectItem>
+                        <SelectItem value="30">Últimos 30 días</SelectItem>
                     </SelectContent>
                 </Select>
             </div>

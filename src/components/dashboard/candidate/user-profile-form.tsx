@@ -16,6 +16,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import type { Candidate } from "@/lib/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -51,6 +52,7 @@ const profileSchema = z.object({
   headline: z.string().min(5, "El titular debe tener al menos 5 caracteres."),
   location: z.string().min(2, "La ubicación es requerida."),
   yearsOfExperience: z.coerce.number().min(0, "Los años no pueden ser negativos.").max(60, "Los años no pueden exceder 60."),
+  targetSeniority: z.enum(["none", "intern", "junior", "mid", "senior", "lead"]).default("none"),
   available: z.boolean().default(true),
   skills: z.array(skillSchema).max(60),
   experience: z.array(experienceSchema).max(20),
@@ -94,6 +96,7 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
       headline: profile?.headline || "",
       location: profile?.location || "",
       yearsOfExperience: profile?.yearsOfExperience || 0,
+      targetSeniority: profile?.targetSeniority || "none",
       available: profile?.available || true,
       skills: profile?.skills?.map(s => ({...s, source: undefined})) || [],
       experience: profile?.experience || [],
@@ -113,6 +116,7 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
         headline: profile.headline || "",
         location: profile.location || "",
         yearsOfExperience: profile.yearsOfExperience || 0,
+        targetSeniority: profile.targetSeniority || "none",
         available: profile.available ?? true,
         skills: profile.skills?.map(s => ({ ...s, source: undefined })) || [],
         experience: profile.experience || [],
@@ -129,6 +133,7 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
     try {
       await candidateService.saveProfile(firestore, auth.currentUser.uid, {
         ...values,
+        targetSeniority: values.targetSeniority === "none" ? undefined : values.targetSeniority,
         fullName: appUser?.fullName,
         email: appUser?.email,
         ...(cvAnalysis ? { cvSummary: cvAnalysis.summary, cvText: cvAnalysis.text } : {}),
@@ -353,6 +358,26 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
                             </FormItem>
                         )} />
                     </div>
+                    <FormField control={form.control} name="targetSeniority" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Seniority al que aspiras</FormLabel>
+                            <FormDescription>Los reclutadores pueden filtrar candidatos por este nivel al buscar talento.</FormDescription>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                    <SelectTrigger><SelectValue placeholder="Sin preferencia" /></SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    <SelectItem value="none">Sin preferencia</SelectItem>
+                                    <SelectItem value="intern">Intern</SelectItem>
+                                    <SelectItem value="junior">Junior</SelectItem>
+                                    <SelectItem value="mid">Mid-level</SelectItem>
+                                    <SelectItem value="senior">Senior</SelectItem>
+                                    <SelectItem value="lead">Lead</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )} />
                      <FormField control={form.control} name="available" render={({ field }) => (
                         <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                             <div className="space-y-0.5">

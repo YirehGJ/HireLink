@@ -50,6 +50,7 @@ service cloud.firestore {
         && d.get('education', []).size() <= 15
         && d.get('cvSummary', '').size() <= 2500
         && d.get('cvText', '').size() <= 9000
+        && d.get('targetSeniority', '') in ['', 'intern', 'junior', 'mid', 'senior', 'lead']
         && d.get('userRef', candidateId) == candidateId;
     }
 

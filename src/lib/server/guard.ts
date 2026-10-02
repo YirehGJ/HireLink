@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { Firestore } from "firebase-admin/firestore";
 import { FieldValue } from "firebase-admin/firestore";
+import * as Sentry from "@sentry/nextjs";
 import { adminDb, verifyRequestUser } from "@/firebase/admin";
 import type { UserRole } from "@/lib/types";
 
@@ -16,6 +17,8 @@ export function errorResponse(e: unknown) {
     return NextResponse.json({ error: e.message }, { status: e.status });
   }
   console.error("Error inesperado en API:", e);
+  // Solo lo no esperado (401/403/429 son control de flujo normal, no bugs).
+  Sentry.captureException(e);
   return NextResponse.json({ error: "Error interno" }, { status: 500 });
 }
 

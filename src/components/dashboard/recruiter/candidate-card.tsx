@@ -24,6 +24,9 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
             <span className="flex items-center"><MapPin className="h-4 w-4 mr-1.5" /> {candidate.location}</span>
             <span className="flex items-center"><Briefcase className="h-4 w-4 mr-1.5 ml-2" /> {candidate.yearsOfExperience} años exp.</span>
         </CardDescription>
+        {candidate.targetSeniority && (
+            <Badge variant="outline" className="mt-2 capitalize">Busca: {candidate.targetSeniority}</Badge>
+        )}
         
         <div className="mt-4 w-full">
             <div className="flex flex-wrap gap-2 justify-center">

@@ -43,8 +43,8 @@ Leyenda: ✅ hecho y verificado · 🟡 parcial · ❌ no hecho · ➖ cambió p
 | S22 | Organizaciones / multi-tenant | ✅ | Alta/edición desde admin, asignación de reclutadores, aislamiento probado |
 | S23 | Herramientas admin | ✅ | Cambio de rol, suspender (con bloqueo real), métricas reales, "ver como" en solo lectura |
 | S24 | Notificaciones | ✅ | Tiempo real + correo real vía Resend (apagado hasta poner `RESEND_API_KEY`, ver [EMAIL_SETUP.md](EMAIL_SETUP.md)) |
-| S25 | Auditoría y observabilidad | 🟡 | `auditLogs` y pantalla de admin ✅. Error tracking (Sentry) ❌ |
-| S26 | Búsqueda avanzada | 🟡 | Vacantes y candidatos con filtros ✅. Faltan filtro por fecha, "seniority objetivo" y documentar la decisión cliente vs Algolia |
+| S25 | Auditoría y observabilidad | ✅ | `auditLogs` y pantalla de admin ✅. Error tracking con Sentry integrado (`@sentry/nextjs`, cliente/servidor/edge), apagado hasta configurar `SENTRY_DSN` — ver [SENTRY_SETUP.md](SENTRY_SETUP.md) |
+| S26 | Búsqueda avanzada | ✅ | Filtro por fecha de publicación en vacantes y por "seniority objetivo" en candidatos (campo nuevo `targetSeniority`); decisión cliente vs Algolia documentada en [DECISION_SEARCH.md](DECISION_SEARCH.md) |
 | S27 | Performance y DX | ❌ | Sin trabajo dedicado. La página de perfil pesa 90 kB y hay 100 vulnerabilidades de dependencias |
 | S28 | Onboarding y A11y | 🟡 | Elección de rol al registrarse y aviso para crear empresa ✅. Tours, accesibilidad y revisión móvil ❌ |
 | S29 | Pre-lanzamiento / pilotos | ❌ | Sin seed script, sin entornos dev/staging/prod, sin piloto |
@@ -74,7 +74,7 @@ producto estable, documentado y probado con usuarios, y reservar tiempo para la 
 |---|---|---|---|---|
 | 1 | 21–27 sep | **Estabilizar producción** | Confirmar despliegue en Vercel con las 4 variables; probar los 3 roles en la URL pública; revisar cuotas de Firebase (Spark/Blaze) y Groq; congelar `main` como línea base v0.9-rc | Backend |
 | 2 | 28 sep–4 oct | **Cerrar S19/S20/S24** | Decisión escrita sobre Storage (recomendado: no subir el PDF y documentarlo); vista previa de experiencia/educación en el asistente de CV; plantilla de correo (o dejarlo documentado como v2) | Backend + Frontend |
-| 3 | 5–11 oct | **Cerrar S25/S26** | Sentry (error tracking) en cliente y API; filtro por fecha y por "seniority objetivo"; documento "búsqueda en cliente vs servicio externo" | Backend + Frontend |
+| 3 | 5–11 oct | **Cerrar S25/S26** ✅ | Sentry (error tracking) en cliente y API; filtro por fecha y por "seniority objetivo"; documento "búsqueda en cliente vs servicio externo" | Backend + Frontend |
 | 4 | 12–18 oct | **Datos y entornos (S29 parte 1)** | Script `seed` con datos de ejemplo realistas; entornos dev/staging/prod (proyecto Firebase de staging + variables); cuentas demo documentadas | Backend + Docs/QA |
 | 5 | 19–25 oct | **Performance y calidad (S27)** | Medir con Lighthouse; code splitting de la página de perfil (pdf.js); actualizar dependencias (`next`, `pdfjs-dist`, `firebase`) y repetir `security-tests/`; limpiar imports | Frontend + Backend |
 | 6 | 26 oct–1 nov | **Accesibilidad y móvil (S12/S28)** | Contraste, foco y teclado; revisión mobile-first de las vistas clave; tours/hints del primer ingreso; meta Lighthouse ≥ 80 | Frontend + Producto |

@@ -18,6 +18,7 @@ export default function CandidatesPage() {
     const [search, setSearch] = useState("");
     const [minLevel, setMinLevel] = useState("0");
     const [onlyAvailable, setOnlyAvailable] = useState(false);
+    const [targetSeniority, setTargetSeniority] = useState("all");
 
     const filtered = useMemo(() => {
         if (!candidates) return [];
@@ -25,6 +26,7 @@ export default function CandidatesPage() {
         const level = Number(minLevel);
         return candidates.filter(c => {
             if (onlyAvailable && !c.available) return false;
+            if (targetSeniority !== "all" && c.targetSeniority !== targetSeniority) return false;
             const skills = c.skills ?? [];
             if (level > 0 && !skills.some(s => s.level >= level)) return false;
             if (!term) return true;
@@ -35,7 +37,7 @@ export default function CandidatesPage() {
                 skills.some(s => s.name.toLowerCase().includes(term))
             );
         });
-    }, [candidates, search, minLevel, onlyAvailable]);
+    }, [candidates, search, minLevel, onlyAvailable, targetSeniority]);
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 space-y-8">
@@ -62,6 +64,17 @@ export default function CandidatesPage() {
                             <SelectItem value="3">Alguna skill nivel 3+</SelectItem>
                             <SelectItem value="4">Alguna skill nivel 4+</SelectItem>
                             <SelectItem value="5">Alguna skill nivel 5</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <Select value={targetSeniority} onValueChange={setTargetSeniority}>
+                        <SelectTrigger className="w-[190px]"><SelectValue placeholder="Seniority objetivo" /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">Cualquier seniority</SelectItem>
+                            <SelectItem value="intern">Intern</SelectItem>
+                            <SelectItem value="junior">Junior</SelectItem>
+                            <SelectItem value="mid">Mid-level</SelectItem>
+                            <SelectItem value="senior">Senior</SelectItem>
+                            <SelectItem value="lead">Lead</SelectItem>
                         </SelectContent>
                     </Select>
                     <div className="flex items-center gap-2">
