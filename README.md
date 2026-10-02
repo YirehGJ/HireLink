@@ -1,114 +1,162 @@
-# Welcome to Antigravity!
+# HireLink | Plataforma de Reclutamiento con IA Explicable
 
-Welcome to your new developer home! Your Firebase Studio project has been successfully migrated to Antigravity.
+HireLink conecta candidatos y reclutadores usando un modelo de lenguaje (IA) que calcula
+la compatibilidad entre un perfil y una vacante **y explica el porqué** con razones
+legibles, en vez de entregar un número sin justificación.
 
-Antigravity is our next-generation, agent-first IDE designed for high-velocity, autonomous development. Because Antigravity runs locally on your machine, you now have access to powerful local workflows and fully integrated AI editing capabilities that go beyond a cloud-based web IDE.
-
-## Getting Started
-- **Run Locally**: Use the **Run and Debug** menu on the left sidebar to start your local development server.
-  - Or in a terminal run `npm run dev` and visit `http://localhost:9002`.
-- **Deploy**: You can deploy your changes to Firebase App Hosting by using the integrated terminal and standard Firebase CLI commands, just as you did in Firebase Studio.
-- **Cleanup**: Cleanup unused artifacts with the @cleanup workflow.
-
-Enjoy the next era of AI-driven development!
-
-File any bugs at https://github.com/firebase/firebase-tools/issues
-
-**Firebase Studio Export Date:** 2026-09-06
-
+Proyecto académico (Seminario de Integración: Desarrollo) en producción en
+**https://hire-link-dun.vercel.app**.
 
 ---
 
-## Previous README.md contents:
+## Características por rol
 
-# HireLink | Plataforma de Talento Impulsada por IA
+### Candidato
+- Sube su CV en PDF; el texto se analiza en el navegador y se envía a la IA, que
+  sugiere titular, ubicación, años de experiencia, habilidades, experiencia laboral y
+  educación. El candidato revisa esa **vista previa** y decide "Aplicar" o "Descartar"
+  antes de que se guarde nada.
+- Recibe vacantes recomendadas con un **porcentaje de compatibilidad** y razones
+  explicadas por la IA; puede explorar y filtrar todas las vacantes por texto,
+  seniority, modalidad y fecha de publicación.
+- Notificaciones en tiempo real (campana) y, opcionalmente, por correo.
 
-HireLink es una aplicación web moderna diseñada para conectar a los mejores talentos con las empresas líderes, utilizando **Inteligencia Artificial Explicable**. A diferencia de los portales de empleo tradicionales, HireLink no solo recomienda vacantes, sino que explica *por qué* un candidato es ideal para un puesto específico.
+### Reclutador
+- Crea y gestiona vacantes (la IA puede redactar la descripción a partir de un título
+  y etiquetas).
+- Ve candidatos recomendados por vacante con su compatibilidad, y puede explorar toda
+  la base de candidatos filtrando por habilidad, disponibilidad y seniority objetivo.
+- Acepta o rechaza un match (el candidato también puede rechazarlo), agenda
+  entrevistas y gestiona el estado de cada postulación.
 
-## 🚀 Características Principales
-
-El sistema está dividido en tres roles de usuario, cada uno con un panel de control personalizado:
-
-### 1. Para Candidatos
-*   **Perfil Inteligente:** Gestión de habilidades técnicas y blandas.
-*   **Extracción de CV con IA:** Sube tu CV en PDF y deja que la IA (Gemini) extraiga automáticamente tu experiencia, titular y habilidades para completar tu perfil.
-*   **Feed de Recomendaciones:** Recibe vacantes que coinciden con tu perfil, acompañadas de un **Puntaje de Afinidad (Match Score)** y razones detalladas generadas por IA.
-*   **Seguimiento de Postulaciones:** Control total sobre el estado de tus aplicaciones (entrevista, oferta, etc.).
-
-### 2. Para Reclutadores
-*   **Gestión de Vacantes:** Crea, edita y publica ofertas de empleo.
-*   **Generador de Descripciones con IA:** Escribe un título y unas etiquetas, y la IA redactará una descripción profesional en formato Markdown por ti.
-*   **Gestión de Candidatos:** Visualiza quién ha aplicado, su compatibilidad y agenda entrevistas.
-*   **Calendario de Entrevistas:** Visualización integrada de las próximas citas con candidatos.
-
-### 3. Para Administradores
-*   **Panel de Control Global:** Métricas generales de la plataforma.
-*   **Moderación de Contenido:** Gestión y supervisión de todos los usuarios y vacantes.
-*   **Auditoría y Equidad:** Herramientas para monitorear el registro de eventos y asegurar un proceso de contratación justo y sin sesgos.
-
----
-
-## 🛠️ Stack Tecnológico
-
-*   **Frontend:** [Next.js 14](https://nextjs.org/) (App Router), [React](https://reactjs.org/), [TypeScript](https://www.typescriptlang.org/).
-*   **Estilos:** [Tailwind CSS](https://tailwindcss.com/) y [Shadcn UI](https://ui.shadcn.com/) (Componentes elegantes y accesibles).
-*   **Backend & Base de Datos:** [Firebase](https://firebase.google.com/) (Firestore para datos en tiempo real y Auth para autenticación).
-*   **Inteligencia Artificial:** [Genkit](https://firebase.google.com/docs/genkit) de Firebase integrando [Google Gemini 1.0 Pro](https://deepmind.google/technologies/gemini/).
-*   **Procesamiento de Documentos:** `pdfjs-dist` para lectura de archivos PDF en el cliente.
+### Administrador
+- Panel con métricas reales de usuarios, organizaciones, vacantes y postulaciones.
+- Gestión de usuarios y organizaciones, cambio de rol, suspensión de cuentas.
+- "Ver como" (solo lectura) para depurar la vista de cualquier usuario sin tocar sus
+  datos, y un registro de auditoría de las acciones relevantes del sistema.
 
 ---
 
-## 🧠 Flujos de Inteligencia Artificial (Genkit)
+## Stack técnico
 
-HireLink utiliza **Genkit Flows** para encapsular la lógica de IA en el servidor:
+- **Frontend:** Next.js 14 (App Router), React, TypeScript, Tailwind CSS + shadcn/ui.
+- **Backend y datos:** Firebase (Authentication, Firestore en tiempo real, Admin SDK
+  para los Route Handlers autenticados).
+- **IA:** [Genkit](https://firebase.google.com/docs/genkit) orquestando un modelo
+  servido por [Groq](https://groq.com) (`openai/gpt-oss-120b`) vía el conector
+  OpenAI-compatible — ver [`src/ai/genkit.ts`](src/ai/genkit.ts).
+- **Despliegue:** Vercel (CI/CD automático desde `main`).
+- **Opcional, apagado por defecto:**
+  [Resend](https://resend.com) para el envío de correo (ver
+  [docs/EMAIL_SETUP.md](docs/EMAIL_SETUP.md)) y
+  [Sentry](https://sentry.io) para seguimiento de errores (ver
+  [docs/SENTRY_SETUP.md](docs/SENTRY_SETUP.md)).
 
-1.  **Extract CV Data (`extract-cv-data-flow.ts`):** 
-    *   **Entrada:** Texto plano extraído del PDF del candidato.
-    *   **Proceso:** Envía el texto a Gemini con un esquema de salida estructurado (Zod).
-    *   **Salida:** Un objeto JSON con el titular, ubicación, años de experiencia y una lista de habilidades niveladas.
+### Flujos de IA (Genkit)
 
-2.  **Generate Job Description (`generate-job-description-flow.ts`):**
-    *   **Entrada:** Título del puesto, seniority y etiquetas clave.
-    *   **Proceso:** Un prompt de sistema especializado actúa como experto en RRHH para redactar una descripción atractiva.
-    *   **Salida:** Texto formateado en Markdown listo para ser publicado.
+| Flujo | Entrada | Salida |
+|---|---|---|
+| [`extract-cv-data-flow.ts`](src/ai/flows/extract-cv-data-flow.ts) | Texto del CV (extraído en el navegador, el PDF nunca se sube) | Titular, ubicación, años de experiencia, habilidades, experiencia laboral y educación |
+| [`match-candidate-job-flow.ts`](src/ai/flows/match-candidate-job-flow.ts) | Perfil del candidato + descripción de la vacante | Puntaje de compatibilidad (0–1) y hasta 5 razones legibles |
+| [`generate-job-description-flow.ts`](src/ai/flows/generate-job-description-flow.ts) | Título, seniority y etiquetas | Descripción de la vacante en Markdown |
 
 ---
 
-## 🔑 Configuración del Entorno
+## Seguridad
 
-Para que el sistema funcione, es necesario configurar las siguientes variables en un archivo `.env`:
+- Reglas de Firestore con validación de rol, propiedad y tamaño de cada documento
+  ([`firestore.rules`](firestore.rules)).
+- Endpoints autenticados (verificación de ID token) con límite de uso por usuario
+  (`enforceRateLimit` en [`src/lib/server/guard.ts`](src/lib/server/guard.ts)) y
+  cabeceras de seguridad HTTP ([`next.config.mjs`](next.config.mjs)).
+- Batería de pruebas automatizadas contra el proyecto real con cuentas desechables:
+  reglas de Firestore, endpoints de la API y carga con usuarios simultáneos — ver
+  [`security-tests/README.md`](security-tests/README.md) para los resultados.
+
+---
+
+## Configuración del entorno
+
+Variables requeridas en `.env.local` (desarrollo) o en Vercel → Settings →
+Environment Variables (producción):
 
 ```env
-# Google AI (Gemini)
-GEMINI_API_KEY="tu_clave_de_google_ai"
-
-# Firebase Public Configuration
+# Firebase — configuración pública del cliente
 NEXT_PUBLIC_FB_API_KEY="..."
 NEXT_PUBLIC_FB_AUTH_DOMAIN="..."
 NEXT_PUBLIC_FB_PROJECT_ID="..."
 NEXT_PUBLIC_FB_STORAGE_BUCKET="..."
 NEXT_PUBLIC_FB_MESSAGING_SENDER_ID="..."
 NEXT_PUBLIC_FB_APP_ID="..."
+
+# Firebase Admin — cuenta de servicio (Project Settings > Service accounts)
+FIREBASE_PROJECT_ID="..."
+FIREBASE_CLIENT_EMAIL="..."
+FIREBASE_PRIVATE_KEY="..."   # con los \n literales del JSON descargado
+
+# IA
+GROQ_API_KEY="..."
+
+# Opcionales (la app funciona sin ellas; ver docs/EMAIL_SETUP.md y docs/SENTRY_SETUP.md)
+RESEND_API_KEY=""
+EMAIL_FROM=""
+NEXT_PUBLIC_APP_URL=""
+SENTRY_DSN=""
+NEXT_PUBLIC_SENTRY_DSN=""
 ```
 
----
-
-## 🚪 Modo Demo (Acceso Rápido)
-
-Para facilitar la revisión de los apartados sin necesidad de crear una cuenta manual:
-1.  Ve al pie de página (footer) de la Landing Page.
-2.  Haz clic en el símbolo de copyright **©**.
-3.  Esto activará el parámetro `viewAs=admin`, dándote acceso inmediato al panel con datos de prueba pre-cargados.
+`/api/health` reporta en producción qué variables están presentes (sin exponer sus
+valores) y si el Admin SDK conecta correctamente con Firestore — útil para
+diagnosticar un despliegue nuevo.
 
 ---
 
-## 📂 Estructura del Proyecto
+## Correr en local
 
-*   `src/app`: Rutas y páginas de Next.js.
-*   `src/components`: Componentes de UI (UI general, Dashboard y Auth).
-*   `src/ai`: Definición de flujos y prompts de Genkit.
-*   `src/firebase`: Configuración y hooks personalizados para Firestore y Auth.
-*   `src/lib`: Tipos de TypeScript, utilidades y datos de prueba (`data.ts`).
+```bash
+npm install
+npm run dev
+```
+
+La app queda en `http://localhost:3000`.
 
 ---
-Desarrollado con ❤️ para conectar el futuro del trabajo.
+
+## Cuentas de prueba
+
+| Rol | Correo | Contraseña |
+|---|---|---|
+| Candidato | `candidato@example.com` | `TestPass1234` |
+| Reclutador | `reclutar@example.com` | `TestPass1234` |
+
+Guion completo de demostración en
+[docs/GUION_DEMO_SEMANA_2.md](docs/GUION_DEMO_SEMANA_2.md).
+
+---
+
+## Estructura del proyecto
+
+- `src/app`: rutas y Route Handlers de Next.js (App Router).
+- `src/components`: componentes de UI, organizados por dashboard/rol y UI general.
+- `src/ai`: flujos y configuración de Genkit.
+- `src/firebase`: cliente de Firebase, hooks (`useCollection`, `useDoc`, `useUser`) y
+  servicios de Firestore.
+- `src/lib/server`: lógica de servidor (autenticación, límite de uso, matching,
+  notificaciones, envío de correo).
+- `firestore.rules`: reglas de seguridad de Firestore.
+- `security-tests/`: pruebas automatizadas de seguridad, API y regresión.
+- `docs/`: decisiones de diseño, cronograma y documentación de las integraciones
+  opcionales.
+
+### Documentación
+
+- [docs/CRONOGRAMA_FINAL.md](docs/CRONOGRAMA_FINAL.md) — estado real por semana y
+  cronograma de cierre.
+- [docs/DECISION_STORAGE_CV.md](docs/DECISION_STORAGE_CV.md) — por qué no se
+  almacena el archivo del CV.
+- [docs/DECISION_SEARCH.md](docs/DECISION_SEARCH.md) — por qué la búsqueda es en el
+  cliente y no con un servicio externo (Algolia).
+- [docs/EMAIL_SETUP.md](docs/EMAIL_SETUP.md) — cómo activar el envío de correo.
+- [docs/SENTRY_SETUP.md](docs/SENTRY_SETUP.md) — cómo activar el seguimiento de
+  errores.
+- [docs/GUION_DEMO_SEMANA_2.md](docs/GUION_DEMO_SEMANA_2.md) — guion de demostración.
