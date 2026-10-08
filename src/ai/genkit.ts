@@ -16,6 +16,10 @@ export const ai = genkit({
       // trim(): un salto de línea o espacio pegado junto a la clave rompe la cabecera Authorization.
       apiKey: process.env.GROQ_API_KEY?.trim(),
       baseURL: 'https://api.groq.com/openai/v1',
+      // Un reintento propio y un tope por llamada: así una espera larga por el límite de tokens por
+      // minuto no agota los 60 s de la función (runAi ya reintenta con espera exponencial).
+      maxRetries: 1,
+      timeout: 25_000,
       // Los ids de Groq contienen "/" (p. ej. openai/gpt-oss-120b); el helper
       // recorta hasta el primer "/", así que anteponemos un prefijo ficticio.
       resolver: (client, actionType, actionName) => {

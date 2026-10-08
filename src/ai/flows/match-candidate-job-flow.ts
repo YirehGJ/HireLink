@@ -63,7 +63,7 @@ CANDIDATO:
 - Años de experiencia: ${input.candidateYearsOfExperience}
 - Habilidades: ${skillsList}
 ${input.candidateCvSummary ? `- Resumen del CV (analizado por IA): ${input.candidateCvSummary}` : ''}
-${input.candidateCvText ? `- Extracto del CV:\n"""\n${input.candidateCvText.slice(0, 4000)}\n"""` : ''}
+${input.candidateCvText ? `- Extracto del CV:\n"""\n${input.candidateCvText.slice(0, 1800)}\n"""` : ''}
 
 VACANTE:
 - Título: ${input.jobTitle}
