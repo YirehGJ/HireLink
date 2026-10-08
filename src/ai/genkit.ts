@@ -13,7 +13,8 @@ export const ai = genkit({
   plugins: [
     openAICompatible({
       name: 'groq',
-      apiKey: process.env.GROQ_API_KEY,
+      // trim(): un salto de línea o espacio pegado junto a la clave rompe la cabecera Authorization.
+      apiKey: process.env.GROQ_API_KEY?.trim(),
       baseURL: 'https://api.groq.com/openai/v1',
       // Los ids de Groq contienen "/" (p. ej. openai/gpt-oss-120b); el helper
       // recorta hasta el primer "/", así que anteponemos un prefijo ficticio.
