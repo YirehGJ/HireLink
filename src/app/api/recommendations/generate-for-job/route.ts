@@ -13,6 +13,7 @@ const MAX_CANDIDATES = 40;
 // El plan gratuito de Groq limita los tokens por minuto: pasado este tiempo no se lanzan
 // evaluaciones nuevas, para responder antes de que Vercel corte la función (60 s).
 const TIME_BUDGET_MS = 30_000;
+const HARD_LIMIT_MS = 52_000;
 
 /**
  * @fileOverview Calcula, para una vacante, la compatibilidad de los candidatos
@@ -47,7 +48,7 @@ export async function POST(request: Request) {
     let skipped = 0;
     const started = Date.now();
 
-    await mapWithConcurrency(candidateDocs, 2, async (c) => {
+    const work = mapWithConcurrency(candidateDocs, 2, async (c) => {
       const candidate = c.data();
       if (!candidate.skills?.length && !candidate.headline) return;
       if (Date.now() - started > TIME_BUDGET_MS) {
@@ -61,6 +62,9 @@ export async function POST(request: Request) {
         console.error(`Error calculando match de ${c.id} para ${jobId}:`, err);
       }
     });
+
+    // Límite duro: se responde con lo ya calculado antes de que Vercel corte la función.
+    await Promise.race([work, new Promise((resolve) => setTimeout(resolve, HARD_LIMIT_MS))]);
 
     return NextResponse.json({ processed, skipped });
   } catch (e) {

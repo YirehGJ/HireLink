@@ -30,22 +30,6 @@ async function probeGroq(): Promise<Record<string, unknown>> {
   } catch (e: any) {
     value = { ok: false, reason: String(e?.message ?? e).slice(0, 120) };
   }
-  // TEMPORAL: llamada mínima por Genkit para ver el error real de las funciones de IA en Vercel.
-  try {
-    const { ai, GROQ_MODEL } = await import("@/ai/genkit");
-    const out = await Promise.race([
-      ai.generate({ prompt: "Responde solo con la palabra: ok", model: GROQ_MODEL }),
-      new Promise<never>((_, rej) => setTimeout(() => rej(new Error("timeout de 20 s")), 20000)),
-    ]);
-    value.genkit = { ok: true, text: String((out as any).text ?? "").slice(0, 40) };
-  } catch (e: any) {
-    value.genkit = {
-      ok: false,
-      name: String(e?.name ?? "").slice(0, 60),
-      message: String(e?.message ?? e).slice(0, 300),
-      status: e?.status ?? e?.cause?.status ?? null,
-    };
-  }
   groqCache = { at: Date.now(), value };
   return value;
 }

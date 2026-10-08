@@ -13,6 +13,7 @@ const MAX_JOBS = 30;
 // El plan gratuito de Groq limita los tokens por minuto: si una llamada ya tardó más de esto, se
 // dejan de lanzar evaluaciones nuevas para responder antes de que Vercel corte la función (60 s).
 const TIME_BUDGET_MS = 30_000;
+const HARD_LIMIT_MS = 52_000;
 
 /**
  * @fileOverview Módulo de Sistemas Inteligentes + Sistemas Distribuidos.
@@ -47,18 +48,22 @@ export async function POST(request: Request) {
     const jobDocs = [...jobsSnap.docs].sort((a, b) => Number(have.has(a.id)) - Number(have.has(b.id)));
 
     const started = Date.now();
-    const evaluated = await mapWithConcurrency(jobDocs, 2, async (jobDoc) => {
-      if (Date.now() - started > TIME_BUDGET_MS) return "skipped" as const;
+    const results: { jobId: string; score: number }[] = [];
+    let skipped = 0;
+    const work = mapWithConcurrency(jobDocs, 2, async (jobDoc) => {
+      if (Date.now() - started > TIME_BUDGET_MS) {
+        skipped++;
+        return;
+      }
       try {
         const match = await evaluateMatch(db, uid, candidate, jobDoc.id, jobDoc.data());
-        return { jobId: jobDoc.id, score: match.score };
+        results.push({ jobId: jobDoc.id, score: match.score });
       } catch (err) {
         console.error(`Error calculando match para job ${jobDoc.id}:`, err);
-        return null;
       }
     });
-    const results = evaluated.filter((r): r is { jobId: string; score: number } => r !== null && r !== "skipped");
-    const skipped = evaluated.filter((r) => r === "skipped").length;
+    // Límite duro: se responde con lo ya calculado antes de que Vercel corte la función.
+    await Promise.race([work, new Promise((resolve) => setTimeout(resolve, HARD_LIMIT_MS))]);
 
     return NextResponse.json({ processed: results.length, skipped, results });
   } catch (e) {
