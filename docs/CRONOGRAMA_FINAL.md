@@ -72,7 +72,7 @@ producto estable, documentado y probado con usuarios, y reservar tiempo para la 
 
 | Semana | Fechas | Objetivo | Entregables | Responsable sugerido |
 |---|---|---|---|---|
-| 1 | 21–27 sep | **Estabilizar producción** 🟡 | Confirmar despliegue en Vercel con las 4 variables; probar los 3 roles en la URL pública; revisar cuotas de Firebase (Spark/Blaze) y Groq; congelar `main` como línea base v0.9-rc. **Atrasado:** falta `FIREBASE_PROJECT_ID` en Vercel (pendiente de que el dueño del proyecto la agregue) | Backend |
+| 1 | 21–27 sep | **Estabilizar producción** ✅ | Confirmar despliegue en Vercel con las 4 variables; probar los 3 roles en la URL pública; revisar cuotas de Firebase (Spark/Blaze) y Groq; congelar `main` como línea base v0.9-rc. **Cerrada el 7 de octubre:** variables de Firebase Admin completas y clave de Groq corregida; análisis de CV (≈7 s) y recomendaciones verificados en producción. Límite conocido: la cuenta gratuita de Groq permite 8 000 tokens por minuto, así que recalcular recomendaciones con 5 vacantes tarda cerca de 50 s | Backend |
 | 2 | 28 sep–4 oct | **Cerrar S19/S20/S24** ✅ | Decisión escrita sobre Storage (recomendado: no subir el PDF y documentarlo); vista previa de experiencia/educación en el asistente de CV; plantilla de correo (o dejarlo documentado como v2) | Backend + Frontend |
 | 3 | 5–11 oct | **Cerrar S25/S26** ✅ | Sentry (error tracking) en cliente y API; filtro por fecha y por "seniority objetivo"; documento "búsqueda en cliente vs servicio externo" | Backend + Frontend |
 | 4 | 12–18 oct | **Datos y entornos (S29 parte 1)** | Script `seed` con datos de ejemplo realistas; entornos dev/staging/prod (proyecto Firebase de staging + variables); cuentas demo documentadas | Backend + Docs/QA |
