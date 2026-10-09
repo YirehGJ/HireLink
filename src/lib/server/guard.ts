@@ -12,13 +12,15 @@ export class HttpError extends Error {
   }
 }
 
-export function errorResponse(e: unknown) {
+export async function errorResponse(e: unknown) {
   if (e instanceof HttpError) {
     return NextResponse.json({ error: e.message }, { status: e.status });
   }
   console.error("Error inesperado en API:", e);
   // Solo lo no esperado (401/403/429 son control de flujo normal, no bugs).
   Sentry.captureException(e);
+  // En serverless la función se congela al responder: se espera el envío del evento (máx. 2 s).
+  await Sentry.flush(2000).catch(() => {});
   return NextResponse.json({ error: "Error interno" }, { status: 500 });
 }
 
