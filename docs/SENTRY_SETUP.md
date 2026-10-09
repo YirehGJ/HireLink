@@ -6,7 +6,9 @@
   Next.js: cliente ([`sentry.client.config.ts`](../sentry.client.config.ts)),
   servidor ([`sentry.server.config.ts`](../sentry.server.config.ts)) y edge
   ([`sentry.edge.config.ts`](../sentry.edge.config.ts)), registrados mediante el
-  hook estándar de Next.js ([`instrumentation.ts`](../instrumentation.ts)).
+  hook estándar de Next.js ([`src/instrumentation.ts`](../src/instrumentation.ts);
+  debe estar dentro de `src/` porque el proyecto usa esa carpeta, de lo contrario
+  Next.js lo ignora y el servidor nunca inicializa Sentry).
 - `next.config.mjs` envuelto con `withSentryConfig` (desde `@sentry/nextjs/config`,
   la ruta pensada para archivos de configuración ESM) para instrumentar
   automáticamente Route Handlers y Server Components.
@@ -18,17 +20,18 @@
   irrecuperables del cliente (fallas del layout raíz) y muestra una pantalla de
   error en español en vez de la pantalla en blanco por defecto de Next.js.
 
-## Por qué no hay nada reportándose todavía
+## Estado actual
 
-**No hay ninguna cuenta de Sentry conectada.** La integración está implementada
-pero apagada a propósito: sin las variables de entorno `SENTRY_DSN` (servidor/edge)
-y `NEXT_PUBLIC_SENTRY_DSN` (cliente), `Sentry.init({ dsn: undefined })` deja el SDK
-inactivo — no hace ninguna llamada de red ni tiene costo. La app sigue
-funcionando exactamente igual que antes; solo deja de capturarse el detalle del
-error (que de todas formas ya se registra con `console.error` en los logs de
-Vercel).
+**Activo en producción desde el 8 de octubre de 2026.** Las variables `SENTRY_DSN` y
+`NEXT_PUBLIC_SENTRY_DSN` están configuradas en Vercel y el proyecto `hirelink` de
+Sentry ya recibió un evento real del servidor (un error de ruta inválida provocado a
+propósito en `POST /api/applications/notify-new`). Para que el evento llegue antes de
+que la función serverless se congele, `errorResponse()` espera `Sentry.flush(2000)`.
 
-## Cómo activarlo (5 minutos)
+Sin esas variables el SDK queda inactivo (`Sentry.init({ dsn: undefined })`): no hace
+llamadas de red ni tiene costo, y la app funciona igual.
+
+## Cómo activarlo desde cero (5 minutos)
 
 1. Crea una cuenta gratis en [sentry.io](https://sentry.io) (plan Developer:
    5 000 errores/mes gratis, más que suficiente para un proyecto académico).

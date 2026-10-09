@@ -43,7 +43,7 @@ Leyenda: ✅ hecho y verificado · 🟡 parcial · ❌ no hecho · ➖ cambió p
 | S22 | Organizaciones / multi-tenant | ✅ | Alta/edición desde admin, asignación de reclutadores, aislamiento probado |
 | S23 | Herramientas admin | ✅ | Cambio de rol, suspender (con bloqueo real), métricas reales, "ver como" en solo lectura |
 | S24 | Notificaciones | ✅ | Tiempo real + correo real vía Resend (apagado hasta poner `RESEND_API_KEY`, ver [EMAIL_SETUP.md](EMAIL_SETUP.md)) |
-| S25 | Auditoría y observabilidad | ✅ | `auditLogs` y pantalla de admin ✅. Error tracking con Sentry integrado (`@sentry/nextjs`, cliente/servidor/edge), apagado hasta configurar `SENTRY_DSN` — ver [SENTRY_SETUP.md](SENTRY_SETUP.md) |
+| S25 | Auditoría y observabilidad | ✅ | `auditLogs` y pantalla de admin ✅. Error tracking con Sentry integrado (`@sentry/nextjs`, cliente/servidor/edge) y **activo en producción** desde el 8 de octubre (evento de prueba recibido en el panel) — ver [SENTRY_SETUP.md](SENTRY_SETUP.md) |
 | S26 | Búsqueda avanzada | ✅ | Filtro por fecha de publicación en vacantes y por "seniority objetivo" en candidatos (campo nuevo `targetSeniority`); decisión cliente vs Algolia documentada en [DECISION_SEARCH.md](DECISION_SEARCH.md) |
 | S27 | Performance y DX | ❌ | Sin trabajo dedicado. La página de perfil pesa 90 kB y hay 100 vulnerabilidades de dependencias |
 | S28 | Onboarding y A11y | 🟡 | Elección de rol al registrarse y aviso para crear empresa ✅. Tours, accesibilidad y revisión móvil ❌ |

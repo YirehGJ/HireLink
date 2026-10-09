@@ -46,11 +46,10 @@ Proyecto académico (Seminario de Integración: Desarrollo) en producción en
   servido por [Groq](https://groq.com) (`openai/gpt-oss-120b`) vía el conector
   OpenAI-compatible — ver [`src/ai/genkit.ts`](src/ai/genkit.ts).
 - **Despliegue:** Vercel (CI/CD automático desde `main`).
-- **Opcional, apagado por defecto:**
-  [Resend](https://resend.com) para el envío de correo (ver
-  [docs/EMAIL_SETUP.md](docs/EMAIL_SETUP.md)) y
-  [Sentry](https://sentry.io) para seguimiento de errores (ver
-  [docs/SENTRY_SETUP.md](docs/SENTRY_SETUP.md)).
+- **Seguimiento de errores:** [Sentry](https://sentry.io), activo en producción
+  (ver [docs/SENTRY_SETUP.md](docs/SENTRY_SETUP.md)).
+- **Opcional, apagado por defecto:** [Resend](https://resend.com) para el envío de
+  correo (ver [docs/EMAIL_SETUP.md](docs/EMAIL_SETUP.md)).
 
 ### Flujos de IA (Genkit)
 
