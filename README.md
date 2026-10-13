@@ -127,9 +127,23 @@ La app queda en `http://localhost:3000`.
 |---|---|---|
 | Candidato | `candidato@example.com` | `TestPass1234` |
 | Reclutador | `reclutar@example.com` | `TestPass1234` |
+| Administrador | `admin@example.com` | `TestPass1234` |
 
-Guion completo de demostración en
+La lista completa de cuentas y datos de ejemplo está en
+[docs/CUENTAS_DEMO.md](docs/CUENTAS_DEMO.md). Guion de demostración en
 [docs/GUION_DEMO_SEMANA_2.md](docs/GUION_DEMO_SEMANA_2.md).
+
+### Datos de ejemplo y entornos
+
+```bash
+npm run seed            # simulación: valida y muestra qué crearía
+npm run seed:apply      # crea empresas, vacantes, candidatos, postulaciones, etc.
+npm run seed:reset      # elimina únicamente lo que creó el script
+```
+
+El script apunta al proyecto indicado en `.env.local` (o a otro con `--env`) y se niega a
+escribir en producción sin `--allow-production`. Cómo separar desarrollo, staging y producción:
+[docs/ENTORNOS.md](docs/ENTORNOS.md). Plantilla de variables: [.env.example](.env.example).
 
 ---
 

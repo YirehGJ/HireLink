@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "hirelink-fd1fe"
+    "default": "hirelink-fd1fe",
+    "production": "hirelink-fd1fe",
+    "staging": "hirelink-staging"
   }
 }
