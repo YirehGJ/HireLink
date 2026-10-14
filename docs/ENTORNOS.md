@@ -8,19 +8,24 @@ probar con libertad sin riesgo para los datos y los usuarios reales.
 
 | Entorno | Dónde corre | Proyecto de Firebase | Variables | Datos |
 |---|---|---|---|---|
-| **Desarrollo** | `npm run dev` en `localhost:3000` | `hirelink-staging` (recomendado) | `.env.local` | Ejemplo (`seed`) |
+| **Desarrollo** | `npm run dev:staging` en `localhost:3100` (o `npm run dev` con `.env.local`) | `hirelink-staging` (recomendado) | `.env.staging` | Ejemplo (`seed`) |
 | **Staging** | Vercel, despliegues *Preview* (cualquier rama distinta de `main`) | `hirelink-staging` | Variables de Vercel con ámbito **Preview** | Ejemplo (`seed`) |
 | **Producción** | Vercel, rama `main` | `hirelink-fd1fe` | Variables de Vercel con ámbito **Production** | Reales |
 
 ## Estado actual
 
 - **Producción:** funcionando en `https://hire-link-dun.vercel.app` con el proyecto `hirelink-fd1fe`.
-- **Desarrollo:** todavía apunta al mismo proyecto que producción, porque el staging no se ha creado.
-- **Staging:** la configuración del repositorio ya está lista (`.firebaserc` con el alias
-  `staging`, `.env.example`, script de datos y esta guía). Falta **crear el proyecto de Firebase**,
-  que solo puede hacerse con la cuenta de Google del equipo (pasos abajo).
+- **Staging:** el proyecto `hirelink-staging` ya existe (plan Spark, sin costo). Tiene Firestore,
+  Authentication con correo y contraseña, una aplicación web registrada, las mismas reglas que el
+  repositorio y los datos de ejemplo cargados (13 cuentas y 82 documentos).
+- **Desarrollo contra staging:** `npm run dev:staging` levanta la aplicación en
+  `http://localhost:3100` con las variables de `.env.staging`, sin tocar `.env.local` ni producción.
+- **Pendiente:** cargar las variables de staging en Vercel con ámbito **Preview** y autorizar el
+  dominio de los despliegues de Preview en Authentication (pasos 2 y 7 de la guía).
 
 ## Crear el entorno de staging (30 minutos)
+
+Esta guía se siguió para crear `hirelink-staging`; se conserva para poder repetirla.
 
 1. **Proyecto.** En [Firebase Console](https://console.firebase.google.com) crea el proyecto
    `hirelink-staging` en el plan gratuito (Spark). Si el identificador queda distinto, cámbialo
@@ -53,7 +58,7 @@ probar con libertad sin riesgo para los datos y los usuarios reales.
 ## Datos de ejemplo
 
 El script `scripts/seed.mjs` crea un conjunto realista y ficticio: 3 empresas, 3 reclutadores,
-8 candidatos con perfil, 9 vacantes publicadas en fechas distintas, postulaciones en cada
+9 candidatos con perfil (incluido el de demostración), 9 vacantes (7 publicadas, 1 borrador y 1 cerrada) publicadas en fechas distintas, postulaciones en cada
 estado del pipeline, recomendaciones de la IA, entrevistas próximas, avisos y auditoría. Las
 cuentas están en [CUENTAS_DEMO.md](CUENTAS_DEMO.md).
 

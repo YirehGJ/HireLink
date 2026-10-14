@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "dev:staging": "node scripts/dev-staging.mjs",
     "seed": "node scripts/seed.mjs",
     "seed:apply": "node scripts/seed.mjs --apply",
     "seed:reset": "node scripts/seed.mjs --reset --apply"

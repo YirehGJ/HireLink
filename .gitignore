@@ -45,6 +45,8 @@ next-env.d.ts
 firebase-debug.log
 firestore-debug.log
 service-account.json
+service-account*.json
+*firebase-adminsdk*.json
 serviceAccountKey.json
 deploy-rules.mjs
 list-releases.mjs
