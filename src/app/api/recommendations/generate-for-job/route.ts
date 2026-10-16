@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/firebase/admin";
-import { evaluateMatch } from "@/lib/server/matching";
+import { evaluateMatch, isUpToDate, matchHash, overlapScore } from "@/lib/server/matching";
 import { mapWithConcurrency } from "@/lib/server/concurrency";
 import { enforceRateLimit, errorResponse, HttpError, requireUser } from "@/lib/server/guard";
 
@@ -9,6 +9,8 @@ export const maxDuration = 60;
 
 // Tope para mantener acotado el costo/tiempo de una sola llamada.
 const MAX_CANDIDATES = 40;
+// Candidatos que se leen para elegir a quién evaluar primero (lectura barata; la IA solo ve a los elegidos).
+const RANK_POOL = 200;
 
 // El plan gratuito de Groq limita los tokens por minuto: pasado este tiempo no se lanzan
 // evaluaciones nuevas, para responder antes de que Vercel corte la función (60 s).
@@ -39,18 +41,33 @@ export async function POST(request: Request) {
     if (!authorized) throw new HttpError(403, "No autorizado");
     if (job.status !== "published") throw new HttpError(409, "Solo se buscan candidatos para vacantes publicadas");
 
-    const candidatesSnap = await db.collection("candidates").limit(MAX_CANDIDATES).get();
-    // Primero los candidatos que aún no tienen recomendación para esta vacante.
+    // Se leen más candidatos de los que se alcanzan a evaluar para poder elegir a los mejores: primero los que
+    // aún no tienen recomendación y, dentro de cada grupo, los que más coinciden con las habilidades de la
+    // vacante. Así el tiempo limitado de la IA se gasta en los candidatos plausibles.
+    const candidatesSnap = await db.collection("candidates").limit(RANK_POOL).get();
     const existing = await db.collection("recommendations").where("jobRef", "==", jobId).get();
-    const have = new Set(existing.docs.map((d) => d.data().candidateRef));
-    const candidateDocs = [...candidatesSnap.docs].sort((a, b) => Number(have.has(a.id)) - Number(have.has(b.id)));
-    let processed = 0;
+    const known = new Map(existing.docs.map((d) => [d.data().candidateRef as string, d.data()]));
+    // Los puntajes vigentes (perfil y vacante sin cambios desde que se calcularon) se reutilizan sin llamar a la
+    // IA: no gastan tokens ni tiempo, así que no cuentan contra el presupuesto de la llamada.
+    const evaluable = candidatesSnap.docs.filter((d) => d.data().skills?.length || d.data().headline);
+    const stillValid = evaluable.filter((d) => isUpToDate(known.get(d.id), matchHash(d.data(), job)));
+    const reused = new Set(stillValid.map((d) => d.id));
+    const candidateDocs = evaluable
+      .filter((d) => !reused.has(d.id))
+      .map((d) => ({ d, evaluated: known.has(d.id), overlap: overlapScore(job, d.data()) }))
+      .sort((a, b) => Number(a.evaluated) - Number(b.evaluated) || b.overlap - a.overlap)
+      .slice(0, MAX_CANDIDATES)
+      .map((x) => x.d);
+    const cached = stillValid.length;
+    let processed = cached;
     let skipped = 0;
+    let quotaError: HttpError | undefined;
     const started = Date.now();
 
     const work = mapWithConcurrency(candidateDocs, 2, async (c) => {
       const candidate = c.data();
-      if (!candidate.skills?.length && !candidate.headline) return;
+      // Sin cupo de IA no tiene caso seguir intentando con los demás candidatos.
+      if (quotaError) return;
       if (Date.now() - started > TIME_BUDGET_MS) {
         skipped++;
         return;
@@ -59,14 +76,19 @@ export async function POST(request: Request) {
         await evaluateMatch(db, c.id, candidate, jobId, job);
         processed++;
       } catch (err) {
-        console.error(`Error calculando match de ${c.id} para ${jobId}:`, err);
+        if (err instanceof HttpError && err.status === 503) quotaError = err;
+        else console.error(`Error calculando match de ${c.id} para ${jobId}:`, err);
       }
     });
 
     // Límite duro: se responde con lo ya calculado antes de que Vercel corte la función.
     await Promise.race([work, new Promise((resolve) => setTimeout(resolve, HARD_LIMIT_MS))]);
 
-    return NextResponse.json({ processed, skipped });
+    // Si no se pudo evaluar a nadie porque la IA se quedó sin cupo, se avisa con un mensaje claro; si ya había
+    // puntajes vigentes se responde con ellos y `aiLimit` indica que la IA no alcanzó a evaluar a los demás.
+    if (quotaError && processed === 0) throw quotaError;
+
+    return NextResponse.json({ processed, cached, skipped, aiLimit: !!quotaError });
   } catch (e) {
     return errorResponse(e);
   }

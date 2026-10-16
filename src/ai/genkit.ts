@@ -4,7 +4,10 @@ import openAICompatible, {
   defineCompatOpenAIModel,
 } from '@genkit-ai/compat-oai';
 
-export const GROQ_MODEL = 'groq/openai/gpt-oss-120b';
+import { GROQ_MODEL } from './model';
+
+// El modelo (y cómo cambiarlo si se agota su cupo diario) se define en ./model.
+export { GROQ_MODEL };
 
 // Evita registrar el mismo modelo varias veces cuando hay llamadas en paralelo.
 const definedModels = new Map<string, ReturnType<typeof defineCompatOpenAIModel>>();

@@ -69,7 +69,7 @@ VACANTE:
 - Título: ${input.jobTitle}
 - Seniority: ${input.jobSeniority}
 - Palabras clave / requisitos: ${input.jobSearchTags.join(', ')}
-- Descripción: ${input.jobDescriptionMd}
+- Descripción: ${input.jobDescriptionMd.slice(0, 2500)}
 
 Calcula un puntaje de compatibilidad (0.0 a 1.0) basado en qué tanto las habilidades, la experiencia y el contenido del CV del candidato cubren los requisitos de la vacante, y da hasta 5 razones cortas y concretas. Responde SIEMPRE en español (las razones nunca en inglés), aunque el CV o la vacante estén en otro idioma (ej. "Experiencia sólida en React", "Seniority acorde al puesto").`,
       output: {
