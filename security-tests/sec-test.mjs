@@ -8,8 +8,8 @@ import {
   getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, collection, getDocs, query, where, limit,
 } from 'firebase/firestore';
 
-const env = fs.readFileSync('.env.local', 'utf8');
-const get = (k) => (env.match(new RegExp('^' + k + '=(.+)$', 'm')) || [])[1]?.trim().replace(/^"|"$/g, '');
+import { loadEnv } from './env.mjs';
+const { get } = loadEnv();
 admin.initializeApp({
   credential: admin.credential.cert({
     projectId: get('FIREBASE_PROJECT_ID'),
@@ -101,6 +101,9 @@ try {
   await allow('CTRL reclutador A lista sus vacantes (incluye borradores)', () => getDocs(query(collection(A.db, 'jobs'), where('organizationRef', '==', orgA.id))));
   await allow('CTRL reclutador A edita su vacante', () => updateDoc(doc(A.db, 'jobs', job.id), { title: 'SEC Job editada' }));
   await allow('CTRL reclutador A edita su organización', () => updateDoc(doc(A.db, 'organizations', orgA.id), { name: 'SEC Org A v2' }));
+  // Las reglas autorizan las entrevistas por la empresa del documento: la consulta debe fijar organizationRef.
+  // (Antes la app consultaba solo por jobRef y el calendario del reclutador quedaba vacío sin avisar.)
+  await allow('CTRL reclutador A lista las entrevistas de su vacante (jobRef + organizationRef)', () => getDocs(query(collection(A.db, 'interviews'), where('jobRef', '==', job.id), where('organizationRef', '==', orgA.id))));
   await allow('CTRL reclutador A cambia estado de postulación', () => updateDoc(doc(A.db, 'jobs', job.id, 'applications', cand1Uid), { status: 'screening', shortlisted: true }));
   await allow('CTRL admin lista usuarios', () => getDocs(query(collection(AD.db, 'users'), limit(2))));
   await allow('CTRL admin cambia rol de un usuario', () => updateDoc(doc(AD.db, 'users', cand2Uid), { role: 'recruiter' }));
@@ -125,6 +128,7 @@ try {
   await deny('S10 reclutador B borra vacante de A', () => deleteDoc(doc(B.db, 'jobs', job.id)));
   await deny('S11 reclutador B lee postulantes de A', () => getDocs(collection(B.db, 'jobs', job.id, 'applications')));
   await deny('S12 reclutador B lee entrevistas de A', () => getDocs(query(collection(B.db, 'interviews'), where('jobRef', '==', job.id))));
+  await deny('S12b reclutador B lee entrevistas de A fijando organizationRef de A', () => getDocs(query(collection(B.db, 'interviews'), where('jobRef', '==', job.id), where('organizationRef', '==', orgA.id))));
   await deny('S13 reclutador B lee recomendaciones de A', () => getDocs(query(collection(B.db, 'recommendations'), where('jobRef', '==', job.id))));
   await deny('S14 reclutador B edita organización de A', () => updateDoc(doc(B.db, 'organizations', orgA.id), { name: 'hackeada' }));
   await deny('S15 reclutador A edita organización de B', () => updateDoc(doc(A.db, 'organizations', orgB.id), { name: 'hackeada' }));

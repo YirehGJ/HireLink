@@ -1,28 +1,37 @@
 # Pruebas de seguridad y carga de HireLink
 
-Scripts automatizados que se ejecutan contra el proyecto real (Firebase) y contra
-un servidor Next.js. **Solo usan cuentas y datos desechables** (`sec.*`, `flow.*`,
-`secload*`) que crean y eliminan por sí mismos; nunca tocan datos reales.
+Scripts automatizados que se ejecutan contra un proyecto de Firebase y contra un servidor
+Next.js. **Solo usan cuentas y datos desechables** (`sec.*`, `flow.*`, `secload*`) que crean y
+eliminan por sí mismos.
 
-Requieren `.env.local` con las variables `NEXT_PUBLIC_FB_*` y las credenciales de
-Firebase Admin (`FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`).
+Requieren un archivo de entorno con las variables `NEXT_PUBLIC_FB_*` y las credenciales de
+Firebase Admin (`FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`). Se elige con
+`--env <archivo>` (o la variable `ENV_FILE`); por defecto es `.env.local`. **Se niegan a correr
+contra producción** (`hirelink-fd1fe`) salvo que se agregue `--allow-production`, así que la forma
+normal de ejecutarlas es contra staging (`--env .env.staging`, ver [docs/ENTORNOS.md](../docs/ENTORNOS.md)).
 Se ejecutan desde la raíz del proyecto.
 
 | Script | Qué prueba | Comando |
 |---|---|---|
-| `sec-test.mjs` | Reglas de Firestore: escalada de privilegios, aislamiento entre empresas, cuentas suspendidas, datos ajenos, integridad de postulaciones, validación de tamaño (57 pruebas de ataque/permiso) | `node security-tests/sec-test.mjs` |
-| `api-test.mjs` | Endpoints `/api/*`: autenticación, roles, aislamiento, validación de entrada, idempotencia, límites de uso, cabeceras de seguridad y carga con 100 usuarios simultáneos | `npm run build && npx next start -p 3100` y luego `node security-tests/api-test.mjs http://localhost:3100` |
-| `flow-test.mjs` | Regresión: los flujos normales de la app (registro, empresa, vacante, postulación, estados, entrevistas) siguen funcionando con las reglas endurecidas | `node security-tests/flow-test.mjs` |
+| `sec-test.mjs` | Reglas de Firestore: escalada de privilegios, aislamiento entre empresas, cuentas suspendidas, datos ajenos, integridad de postulaciones, validación de tamaño (57 pruebas de ataque/permiso) | `node security-tests/sec-test.mjs --env .env.staging` |
+| `api-test.mjs` | Endpoints `/api/*`: autenticación, roles, aislamiento, validación de entrada, idempotencia, límites de uso, cabeceras de seguridad y carga con 100 usuarios simultáneos | `npm run build:staging && npm run start:staging` y luego `node security-tests/api-test.mjs http://localhost:3100 --env .env.staging` |
+| `flow-test.mjs` | Regresión: los flujos normales de la app (registro, empresa, vacante, postulación, estados, entrevistas) siguen funcionando con las reglas endurecidas | `node security-tests/flow-test.mjs --env .env.staging` |
 
-## Resultados (última ejecución)
+## Resultados (última ejecución: 16 de octubre de 2026, contra `hirelink-staging`)
 
-- **Reglas de Firestore:** 59/59 (antes de endurecer: 45/57, 12 vulnerabilidades).
-- **API + carga:** 54/54.
+- **Reglas de Firestore:** 61/61 (antes de endurecer: 45/57, 12 vulnerabilidades). Se agregaron dos controles: el
+  reclutador de una empresa lee las entrevistas de su vacante (consulta con `jobRef` y `organizationRef`) y otro
+  reclutador no las lee, aun fijando la empresa ajena.
+- **API + carga:** 67/67. Se agregaron los endpoints `/api/jobs/delete` y `/api/interviews/cancel` (sin sesión,
+  roles, empresa ajena, vacante inexistente, entrada inválida y efecto en cascada).
   - 100 usuarios distintos llamando a la vez a la API autenticada: 100/100 correctas en ~1 s.
   - 100 visitas simultáneas a las páginas: 100/100 correctas (< 0.5 s).
   - 100 lecturas simultáneas de Firestore con reglas: 100/100 correctas.
-  - Ráfaga abusiva de un solo usuario (100 llamadas): 18 atendidas, 82 bloqueadas con 429, 0 errores 5xx.
+  - Ráfaga abusiva de un solo usuario (100 llamadas): 11 atendidas, 89 bloqueadas con 429, 0 errores 5xx.
 - **Flujos de la app:** 23/23.
+
+Los resultados anteriores (antes de los cambios de esta semana, contra el proyecto de producción) eran 59/59, 54/54 y 23/23. Desde esta
+ejecución las pruebas dejan de apuntar a producción por defecto.
 
 ## Vulnerabilidades encontradas y corregidas
 

@@ -1,12 +1,12 @@
 // Pruebas de seguridad de la API + carga (100 usuarios simultáneos) contra un servidor en marcha.
-// Uso: node api-test.mjs http://localhost:3000
+// Uso: node security-tests/api-test.mjs http://localhost:3000 [--env .env.staging]
 // Usa SOLO cuentas/datos desechables (sec.*) que se eliminan al terminar.
 import fs from 'fs';
 import admin from 'firebase-admin';
+import { loadEnv, positionalArgs } from './env.mjs';
 
-const BASE = process.argv[2] || 'http://localhost:3000';
-const env = fs.readFileSync('.env.local', 'utf8');
-const get = (k) => (env.match(new RegExp('^' + k + '=(.+)$', 'm')) || [])[1]?.trim().replace(/^"|"$/g, '');
+const BASE = positionalArgs[0] || 'http://localhost:3000';
+const { get } = loadEnv();
 admin.initializeApp({ credential: admin.credential.cert({ projectId: get('FIREBASE_PROJECT_ID'), clientEmail: get('FIREBASE_CLIENT_EMAIL'), privateKey: get('FIREBASE_PRIVATE_KEY').replace(/\\n/g, '\n') }) });
 const adb = admin.firestore();
 const aauth = admin.auth();
@@ -64,7 +64,7 @@ try {
   for (const [k, e] of [['reca', 'sec.reca'], ['recb', 'sec.recb'], ['cand1', 'sec.cand1'], ['cand2', 'sec.cand2'], ['susp', 'sec.susp']]) T[k] = await token(`${e}@example.com`);
 
   // ---------- 1) sin autenticación ----------
-  for (const p of ['/api/audit', '/api/ai/extract-cv', '/api/ai/generate-description', '/api/applications/notify-new', '/api/applications/notify-status', '/api/recommendations/generate', '/api/recommendations/generate-for-job', '/api/matches/respond']) {
+  for (const p of ['/api/audit', '/api/ai/extract-cv', '/api/ai/generate-description', '/api/applications/notify-new', '/api/applications/notify-status', '/api/recommendations/generate', '/api/recommendations/generate-for-job', '/api/matches/respond', '/api/jobs/delete', '/api/interviews/cancel']) {
     expect(`A01 sin token -> ${p}`, (await api(p, null, {})).status, 401);
     expect(`A02 token falso -> ${p}`, (await api(p, 'eyJhbGciOiJSUzI1NiJ9.e30.x', {})).status, 401);
   }
@@ -92,7 +92,25 @@ try {
   expect('A21 CV demasiado largo (DoS)', (await api('/api/ai/extract-cv', T.cand1, { cvText: 'x'.repeat(50000) })).status, 413);
   expect('A22 CV vacío', (await api('/api/ai/extract-cv', T.cand1, { cvText: 'corto' })).status, 400);
   expect('A23 body no-JSON', (await api('/api/audit', T.reca, undefined)).status, [400, 403]);
-  // ---------- 5) suspendidos ----------
+  // ---------- 4b) eliminar vacante en cascada y cancelar entrevista (endpoints nuevos) ----------
+  const jobDel = await adb.collection('jobs').add({ organizationRef: orgA.id, title: 'SEC Job a eliminar', descriptionMd: 'x'.repeat(60), searchTags: ['a'], seniority: 'junior', location: 'x', remoteAllowed: false, status: 'published' }); created.push(jobDel.path);
+  await adb.doc(`jobs/${jobDel.id}/applications/${uids.cand1}`).set({ candidateRef: uids.cand1, jobRef: jobDel.id, status: 'screening' });
+  await adb.doc(`users/${uids.cand1}/applications/${jobDel.id}`).set({ candidateRef: uids.cand1, jobRef: jobDel.id, status: 'screening' });
+  await adb.doc(`recommendations/${uids.cand1}_${jobDel.id}`).set({ candidateRef: uids.cand1, jobRef: jobDel.id, score: 0.8, status: 'pending', reasons: [] });
+  const iv = await adb.collection('interviews').add({ jobRef: jobDel.id, jobTitle: 'SEC Job a eliminar', organizationRef: orgA.id, candidateRef: uids.cand1, candidateName: 'Cand Uno', interviewerRef: uids.reca, type: 'video', scheduledStart: admin.firestore.Timestamp.fromDate(new Date(Date.now() + 864e5)), location: 'x' }); created.push(iv.path);
+  expect('N01 candidato elimina una vacante', (await api('/api/jobs/delete', T.cand1, { jobId: jobDel.id })).status, 403);
+  expect('N02 reclutador B elimina la vacante de A', (await api('/api/jobs/delete', T.recb, { jobId: jobDel.id })).status, 403);
+  expect('N03 eliminar una vacante inexistente', (await api('/api/jobs/delete', T.reca, { jobId: 'no-existe-sec' })).status, 404);
+  expect('N04 eliminar sin jobId', (await api('/api/jobs/delete', T.reca, {})).status, 400);
+  expect('N05 candidato cancela una entrevista', (await api('/api/interviews/cancel', T.cand1, { interviewId: iv.id })).status, 403);
+  expect('N06 reclutador B cancela la entrevista de A', (await api('/api/interviews/cancel', T.recb, { interviewId: iv.id })).status, 403);
+  expect('N07 cancelar una entrevista inexistente', (await api('/api/interviews/cancel', T.reca, { interviewId: 'no-existe-sec' })).status, 404);
+  const cancelRes = await api('/api/interviews/cancel', T.reca, { interviewId: iv.id, timeZone: 'America/Mexico_City' });
+  const notified = (await adb.collection(`users/${uids.cand1}/notifications`).get()).docs.some((d) => d.data().type === 'interview_cancelled');
+  results.push({ name: 'N08 reclutador A cancela su entrevista: se elimina y se avisa al candidato', ok: cancelRes.status === 200 && !(await adb.doc(`interviews/${iv.id}`).get()).exists && notified, note: `HTTP ${cancelRes.status}; aviso ${notified}` });
+  const delRes = await api('/api/jobs/delete', T.reca, { jobId: jobDel.id });
+  const left = [(await adb.doc(`jobs/${jobDel.id}`).get()).exists, (await adb.collection(`jobs/${jobDel.id}/applications`).get()).size, (await adb.doc(`users/${uids.cand1}/applications/${jobDel.id}`).get()).exists, (await adb.doc(`recommendations/${uids.cand1}_${jobDel.id}`).get()).exists];
+  results.push({ name: 'N09 reclutador A elimina su vacante en cascada (postulaciones, copia del candidato y recomendación)', ok: delRes.status === 200 && left.every((x) => !x), note: `HTTP ${delRes.status}; restos ${JSON.stringify(left)}` });  // ---------- 5) suspendidos ----------
   for (const p of ['/api/audit', '/api/ai/extract-cv', '/api/recommendations/generate', '/api/applications/notify-new']) {
     expect(`A24 cuenta suspendida -> ${p}`, (await api(p, T.susp, { cvText: 'x'.repeat(100), jobId: job.id })).status, 403);
   }

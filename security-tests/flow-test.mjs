@@ -5,8 +5,8 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, collection, getDocs, query, where, writeBatch, serverTimestamp, deleteDoc } from 'firebase/firestore';
 
-const env = fs.readFileSync('.env.local', 'utf8');
-const get = (k) => (env.match(new RegExp('^' + k + '=(.+)$', 'm')) || [])[1]?.trim().replace(/^"|"$/g, '');
+import { loadEnv } from './env.mjs';
+const { get } = loadEnv();
 admin.initializeApp({ credential: admin.credential.cert({ projectId: get('FIREBASE_PROJECT_ID'), clientEmail: get('FIREBASE_CLIENT_EMAIL'), privateKey: get('FIREBASE_PRIVATE_KEY').replace(/\\n/g, '\n') }) });
 const adb = admin.firestore(); const aauth = admin.auth();
 const PASS = 'TestPass1234';
