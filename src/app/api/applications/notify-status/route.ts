@@ -4,6 +4,7 @@ import { FieldValue } from "firebase-admin/firestore";
 import { writeAuditLog } from "@/firebase/admin-audit";
 import { enforceRateLimit, errorResponse, HttpError, requireUser } from "@/lib/server/guard";
 import { notifyUser } from "@/lib/server/notify";
+import { formatDateTimeEs, safeTimeZone } from "@/lib/server/datetime";
 
 const INTERVIEW_TYPE_LABEL: Record<string, string> = {
   phone: "llamada",
@@ -37,7 +38,7 @@ export async function POST(request: Request) {
     await enforceRateLimit(db, caller.uid, "notify-status", 300, 3600);
 
     const body = await request.json().catch(() => null);
-    const { jobId, candidateUid, newStatus, interviewAt, interviewType } = body ?? {};
+    const { jobId, candidateUid, newStatus, interviewAt, interviewType, timeZone } = body ?? {};
     if (
       typeof jobId !== "string" || typeof candidateUid !== "string" ||
       typeof newStatus !== "string" || !STATUS_LABEL[newStatus]
@@ -74,7 +75,7 @@ export async function POST(request: Request) {
     }
 
     const interviewBody = interviewDate
-      ? `${job.title}: te agendaron una entrevista (${INTERVIEW_TYPE_LABEL[interviewType] ?? "entrevista"}) el ${interviewDate.toLocaleString("es-MX", { dateStyle: "long", timeStyle: "short" })}`
+      ? `${job.title}: te agendaron una entrevista (${INTERVIEW_TYPE_LABEL[interviewType] ?? "entrevista"}) el ${formatDateTimeEs(interviewDate, safeTimeZone(timeZone))}`
       : null;
 
     await notifyUser(db, candidateUid, {

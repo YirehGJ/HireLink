@@ -6,6 +6,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { ApplyButton } from "./apply-button";
 import { RejectMatchButton } from "./reject-match-button";
 import { MATCH_THRESHOLD } from "@/lib/constants";
+import { seniorityLabel } from "@/lib/format";
+import { stripMarkdown } from "@/lib/markdown";
 
 interface RecommendationCardProps {
   recommendation: Recommendation;
@@ -22,13 +24,13 @@ export function RecommendationCard({ recommendation, job }: RecommendationCardPr
                 <CardTitle className="font-headline text-xl text-primary dark:text-primary-foreground/90">{job.title}</CardTitle>
                 <CardDescription className="flex items-center gap-2 mt-1 flex-wrap">
                     <span className="flex items-center"><MapPin className="h-4 w-4 mr-1.5" /> {job.location}</span>
-                    <span className="flex items-center"><Briefcase className="h-4 w-4 mr-1.5 ml-2" /> {job.seniority}</span>
+                    <span className="flex items-center"><Briefcase className="h-4 w-4 mr-1.5 ml-2" /> {seniorityLabel(job.seniority)}</span>
                 </CardDescription>
             </div>
             <TooltipProvider>
               <Tooltip>
-                <TooltipTrigger>
-                  <Badge variant="secondary" className="font-bold">
+                <TooltipTrigger asChild>
+                  <Badge variant="secondary" className="font-bold whitespace-nowrap">
                       <Zap className="h-3 w-3 mr-1" />
                       {(recommendation.score * 100).toFixed(0)}% Match
                   </Badge>
@@ -41,7 +43,7 @@ export function RecommendationCard({ recommendation, job }: RecommendationCardPr
         </div>
       </CardHeader>
       <CardContent className="flex-grow">
-        <p className="text-sm text-muted-foreground line-clamp-2">{job.descriptionMd}</p>
+        <p className="text-sm text-muted-foreground line-clamp-2">{stripMarkdown(job.descriptionMd)}</p>
         <div className="mt-4">
             <h4 className="text-sm font-semibold mb-2 text-foreground">Razones Principales</h4>
             <div className="flex flex-wrap gap-2">

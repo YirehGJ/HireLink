@@ -13,11 +13,16 @@ import {
   type Firestore,
   type CollectionReference,
   type Query,
+  type WhereFilterOp,
 } from "firebase/firestore";
 import { useFirestore } from "../provider";
 
+/** [campo, operador, valor] */
+export type WhereClause = [string, WhereFilterOp, any];
+
 interface UseCollectionOptions {
-  where?: [string, any, any];
+  /** Una condición o varias (todas se combinan con AND). */
+  where?: WhereClause | WhereClause[];
   orderBy?: [string, "asc" | "desc"];
   limit?: number;
   startAfter?: any;
@@ -56,7 +61,10 @@ export function useCollection<T>(
       let q: Query | CollectionReference = collection(firestore, path);
 
       if (options.where) {
-        q = query(q, where(...options.where));
+        const clauses: WhereClause[] = Array.isArray(options.where[0])
+          ? (options.where as WhereClause[])
+          : [options.where as WhereClause];
+        for (const clause of clauses) q = query(q, where(...clause));
       }
       if (options.orderBy) {
         q = query(q, orderBy(...options.orderBy));

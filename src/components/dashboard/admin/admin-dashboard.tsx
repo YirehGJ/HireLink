@@ -28,6 +28,7 @@ const ACTION_TEXT: Record<string, string> = {
   match_accepted: "Aceptó un match",
   match_rejected_by_recruiter: "Rechazó un match (empresa)",
   match_rejected_by_candidate: "Rechazó un match (candidato)",
+  interview_cancelled: "Canceló entrevista",
 };
 
 const STATUS_STEPS: { key: string; label: string }[] = [
@@ -38,6 +39,7 @@ const STATUS_STEPS: { key: string; label: string }[] = [
   { key: "offer", label: "Oferta" },
   { key: "hired", label: "Contratado" },
   { key: "rejected", label: "Rechazado" },
+  { key: "withdrawn", label: "Retirado" },
 ];
 
 function AuditTab() {

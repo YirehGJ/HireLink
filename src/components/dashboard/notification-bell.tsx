@@ -24,7 +24,7 @@ function toJsDate(v: any): Date {
 }
 
 export function NotificationBell({ uid }: { uid: string | null }) {
-  const { data: notifications, markAsRead } = useNotifications(uid);
+  const { data: notifications, markAsRead, markAllAsRead } = useNotifications(uid);
   const unreadCount = notifications?.filter((n) => !n.read).length ?? 0;
 
   return (
@@ -37,11 +37,23 @@ export function NotificationBell({ uid }: { uid: string | null }) {
               {unreadCount}
             </Badge>
           )}
-          <span className="sr-only">Notificaciones</span>
+          <span className="sr-only">Notificaciones{unreadCount > 0 ? `, ${unreadCount} sin leer` : ""}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80">
-        <DropdownMenuLabel>Notificaciones</DropdownMenuLabel>
+      <DropdownMenuContent align="end" className="w-80 max-h-[70vh] overflow-y-auto">
+        <div className="flex items-center justify-between pr-2">
+          <DropdownMenuLabel>Notificaciones</DropdownMenuLabel>
+          {unreadCount > 0 && (
+            <Button
+              variant="link"
+              size="sm"
+              className="h-auto p-0 text-xs"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); markAllAsRead().catch((err) => console.error(err)); }}
+            >
+              Marcar todas como leídas
+            </Button>
+          )}
+        </div>
         <DropdownMenuSeparator />
         {!notifications || notifications.length === 0 ? (
           <p className="px-2 py-4 text-sm text-muted-foreground text-center">Sin notificaciones por ahora.</p>

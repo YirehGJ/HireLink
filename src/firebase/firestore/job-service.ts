@@ -1,9 +1,9 @@
-import { addDoc, collection, deleteDoc, doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { addDoc, collection, doc, setDoc, serverTimestamp } from "firebase/firestore";
 import type { Firestore } from "firebase/firestore";
 import type { Job, JobStatus } from "@/lib/types";
 
 /**
- * @fileOverview Servicio para publicar, editar, cerrar y eliminar vacantes.
+ * @fileOverview Servicio para publicar, editar y cerrar vacantes.
  */
 
 export type JobInput = Pick<
@@ -34,7 +34,6 @@ export const jobService = {
     await setDoc(ref, { status, updatedAt: serverTimestamp() }, { merge: true });
   },
 
-  async deleteJob(firestore: Firestore, jobId: string) {
-    await deleteDoc(doc(firestore, "jobs", jobId));
-  },
+  // La eliminación de una vacante se hace en el servidor (POST /api/jobs/delete), que además borra sus
+  // postulaciones, recomendaciones y entrevistas. Borrar solo el documento dejaba datos huérfanos.
 };

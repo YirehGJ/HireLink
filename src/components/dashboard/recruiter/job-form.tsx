@@ -18,17 +18,20 @@ import { useToast } from "@/hooks/use-toast";
 import type { Job } from "@/lib/types";
 import { useAuth, useFirestore } from "@/firebase";
 import { logAudit } from "@/lib/audit-client";
-import { callAuthedApi } from "@/lib/api-client";
+import { aiUnavailableMessage, callAuthedApi } from "@/lib/api-client";
 import { useApp } from "@/components/providers/app-provider";
 import { jobService } from "@/firebase/firestore/job-service";
+import { SENIORITY_OPTIONS, parseTags } from "@/lib/format";
 
+// Los máximos coinciden con las reglas de seguridad (validJob): así el error se explica en el formulario
+// y no como un genérico «No se pudo guardar» después de enviar.
 const jobSchema = z.object({
-  title: z.string().min(5, "El título debe tener al menos 5 caracteres."),
-  location: z.string().min(2, "La ubicación es requerida."),
+  title: z.string().trim().min(5, "El título debe tener al menos 5 caracteres.").max(200, "El título no puede pasar de 200 caracteres."),
+  location: z.string().trim().min(2, "La ubicación es requerida.").max(200, "La ubicación no puede pasar de 200 caracteres."),
   seniority: z.enum(["intern", "junior", "mid", "senior", "lead"]),
   remoteAllowed: z.boolean().default(false),
-  descriptionMd: z.string().min(50, "La descripción debe tener al menos 50 caracteres."),
-  searchTags: z.string().min(3, "Ingresa al menos una habilidad o palabra clave."),
+  descriptionMd: z.string().trim().min(50, "La descripción debe tener al menos 50 caracteres.").max(10000, "La descripción no puede pasar de 10 000 caracteres."),
+  searchTags: z.string().refine((v) => parseTags(v).length > 0, "Ingresa al menos una habilidad o palabra clave."),
 });
 
 export function JobForm({ job }: { job?: Job }) {
@@ -54,7 +57,8 @@ export function JobForm({ job }: { job?: Job }) {
 
   const handleGenerateDescription = async () => {
     const { title, seniority, searchTags } = form.getValues();
-    if (!title || !seniority || !searchTags) {
+    const tags = parseTags(searchTags);
+    if (!title.trim() || !seniority || tags.length === 0) {
         toast({
             title: "Faltan datos",
             description: "Por favor, completa el título, seniority y habilidades para generar la descripción.",
@@ -67,9 +71,9 @@ export function JobForm({ job }: { job?: Job }) {
     try {
         if (!auth) throw new Error("No hay sesión activa.");
         const result = await callAuthedApi(auth, "/api/ai/generate-description", {
-            title,
+            title: title.trim(),
             seniority,
-            searchTags: searchTags.split(',').map(tag => tag.trim()),
+            searchTags: tags,
         });
         if (result.descriptionMd) {
             form.setValue("descriptionMd", result.descriptionMd, { shouldValidate: true });
@@ -82,7 +86,7 @@ export function JobForm({ job }: { job?: Job }) {
         console.error("Error generating description:", error);
         toast({
             title: "Error de la IA",
-            description: "No se pudo generar la descripción en este momento.",
+            description: aiUnavailableMessage(error) ?? "No se pudo generar la descripción en este momento.",
             variant: "destructive"
         });
     } finally {
@@ -103,7 +107,7 @@ export function JobForm({ job }: { job?: Job }) {
 
     const payload = {
       ...values,
-      searchTags: values.searchTags.split(',').map(tag => tag.trim()),
+      searchTags: parseTags(values.searchTags),
     };
 
     try {
@@ -177,11 +181,7 @@ export function JobForm({ job }: { job?: Job }) {
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                             <SelectContent>
-                                <SelectItem value="intern">Intern</SelectItem>
-                                <SelectItem value="junior">Junior</SelectItem>
-                                <SelectItem value="mid">Mid-level</SelectItem>
-                                <SelectItem value="senior">Senior</SelectItem>
-                                <SelectItem value="lead">Lead</SelectItem>
+                                {SENIORITY_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
                             </SelectContent>
                         </Select>
                         <FormMessage />
@@ -204,7 +204,7 @@ export function JobForm({ job }: { job?: Job }) {
                 <FormItem>
                     <FormLabel>Habilidades y Palabras Clave</FormLabel>
                     <FormControl><Input placeholder="Ej. React, Node.js, Liderazgo" {...field} /></FormControl>
-                    <FormDescription>Separa las habilidades con comas. Serán usadas por la IA.</FormDescription>
+                    <FormDescription>Separa las habilidades con comas (hasta 40). Se eliminan vacías y repetidas. Serán usadas por la IA.</FormDescription>
                     <FormMessage />
                 </FormItem>
             )} />

@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useAuth, useCollection, useFirestore } from "@/firebase";
 import { organizationService } from "@/firebase/firestore/organization-service";
 import { logAudit } from "@/lib/audit-client";
+import { isHttpUrl } from "@/lib/format";
 import { useToast } from "@/hooks/use-toast";
 import type { Job, Organization, User } from "@/lib/types";
 
@@ -41,6 +42,15 @@ export function AdminOrganizations() {
     if (!firestore || !editing) return;
     if (name.trim().length < 2) {
       toast({ title: "El nombre es requerido", variant: "destructive" });
+      return;
+    }
+    // Mismos límites que las reglas de seguridad (validOrg) y que el formulario del reclutador.
+    if (name.trim().length > 200 || description.trim().length > 3000 || website.trim().length > 300) {
+      toast({ title: "Algún texto es demasiado largo", description: "Nombre: 200, sitio web: 300, descripción: 3 000 caracteres.", variant: "destructive" });
+      return;
+    }
+    if (website.trim() && !isHttpUrl(website.trim())) {
+      toast({ title: "El sitio web no es válido", description: "Debe empezar con http:// o https://", variant: "destructive" });
       return;
     }
     setSaving(true);

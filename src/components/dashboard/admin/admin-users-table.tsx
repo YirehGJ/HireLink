@@ -13,7 +13,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Eye, MoreHorizontal, Search, UserX } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/user-avatar";
+import { matchesText, normalizeText } from "@/lib/format";
 import { useToast } from "@/hooks/use-toast";
 import { useApp } from "@/components/providers/app-provider";
 import { logAudit } from "@/lib/audit-client";
@@ -83,12 +84,21 @@ export function AdminUsersTable() {
     router.push("/dashboard/jobs");
   };
 
-  const term = filter.toLowerCase();
-  const filteredUsers = (users ?? []).filter(user =>
-    user.fullName?.toLowerCase().includes(term) ||
-    user.email?.toLowerCase().includes(term) ||
-    user.role?.toLowerCase().includes(term)
-  );
+  const term = normalizeText(filter.trim());
+  // Orden estable y predecible: primero administradores, luego reclutadores y candidatos; por nombre dentro de cada rol.
+  const ROLE_ORDER: Record<UserRole, number> = { admin: 0, recruiter: 1, candidate: 2 };
+  const filteredUsers = (users ?? [])
+    .filter(user =>
+      !term ||
+      matchesText(user.fullName, term) ||
+      matchesText(user.email, term) ||
+      matchesText(roleText[user.role] ?? user.role, term) ||
+      matchesText(user.role, term)
+    )
+    .sort((a, b) =>
+      (ROLE_ORDER[a.role] ?? 9) - (ROLE_ORDER[b.role] ?? 9) ||
+      (a.fullName ?? "").localeCompare(b.fullName ?? "", "es", { sensitivity: "base" })
+    );
 
   if (loading) {
     return (
@@ -138,10 +148,7 @@ export function AdminUsersTable() {
                 <TableRow key={user.id} className={user.status === 'suspended' ? 'bg-muted/30' : ''}>
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-3">
-                        <Avatar>
-                            <AvatarImage data-ai-hint="person" src={`https://picsum.photos/seed/${user.id}/100/100`} />
-                            <AvatarFallback>{user.fullName?.charAt(0)}</AvatarFallback>
-                        </Avatar>
+                        <UserAvatar name={user.fullName} seed={user.id} />
                         <div>
                             <p>{user.fullName}</p>
                             <p className="text-sm text-muted-foreground">{user.email}</p>
@@ -150,7 +157,7 @@ export function AdminUsersTable() {
                   </TableCell>
                   <TableCell>
                     <Select value={user.role} onValueChange={(v) => handleRoleChange(user, v as UserRole)} disabled={isMe}>
-                      <SelectTrigger className="w-[130px]"><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="w-[130px]" aria-label={`Rol de ${user.fullName}`}><SelectValue /></SelectTrigger>
                       <SelectContent>
                         {(Object.keys(roleText) as UserRole[]).map(r => (
                           <SelectItem key={r} value={r}>{roleText[r]}</SelectItem>
@@ -161,7 +168,7 @@ export function AdminUsersTable() {
                   <TableCell className="hidden lg:table-cell">
                     {user.role === 'recruiter' ? (
                       <Select value={user.organizationRef ?? NO_ORG} onValueChange={(v) => handleOrgChange(user, v)}>
-                        <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="w-[220px]" aria-label={`Organización de ${user.fullName}`}><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value={NO_ORG}>Sin organización</SelectItem>
                           {(orgs ?? []).map(o => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}

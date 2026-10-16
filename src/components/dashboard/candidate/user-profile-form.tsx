@@ -24,34 +24,37 @@ import { useAuth, useFirestore } from "@/firebase";
 import { candidateService } from "@/firebase/firestore/candidate-service";
 import { callAuthedApi } from "@/lib/api-client";
 import { useApp } from "@/components/providers/app-provider";
+import { SENIORITY_OPTIONS } from "@/lib/format";
 
-
+// Años y niveles son números enteros: antes un valor con decimales (la IA devuelve «4.8» o «2.5») hacía que el
+// navegador bloqueara el envío sin mostrar ningún aviso y «Guardar Perfil» parecía no funcionar.
 const skillSchema = z.object({
-  name: z.string().min(1, "El nombre de la habilidad es requerido."),
-  level: z.coerce.number().min(1, "El nivel debe ser entre 1 y 5.").max(5, "El nivel debe ser entre 1 y 5."),
-  years: z.coerce.number().min(0, "Los años no pueden ser negativos.").max(60, "Los años no pueden exceder 60."),
+  name: z.string().trim().min(1, "El nombre de la habilidad es requerido.").max(60, "Máximo 60 caracteres."),
+  level: z.coerce.number().int("Usa un número entero.").min(1, "El nivel debe ser entre 1 y 5.").max(5, "El nivel debe ser entre 1 y 5."),
+  years: z.coerce.number().int("Usa años completos.").min(0, "Los años no pueden ser negativos.").max(60, "Los años no pueden exceder 60."),
 });
 
 const experienceSchema = z.object({
-  title: z.string().min(1, "El puesto es requerido."),
-  company: z.string().min(1, "La empresa es requerida."),
-  startDate: z.string().max(40).default(""),
-  endDate: z.string().max(40).default(""),
-  description: z.string().max(500).default(""),
+  title: z.string().trim().min(1, "El puesto es requerido.").max(150, "Máximo 150 caracteres."),
+  company: z.string().trim().max(150, "Máximo 150 caracteres.").default(""),
+  startDate: z.string().max(40, "Máximo 40 caracteres.").default(""),
+  endDate: z.string().max(40, "Máximo 40 caracteres.").default(""),
+  description: z.string().max(500, "Máximo 500 caracteres.").default(""),
 });
 
 const educationSchema = z.object({
-  institution: z.string().min(1, "La institución es requerida."),
-  degree: z.string().max(150).default(""),
-  field: z.string().max(150).default(""),
-  startDate: z.string().max(40).default(""),
-  endDate: z.string().max(40).default(""),
+  institution: z.string().trim().min(1, "La institución es requerida.").max(150, "Máximo 150 caracteres."),
+  degree: z.string().max(150, "Máximo 150 caracteres.").default(""),
+  field: z.string().max(150, "Máximo 150 caracteres.").default(""),
+  startDate: z.string().max(40, "Máximo 40 caracteres.").default(""),
+  endDate: z.string().max(40, "Máximo 40 caracteres.").default(""),
 });
 
+// Los máximos coinciden con las reglas de seguridad (validCandidate): el error se explica en el formulario.
 const profileSchema = z.object({
-  headline: z.string().min(5, "El titular debe tener al menos 5 caracteres."),
-  location: z.string().min(2, "La ubicación es requerida."),
-  yearsOfExperience: z.coerce.number().min(0, "Los años no pueden ser negativos.").max(60, "Los años no pueden exceder 60."),
+  headline: z.string().trim().min(5, "El titular debe tener al menos 5 caracteres.").max(200, "El titular no puede pasar de 200 caracteres."),
+  location: z.string().trim().min(2, "La ubicación es requerida.").max(200, "La ubicación no puede pasar de 200 caracteres."),
+  yearsOfExperience: z.coerce.number().int("Usa años completos.").min(0, "Los años no pueden ser negativos.").max(60, "Los años no pueden exceder 60."),
   targetSeniority: z.enum(["none", "intern", "junior", "mid", "senior", "lead"]).default("none"),
   available: z.boolean().default(true),
   skills: z.array(skillSchema).max(60),
@@ -97,7 +100,7 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
       location: profile?.location || "",
       yearsOfExperience: profile?.yearsOfExperience || 0,
       targetSeniority: profile?.targetSeniority || "none",
-      available: profile?.available || true,
+      available: profile?.available ?? true,
       skills: profile?.skills?.map(s => ({...s, source: undefined})) || [],
       experience: profile?.experience || [],
       education: profile?.education || [],
@@ -126,6 +129,14 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile]);
 
+  // El formulario tiene campos con errores: se avisa y React Hook Form lleva el foco al primero.
+  function onInvalid() {
+    toast({
+      title: "Revisa el formulario",
+      description: "Hay campos con errores (marcados en rojo). Corrígelos y vuelve a guardar.",
+      variant: "destructive",
+    });
+  }
   async function onSubmit(values: ProfileFormValues) {
     if (!firestore || !auth || !auth.currentUser) return;
     setIsSubmitting(true);
@@ -260,7 +271,7 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} noValidate>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
 
@@ -353,7 +364,7 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
                         <FormField control={form.control} name="yearsOfExperience" render={({ field }) => (
                              <FormItem>
                                 <FormLabel>Años de Experiencia</FormLabel>
-                                <FormControl><Input type="number" min="0" max="60" {...field} /></FormControl>
+                                <FormControl><Input type="number" min="0" max="60" step="1" {...field} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
@@ -368,11 +379,7 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
                                 </FormControl>
                                 <SelectContent>
                                     <SelectItem value="none">Sin preferencia</SelectItem>
-                                    <SelectItem value="intern">Intern</SelectItem>
-                                    <SelectItem value="junior">Junior</SelectItem>
-                                    <SelectItem value="mid">Mid-level</SelectItem>
-                                    <SelectItem value="senior">Senior</SelectItem>
-                                    <SelectItem value="lead">Lead</SelectItem>
+                                    {SENIORITY_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
                                 </SelectContent>
                             </Select>
                             <FormMessage />
@@ -419,14 +426,14 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
                             <FormField control={form.control} name={`skills.${index}.years`} render={({ field }) => (
                                 <FormItem>
                                     <FormLabel className={index !== 0 ? "sr-only" : ""}>Años</FormLabel>
-                                    <FormControl><Input type="number" min="0" className="w-20" placeholder="3" {...field} /></FormControl>
+                                    <FormControl><Input type="number" min="0" max="60" step="1" className="w-20" placeholder="3" {...field} /></FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )} />
                              <FormField control={form.control} name={`skills.${index}.level`} render={({ field }) => (
                                 <FormItem>
                                     <FormLabel className={index !== 0 ? "sr-only" : ""}>Nivel (1-5)</FormLabel>
-                                    <FormControl><Input type="number" min="1" max="5" className="w-20" placeholder="4" {...field} /></FormControl>
+                                    <FormControl><Input type="number" min="1" max="5" step="1" className="w-20" placeholder="4" {...field} /></FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )} />
@@ -476,14 +483,14 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                                 <FormField control={form.control} name={`experience.${index}.startDate`} render={({ field }) => (
-                                    <FormItem><FormLabel>Inicio</FormLabel><FormControl><Input placeholder="Ene 2021" {...field} /></FormControl></FormItem>
+                                    <FormItem><FormLabel>Inicio</FormLabel><FormControl><Input placeholder="Ene 2021" {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
                                 <FormField control={form.control} name={`experience.${index}.endDate`} render={({ field }) => (
-                                    <FormItem><FormLabel>Fin</FormLabel><FormControl><Input placeholder="Presente" {...field} /></FormControl></FormItem>
+                                    <FormItem><FormLabel>Fin</FormLabel><FormControl><Input placeholder="Presente" {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
                             </div>
                             <FormField control={form.control} name={`experience.${index}.description`} render={({ field }) => (
-                                <FormItem><FormLabel>Descripción</FormLabel><FormControl><Textarea rows={2} placeholder="Responsabilidades o logros principales" {...field} /></FormControl></FormItem>
+                                <FormItem><FormLabel>Descripción</FormLabel><FormControl><Textarea rows={2} placeholder="Responsabilidades o logros principales" {...field} /></FormControl><FormMessage /></FormItem>
                             )} />
                         </div>
                     ))}
@@ -521,18 +528,18 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
                             )} />
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <FormField control={form.control} name={`education.${index}.degree`} render={({ field }) => (
-                                    <FormItem><FormLabel>Título</FormLabel><FormControl><Input placeholder="Ej. Ingeniería en Sistemas" {...field} /></FormControl></FormItem>
+                                    <FormItem><FormLabel>Título</FormLabel><FormControl><Input placeholder="Ej. Ingeniería en Sistemas" {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
                                 <FormField control={form.control} name={`education.${index}.field`} render={({ field }) => (
-                                    <FormItem><FormLabel>Área</FormLabel><FormControl><Input placeholder="Ej. Computación" {...field} /></FormControl></FormItem>
+                                    <FormItem><FormLabel>Área</FormLabel><FormControl><Input placeholder="Ej. Computación" {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                                 <FormField control={form.control} name={`education.${index}.startDate`} render={({ field }) => (
-                                    <FormItem><FormLabel>Inicio</FormLabel><FormControl><Input placeholder="2018" {...field} /></FormControl></FormItem>
+                                    <FormItem><FormLabel>Inicio</FormLabel><FormControl><Input placeholder="2018" {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
                                 <FormField control={form.control} name={`education.${index}.endDate`} render={({ field }) => (
-                                    <FormItem><FormLabel>Fin</FormLabel><FormControl><Input placeholder="2022" {...field} /></FormControl></FormItem>
+                                    <FormItem><FormLabel>Fin</FormLabel><FormControl><Input placeholder="2022" {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
                             </div>
                         </div>

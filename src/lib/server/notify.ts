@@ -33,6 +33,8 @@ const EMAIL_TOGGLE_FOR: Partial<Record<NotificationType, "communication_emails" 
   match_rejected_by_candidate: "marketing_emails",
   application_status_changed: "marketing_emails",
   interview_scheduled: "marketing_emails",
+  interview_cancelled: "marketing_emails",
+  job_removed: "marketing_emails",
   new_application: "marketing_emails",
 };
 

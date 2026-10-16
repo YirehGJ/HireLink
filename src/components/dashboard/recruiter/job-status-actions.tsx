@@ -20,6 +20,7 @@ import { jobService } from "@/firebase/firestore/job-service";
 import { useApp } from "@/components/providers/app-provider";
 import { useToast } from "@/hooks/use-toast";
 import { logAudit } from "@/lib/audit-client";
+import { callAuthedApi } from "@/lib/api-client";
 import type { Job } from "@/lib/types";
 
 /**
@@ -30,7 +31,7 @@ export function JobStatusActions({ job }: { job: Job }) {
   const auth = useAuth();
   const router = useRouter();
   const { toast } = useToast();
-  const { readOnly } = useApp();
+  const { readOnly, role } = useApp();
   const [busy, setBusy] = React.useState(false);
 
   const isClosed = job.status === "closed";
@@ -57,18 +58,14 @@ export function JobStatusActions({ job }: { job: Job }) {
   }
 
   async function remove() {
-    if (!firestore) return;
+    if (!auth) return;
     setBusy(true);
     try {
-      await jobService.deleteJob(firestore, job.id);
-      logAudit(auth, {
-        action: "job_deleted",
-        targetType: "job",
-        targetId: job.id,
-        details: job.title,
-      });
+      // El servidor elimina también las postulaciones, recomendaciones y entrevistas de la vacante,
+      // avisa a los candidatos con una postulación en curso y registra la auditoría.
+      await callAuthedApi(auth, "/api/jobs/delete", { jobId: job.id });
       toast({ title: "Vacante eliminada" });
-      router.push("/dashboard/jobs");
+      router.push(role === "admin" ? "/dashboard/admin/jobs" : "/dashboard/jobs");
     } catch (e) {
       console.error(e);
       toast({ title: "No se pudo eliminar la vacante", variant: "destructive" });
@@ -92,8 +89,9 @@ export function JobStatusActions({ job }: { job: Job }) {
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar esta vacante?</AlertDialogTitle>
             <AlertDialogDescription>
-              Se eliminará "{job.title}" de forma permanente. Si solo quieres dejar de recibir
-              postulaciones, usa "Cerrar vacante".
+              Se eliminará "{job.title}" de forma permanente, junto con sus postulaciones, recomendaciones y
+              entrevistas. Los candidatos con una postulación en curso recibirán un aviso. Si solo quieres dejar
+              de recibir postulaciones, usa "Cerrar vacante".
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

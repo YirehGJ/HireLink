@@ -20,11 +20,15 @@ import { useApp } from "@/components/providers/app-provider";
 import { organizationService } from "@/firebase/firestore/organization-service";
 import { userService } from "@/firebase/firestore/user-service";
 import { logAudit } from "@/lib/audit-client";
+import { isHttpUrl } from "@/lib/format";
 
+// Los máximos coinciden con las reglas de seguridad (validOrg).
 const orgSchema = z.object({
-  name: z.string().min(2, "El nombre de la organización es requerido."),
-  website: z.string().url("Debe ser una URL válida.").optional().or(z.literal('')),
-  description: z.string().min(20, "La descripción debe tener al menos 20 caracteres.").optional().or(z.literal('')),
+  name: z.string().trim().min(2, "El nombre de la organización es requerido.").max(200, "El nombre no puede pasar de 200 caracteres."),
+  website: z.string().trim()
+    .max(300, "La dirección no puede pasar de 300 caracteres.")
+    .refine((v) => v === "" || isHttpUrl(v), "Debe ser una URL válida que empiece con http:// o https://"),
+  description: z.string().trim().min(20, "La descripción debe tener al menos 20 caracteres.").max(3000, "La descripción no puede pasar de 3 000 caracteres.").optional().or(z.literal('')),
 });
 
 export function OrganizationProfileForm({ organization }: { organization: Organization | null | undefined }) {

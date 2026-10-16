@@ -12,6 +12,7 @@ import type { Candidate } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState, useMemo } from "react";
+import { SENIORITY_OPTIONS, matchesText, normalizeText } from "@/lib/format";
 
 export default function CandidatesPage() {
     const { data: candidates, loading } = useCollection<Candidate>("candidates");
@@ -22,7 +23,7 @@ export default function CandidatesPage() {
 
     const filtered = useMemo(() => {
         if (!candidates) return [];
-        const term = search.trim().toLowerCase();
+        const term = normalizeText(search.trim());
         const level = Number(minLevel);
         return candidates.filter(c => {
             if (onlyAvailable && !c.available) return false;
@@ -31,10 +32,10 @@ export default function CandidatesPage() {
             if (level > 0 && !skills.some(s => s.level >= level)) return false;
             if (!term) return true;
             return (
-                c.headline?.toLowerCase().includes(term) ||
-                c.fullName?.toLowerCase().includes(term) ||
-                c.location?.toLowerCase().includes(term) ||
-                skills.some(s => s.name.toLowerCase().includes(term))
+                matchesText(c.headline, term) ||
+                matchesText(c.fullName, term) ||
+                matchesText(c.location, term) ||
+                skills.some(s => matchesText(s.name, term))
             );
         });
     }, [candidates, search, minLevel, onlyAvailable, targetSeniority]);
@@ -52,13 +53,14 @@ export default function CandidatesPage() {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                         <Input
                             placeholder="Habilidad, titular, nombre o ubicación..."
+                            aria-label="Buscar candidatos"
                             className="pl-10"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
                     </div>
                     <Select value={minLevel} onValueChange={setMinLevel}>
-                        <SelectTrigger className="w-[190px]"><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="w-[190px]" aria-label="Nivel mínimo de habilidad"><SelectValue /></SelectTrigger>
                         <SelectContent>
                             <SelectItem value="0">Cualquier nivel</SelectItem>
                             <SelectItem value="3">Alguna skill nivel 3+</SelectItem>
@@ -67,14 +69,10 @@ export default function CandidatesPage() {
                         </SelectContent>
                     </Select>
                     <Select value={targetSeniority} onValueChange={setTargetSeniority}>
-                        <SelectTrigger className="w-[190px]"><SelectValue placeholder="Seniority objetivo" /></SelectTrigger>
+                        <SelectTrigger className="w-[190px]" aria-label="Seniority objetivo"><SelectValue placeholder="Seniority objetivo" /></SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">Cualquier seniority</SelectItem>
-                            <SelectItem value="intern">Intern</SelectItem>
-                            <SelectItem value="junior">Junior</SelectItem>
-                            <SelectItem value="mid">Mid-level</SelectItem>
-                            <SelectItem value="senior">Senior</SelectItem>
-                            <SelectItem value="lead">Lead</SelectItem>
+                            {SENIORITY_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
                         </SelectContent>
                     </Select>
                     <div className="flex items-center gap-2">
@@ -82,6 +80,11 @@ export default function CandidatesPage() {
                         <Label htmlFor="available">Solo disponibles</Label>
                     </div>
                 </div>
+                {!loading && (
+                    <p className="text-sm text-muted-foreground" aria-live="polite">
+                        {filtered.length} {filtered.length === 1 ? "candidato" : "candidatos"}
+                    </p>
+                )}
                 {loading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                         {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-72 w-full" />)}

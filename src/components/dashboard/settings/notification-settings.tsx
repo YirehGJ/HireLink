@@ -26,7 +26,7 @@ import { doc, setDoc } from "firebase/firestore";
 import { useApp } from "@/components/providers/app-provider";
 
 const notificationsFormSchema = z.object({
-  communication_emails: z.boolean().default(false).optional(),
+  communication_emails: z.boolean().default(true).optional(),
   marketing_emails: z.boolean().default(true).optional(),
   social_emails: z.boolean().default(true).optional(),
   security_emails: z.boolean(),
@@ -34,8 +34,10 @@ const notificationsFormSchema = z.object({
 
 type NotificationsFormValues = z.infer<typeof notificationsFormSchema>;
 
+// Sin preferencia guardada el servidor SÍ envía el correo (ver src/lib/server/notify.ts): la pantalla debe
+// mostrar activado lo que está activo; antes «Coincidencias de la IA» aparecía apagado y aun así llegaba el correo.
 const defaultValues: Partial<NotificationsFormValues> = {
-  communication_emails: false,
+  communication_emails: true,
   marketing_emails: true,
   social_emails: true,
   security_emails: true,
@@ -55,7 +57,8 @@ export function NotificationSettings() {
   });
 
   React.useEffect(() => {
-    if (savedPrefs) form.reset(savedPrefs);
+    if (savedPrefs) form.reset({ ...defaultValues, ...savedPrefs });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedPrefs]);
 
   async function onSubmit(data: NotificationsFormValues) {

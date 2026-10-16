@@ -11,6 +11,8 @@ export type NotificationType =
   | "match_rejected_by_candidate"
   | "application_status_changed"
   | "interview_scheduled"
+  | "interview_cancelled"
+  | "job_removed"
   | "new_application";
 
 export interface TemplateInput {
@@ -36,6 +38,8 @@ const CTA_LABEL: Partial<Record<NotificationType, string>> = {
   match_rejected_by_candidate: "Ver vacante",
   application_status_changed: "Ver mis postulaciones",
   interview_scheduled: "Ver mi agenda",
+  interview_cancelled: "Ver mis postulaciones",
+  job_removed: "Explorar vacantes",
   new_application: "Ver postulantes",
 };
 

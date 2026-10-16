@@ -20,9 +20,10 @@ import { useAuth, useFirestore } from "@/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Icons } from "@/components/icons";
 import { userService } from "@/firebase/firestore/user-service";
+import { clearIntentionalSignOut } from "@/lib/auth-flags";
 
 const registerSchema = z.object({
-  fullName: z.string().min(2, "Mínimo 2 caracteres"),
+  fullName: z.string().trim().min(2, "Mínimo 2 caracteres").max(120, "Máximo 120 caracteres"),
   email: z.string().email("Email inválido"),
   password: z.string().min(8, "Mínimo 8 caracteres"),
   role: z.enum(["candidate", "recruiter"], {
@@ -53,9 +54,10 @@ function RegisterPageContent() {
     setLoading(true);
 
     try {
-      const { user } = await createUserWithEmailAndPassword(auth, values.email, values.password);
-      await updateProfile(user, { displayName: values.fullName });
-      await userService.ensureProfileExists(firestore, user.uid, values.email, values.fullName, values.role);
+      const { user } = await createUserWithEmailAndPassword(auth, values.email.trim(), values.password);
+      await updateProfile(user, { displayName: values.fullName.trim() });
+      await userService.ensureProfileExists(firestore, user.uid, values.email.trim(), values.fullName.trim(), values.role);
+      clearIntentionalSignOut();
 
       toast({ title: "¡Cuenta creada!", description: "Bienvenido a HireLink." });
       router.push("/dashboard");
@@ -83,15 +85,15 @@ function RegisterPageContent() {
             <FormItem><FormLabel>Nombre completo</FormLabel><FormControl><Input placeholder="Juan Pérez" {...field} /></FormControl><FormMessage /></FormItem>
           )} />
           <FormField control={form.control} name="email" render={({ field }) => (
-            <FormItem><FormLabel>Email</FormLabel><FormControl><Input placeholder="tu@email.com" {...field} /></FormControl><FormMessage /></FormItem>
+            <FormItem><FormLabel>Email</FormLabel><FormControl><Input placeholder="tu@email.com" autoComplete="email" {...field} /></FormControl><FormMessage /></FormItem>
           )} />
           <FormField control={form.control} name="password" render={({ field }) => (
             <FormItem>
               <FormLabel>Contraseña</FormLabel>
               <FormControl>
                 <div className="relative">
-                  <Input type={showPassword ? "text" : "password"} placeholder="********" {...field} />
-                  <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => setShowPassword(!showPassword)}>
+                  <Input type={showPassword ? "text" : "password"} placeholder="********" autoComplete="new-password" {...field} />
+                  <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"} onClick={() => setShowPassword(!showPassword)}>
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                 </div>

@@ -20,8 +20,8 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: 'HireLink | AI-Powered Talent Platform',
-  description: 'HireLink connects top talent with the best companies using explainable AI.',
+  title: 'HireLink | Plataforma de talento con IA explicable',
+  description: 'HireLink conecta a candidatos y empresas con inteligencia artificial que explica cada recomendación.',
 };
 
 export default function RootLayout({
@@ -30,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${nunito.variable}`}>
+    <html lang="es" suppressHydrationWarning className={`${inter.variable} ${nunito.variable}`}>
       <head />
       <body className="font-body antialiased">
         <ThemeProvider

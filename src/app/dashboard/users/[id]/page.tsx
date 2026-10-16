@@ -7,12 +7,13 @@ import { ArrowLeft, Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/user-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDoc } from "@/firebase";
 import { useApp } from "@/components/providers/app-provider";
+import { yearsLabel } from "@/lib/format";
 import type { Candidate, Organization, User } from "@/lib/types";
 
 export default function UserProfilePage({ params }: { params: { id: string } }) {
@@ -63,10 +64,7 @@ export default function UserProfilePage({ params }: { params: { id: string } }) 
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="flex items-center gap-4">
-                        <Avatar className="h-16 w-16">
-                            <AvatarImage data-ai-hint="person" src={`https://picsum.photos/seed/${user.id}/100/100`} />
-                            <AvatarFallback>{user.fullName?.charAt(0)}</AvatarFallback>
-                        </Avatar>
+                        <UserAvatar name={user.fullName} seed={user.id} className="h-16 w-16 text-xl" />
                         <div>
                             <p className="font-bold text-xl">{user.fullName}</p>
                             <p className="text-muted-foreground">{user.email}</p>
@@ -100,7 +98,7 @@ export default function UserProfilePage({ params }: { params: { id: string } }) 
                                 <p className="text-sm text-muted-foreground">Este candidato aún no completa su perfil.</p>
                             ) : (
                                 <>
-                                    <p className="text-sm">{candidate.headline} · {candidate.location} · {candidate.yearsOfExperience} años exp.</p>
+                                    <p className="text-sm">{candidate.headline} · {candidate.location} · {yearsLabel(candidate.yearsOfExperience)} de exp.</p>
                                     <div className="flex flex-wrap gap-2">
                                         {(candidate.skills ?? []).map((s, i) => (
                                             <Badge key={i} variant="secondary">{s.name} · {s.level}/5</Badge>

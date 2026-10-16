@@ -24,6 +24,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth, useCollection, useFirestore } from "@/firebase";
 import { jobService } from "@/firebase/firestore/job-service";
 import { logAudit } from "@/lib/audit-client";
+import { callAuthedApi } from "@/lib/api-client";
+import { matchesText, normalizeText, seniorityLabel } from "@/lib/format";
 import type { Job, Organization } from "@/lib/types";
 import Link from "next/link";
 
@@ -69,10 +71,10 @@ export function AdminJobsTable() {
   };
 
   const handleDelete = async () => {
-    if (!firestore || !toDelete) return;
+    if (!auth || !toDelete) return;
     try {
-      await jobService.deleteJob(firestore, toDelete.id);
-      logAudit(auth, { action: "job_deleted", targetType: "job", targetId: toDelete.id, details: toDelete.title });
+      // Elimina la vacante con sus postulaciones, recomendaciones y entrevistas, y registra la auditoría.
+      await callAuthedApi(auth, "/api/jobs/delete", { jobId: toDelete.id });
       toast({ title: "Vacante eliminada" });
     } catch (e) {
       console.error(e);
@@ -82,13 +84,14 @@ export function AdminJobsTable() {
     }
   };
 
-  const term = filter.toLowerCase();
+  const term = normalizeText(filter.trim());
   const filteredJobs = (jobs ?? [])
     .filter(job => statusFilter === "all" || job.status === statusFilter)
     .filter(job =>
-      job.title.toLowerCase().includes(term) ||
-      job.id.toLowerCase().includes(term) ||
-      (orgName.get(job.organizationRef) ?? job.organizationRef).toLowerCase().includes(term)
+      !term ||
+      matchesText(job.title, term) ||
+      matchesText(job.id, term) ||
+      matchesText(orgName.get(job.organizationRef) ?? job.organizationRef, term)
     );
 
   return (
@@ -142,7 +145,7 @@ export function AdminJobsTable() {
                 <TableRow key={job.id} className={job.status === 'closed' ? 'bg-muted/30' : ''}>
                   <TableCell className="font-medium">{job.title}</TableCell>
                   <TableCell className="text-muted-foreground hidden md:table-cell">{orgName.get(job.organizationRef) ?? job.organizationRef}</TableCell>
-                  <TableCell className="hidden sm:table-cell capitalize">{job.seniority}</TableCell>
+                  <TableCell className="hidden sm:table-cell">{seniorityLabel(job.seniority)}</TableCell>
                   <TableCell>
                     <Badge variant={statusVariantMap[job.status] || 'default'}>
                       {statusText[job.status] ?? job.status}

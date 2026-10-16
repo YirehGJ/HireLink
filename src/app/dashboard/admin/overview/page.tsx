@@ -59,7 +59,7 @@ export default function AdminOverviewPage() {
             <div className="space-y-8">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     <Metric title="Usuarios Totales" value={users?.length ?? 0} hint={`${stats.candidates} candidatos · ${stats.recruiters} reclutadores`} icon={Users} loading={usersLoading} />
-                    <Metric title="Nuevos candidatos" value={stats.candidates} hint="Candidatos registrados en la plataforma" icon={UserPlus} loading={usersLoading} />
+                    <Metric title="Candidatos" value={stats.candidates} hint="Candidatos registrados en la plataforma" icon={UserPlus} loading={usersLoading} />
                     <Metric title="Organizaciones" value={orgs?.length ?? 0} hint="Empresas con perfil activo" icon={Building2} loading={orgsLoading} />
                     <Metric title="Vacantes abiertas" value={stats.open} hint="Publicadas y recibiendo postulaciones" icon={Briefcase} loading={jobsLoading} />
                     <Metric title="Vacantes cerradas" value={stats.closed} hint={`${jobs?.length ?? 0} vacantes en total`} icon={Briefcase} loading={jobsLoading} />

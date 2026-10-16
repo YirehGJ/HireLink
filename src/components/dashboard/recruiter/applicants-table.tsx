@@ -10,7 +10,7 @@ import type { Application, ApplicationStatus, Candidate, Recommendation } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileText, Loader2, Star, Zap } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/user-avatar";
 import { useAuth, useFirestore, useDoc, useCollection } from "@/firebase";
 import { applicationService } from "@/firebase/firestore/application-service";
 import { callAuthedApi } from "@/lib/api-client";
@@ -61,7 +61,7 @@ function ApplicantRow({
   const firestore = useFirestore();
   const { toast } = useToast();
   const { readOnly } = useApp();
-  const { data: candidate } = useDoc<Candidate>(`candidates/${app.candidateRef}`);
+  const { data: candidate, loading: candidateLoading } = useDoc<Candidate>(`candidates/${app.candidateRef}`);
   const [isUpdating, setIsUpdating] = React.useState(false);
   const [detailsOpen, setDetailsOpen] = React.useState(false);
 
@@ -70,17 +70,29 @@ function ApplicantRow({
     setIsUpdating(true);
     try {
       await applicationService.updateStatus(firestore, job.id, app.id, status);
-      await callAuthedApi(auth, "/api/applications/notify-status", {
-        jobId: job.id,
-        candidateUid: app.candidateRef,
-        newStatus: status,
-      });
     } catch (error) {
       console.error("Error updating application status:", error);
       toast({
         title: "Error al actualizar",
         description: "No se pudo cambiar el estado de la postulación.",
         variant: "destructive",
+      });
+      setIsUpdating(false);
+      return;
+    }
+    // El estado ya quedó guardado: si falla el aviso al candidato se dice con claridad, en lugar de
+    // mostrar un error que sugiere que el cambio no se hizo.
+    try {
+      await callAuthedApi(auth, "/api/applications/notify-status", {
+        jobId: job.id,
+        candidateUid: app.candidateRef,
+        newStatus: status,
+      });
+    } catch (error) {
+      console.error("Error notifying status change:", error);
+      toast({
+        title: "Estado actualizado",
+        description: "El cambio se guardó, pero no se pudo avisar al candidato.",
       });
     } finally {
       setIsUpdating(false);
@@ -99,17 +111,14 @@ function ApplicantRow({
     }
   }
 
-  const name = candidate?.fullName || candidate?.headline || 'Cargando...';
+  const name = candidate?.fullName || candidate?.headline || (candidateLoading ? 'Cargando...' : 'Candidato sin perfil');
 
   return (
     <>
     <TableRow>
         <TableCell className="font-medium">
             <div className="flex items-center gap-3">
-                <Avatar>
-                    <AvatarImage data-ai-hint="person" src={`https://picsum.photos/seed/${app.candidateRef}/100/100`} />
-                    <AvatarFallback>{name.charAt(0)}</AvatarFallback>
-                </Avatar>
+                <UserAvatar name={name} seed={app.candidateRef} />
                 <div>
                     <button type="button" className="text-left hover:underline" onClick={() => setDetailsOpen(true)}>{name}</button>
                     <p className="text-sm text-muted-foreground">{candidate?.headline}{candidate?.location ? ` · ${candidate.location}` : ''}</p>
@@ -125,7 +134,7 @@ function ApplicantRow({
         </TableCell>
         <TableCell className="text-muted-foreground hidden md:table-cell">{formatDate(app.appliedAt)}</TableCell>
         <TableCell>
-            <Badge variant={statusVariantMap[app.status] || 'outline'} className="capitalize">
+            <Badge variant={statusVariantMap[app.status] || 'outline'} className="capitalize whitespace-nowrap">
                 {applicationStatusText[app.status]}
             </Badge>
         </TableCell>
@@ -136,7 +145,7 @@ function ApplicantRow({
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => setDetailsOpen(true)}>Detalles</Button>
                 <Select value={app.status} onValueChange={(v) => handleStatusChange(v as ApplicationStatus)} disabled={isUpdating || readOnly}>
-                    <SelectTrigger className="w-[150px]">
+                    <SelectTrigger className="w-[150px]" aria-label={`Cambiar estado de ${name}`}>
                         {isUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : <SelectValue />}
                     </SelectTrigger>
                     <SelectContent>

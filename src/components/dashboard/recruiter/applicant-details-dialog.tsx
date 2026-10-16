@@ -22,6 +22,7 @@ import { interviewService } from "@/firebase/firestore/interview-service";
 import { callAuthedApi } from "@/lib/api-client";
 import { useApp } from "@/components/providers/app-provider";
 import { useToast } from "@/hooks/use-toast";
+import { yearsLabel } from "@/lib/format";
 import type { Application, Candidate, InterviewType, Recommendation } from "@/lib/types";
 
 interface Props {
@@ -79,8 +80,16 @@ export function ApplicantDetailsDialog({ open, onOpenChange, app, candidate, rec
       toast({ title: "Elige una fecha y hora válidas", variant: "destructive" });
       return;
     }
+    if (start.getTime() <= Date.now()) {
+      toast({ title: "La entrevista debe ser en una fecha y hora futuras", variant: "destructive" });
+      return;
+    }
     if (!place.trim()) {
       toast({ title: type === "video" ? "Agrega el enlace de la videollamada" : "Agrega el lugar o teléfono", variant: "destructive" });
+      return;
+    }
+    if (place.trim().length > 500) {
+      toast({ title: "El lugar o enlace no puede pasar de 500 caracteres", variant: "destructive" });
       return;
     }
     setScheduling(true);
@@ -97,23 +106,32 @@ export function ApplicantDetailsDialog({ open, onOpenChange, app, candidate, rec
         location: place.trim(),
       });
       await applicationService.updateStatus(firestore, job.id, app.id, "interview");
-      // Notifica al candidato y deja constancia en la auditoría.
+    } catch (e) {
+      console.error(e);
+      toast({ title: "No se pudo agendar la entrevista", variant: "destructive" });
+      setScheduling(false);
+      return;
+    }
+    try {
+      // Notifica al candidato (con la hora en la zona del reclutador) y deja constancia en la auditoría.
       await callAuthedApi(auth, "/api/applications/notify-status", {
         jobId: job.id,
         candidateUid: app.candidateRef,
         newStatus: "interview",
         interviewAt: start.toISOString(),
         interviewType: type,
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
       toast({ title: "Entrevista agendada", description: "El candidato recibió una notificación." });
+    } catch (e) {
+      // La entrevista ya existe: se evita pedir al reclutador que la agende otra vez y duplicarla.
+      console.error(e);
+      toast({ title: "Entrevista agendada", description: "Se guardó, pero no se pudo avisar al candidato." });
+    } finally {
       setDate("");
       setPlace("");
-      onOpenChange(false);
-    } catch (e) {
-      console.error(e);
-      toast({ title: "No se pudo agendar la entrevista", variant: "destructive" });
-    } finally {
       setScheduling(false);
+      onOpenChange(false);
     }
   }
 
@@ -130,7 +148,7 @@ export function ApplicantDetailsDialog({ open, onOpenChange, app, candidate, rec
             {candidate?.location && (
               <span className="flex items-center"><MapPin className="h-4 w-4 mr-1.5" />{candidate.location}</span>
             )}
-            <span className="flex items-center"><Briefcase className="h-4 w-4 mr-1.5" />{candidate?.yearsOfExperience ?? 0} años exp.</span>
+            <span className="flex items-center"><Briefcase className="h-4 w-4 mr-1.5" />{yearsLabel(candidate?.yearsOfExperience)} de exp.</span>
             {candidate?.email && (
               <a className="flex items-center text-primary hover:underline" href={`mailto:${candidate.email}`}>
                 <Mail className="h-4 w-4 mr-1.5" />{candidate.email}
@@ -212,7 +230,7 @@ export function ApplicantDetailsDialog({ open, onOpenChange, app, candidate, rec
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="space-y-1">
                 <Label htmlFor="int-date">Fecha</Label>
-                <Input id="int-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+                <Input id="int-date" type="date" min={new Date().toLocaleDateString("en-CA")} value={date} onChange={(e) => setDate(e.target.value)} />
               </div>
               <div className="space-y-1">
                 <Label htmlFor="int-time">Hora</Label>

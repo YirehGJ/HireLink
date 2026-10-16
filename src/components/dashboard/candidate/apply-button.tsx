@@ -15,12 +15,14 @@ export function ApplyButton({ job, className }: { job: Job; className?: string }
   const uid = auth?.currentUser?.uid ?? null;
 
   const { data: candidate } = useDoc<Candidate>(uid ? `candidates/${uid}` : null);
-  const { data: applications, loading } = useDoc<Application>(
-    uid ? `jobs/${job.id}/applications/${uid}` : null
+  // Se lee la copia propia de la postulación (/users/{uid}/applications/{jobId}): el candidato siempre
+  // puede leerla, exista o no, a diferencia de la de la vacante, cuya lectura las reglas niegan si no existe.
+  const { data: application, loading } = useDoc<Application>(
+    uid ? `users/${uid}/applications/${job.id}` : null
   );
 
   const [isApplying, setIsApplying] = React.useState(false);
-  const alreadyApplied = !!applications;
+  const alreadyApplied = !!application;
 
   async function handleApply() {
     if (!firestore || !uid) return;
@@ -52,7 +54,7 @@ export function ApplyButton({ job, className }: { job: Job; className?: string }
   if (alreadyApplied) {
     return (
       <Button disabled variant="secondary" className={className}>
-        <CheckCircle className="mr-2 h-4 w-4" /> Ya postulaste
+        <CheckCircle className="mr-2 h-4 w-4" /> {application?.status === "withdrawn" ? "Postulación retirada" : "Ya postulaste"}
       </Button>
     );
   }

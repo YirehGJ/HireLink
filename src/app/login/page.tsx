@@ -2,13 +2,20 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import React from "react";
+import React, { Suspense } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence,
+} from "firebase/auth";
 
 import { Button } from "@/components/ui/button";
 import { FormCard } from "@/components/auth/form-card";
@@ -19,6 +26,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth, useFirestore } from "@/firebase";
 import { Icons } from "@/components/icons";
 import { userService } from "@/firebase/firestore/user-service";
+import { clearIntentionalSignOut, safeNextPath } from "@/lib/auth-flags";
 
 const loginSchema = z.object({
   email: z.string().min(1, "El email es requerido").email("Email inválido"),
@@ -28,17 +36,21 @@ const loginSchema = z.object({
 
 type LoginValues = z.infer<typeof loginSchema>;
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const auth = useAuth();
   const firestore = useFirestore();
   const [showPassword, setShowPassword] = React.useState(false);
   const [loadingType, setLoadingType] = React.useState<'email' | 'google' | null>(null);
+  // Si el guard del dashboard mandó aquí, se vuelve a la página que se intentaba abrir.
+  const nextPath = safeNextPath(searchParams.get("next")) ?? "/dashboard";
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "", rememberMe: false },
+    // Marcado por defecto: la sesión persiste como hasta ahora; desmarcarlo la limita a esta pestaña.
+    defaultValues: { email: "", password: "", rememberMe: true },
   });
 
   const handleAuthError = (error: any) => {
@@ -55,9 +67,12 @@ export default function LoginPage() {
     setLoadingType('email');
     
     try {
-      const { user } = await signInWithEmailAndPassword(auth, values.email, values.password);
+      // «Recuérdame»: sesión persistente en el navegador, o solo mientras la pestaña esté abierta.
+      await setPersistence(auth, values.rememberMe ? browserLocalPersistence : browserSessionPersistence);
+      const { user } = await signInWithEmailAndPassword(auth, values.email.trim(), values.password);
       await userService.ensureProfileExists(firestore, user.uid, user.email!, user.displayName || values.email.split('@')[0]);
-      router.push("/dashboard");
+      clearIntentionalSignOut();
+      router.push(nextPath);
     } catch (error) {
       handleAuthError(error);
     } finally {
@@ -70,10 +85,12 @@ export default function LoginPage() {
     setLoadingType('google');
 
     try {
+      await setPersistence(auth, browserLocalPersistence);
       const provider = new GoogleAuthProvider();
       const { user } = await signInWithPopup(auth, provider);
       await userService.ensureProfileExists(firestore, user.uid, user.email!, user.displayName || "Usuario Google");
-      router.push("/dashboard");
+      clearIntentionalSignOut();
+      router.push(nextPath);
     } catch (error) {
       handleAuthError(error);
     } finally {
@@ -103,7 +120,7 @@ export default function LoginPage() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
-                  <FormControl><Input placeholder="tu@email.com" {...field} /></FormControl>
+                  <FormControl><Input placeholder="tu@email.com" autoComplete="username" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -116,12 +133,13 @@ export default function LoginPage() {
                   <FormLabel>Contraseña</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <Input type={showPassword ? 'text' : 'password'} placeholder="********" {...field} />
+                      <Input type={showPassword ? 'text' : 'password'} placeholder="********" autoComplete="current-password" {...field} />
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
                         className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                        aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -159,5 +177,13 @@ export default function LoginPage() {
 
       </div>
     </FormCard>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto" /></div>}>
+      <LoginPageContent />
+    </Suspense>
   );
 }

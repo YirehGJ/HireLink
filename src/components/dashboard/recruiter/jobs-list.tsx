@@ -12,6 +12,7 @@ import { useCollection } from "@/firebase";
 import type { Job } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SENIORITY_OPTIONS, matchesText, normalizeText, seniorityLabel } from "@/lib/format";
 
 const statusText: Record<Job['status'], string> = {
   published: 'Publicada',
@@ -24,7 +25,7 @@ function ApplicantsCount({ jobId }: { jobId: string }) {
   return (
     <div className="flex items-center text-muted-foreground">
       <Users className="h-4 w-4 mr-2" />
-      <span>{data?.length ?? 0} aplicantes</span>
+      <span>{data?.length ?? 0} {data?.length === 1 ? "aplicante" : "aplicantes"}</span>
     </div>
   );
 }
@@ -40,12 +41,12 @@ export function JobsList() {
   const [seniority, setSeniority] = useState("all");
 
   const filtered = useMemo(() => {
-    const term = search.trim().toLowerCase();
+    const term = normalizeText(search.trim());
     return (recruiterJobs ?? [])
       .filter(j => status === "all" || j.status === status)
       .filter(j => seniority === "all" || j.seniority === seniority)
-      .filter(j => !term || j.title.toLowerCase().includes(term) || j.location.toLowerCase().includes(term) ||
-        (j.searchTags ?? []).some(t => t.toLowerCase().includes(term)));
+      .filter(j => !term || matchesText(j.title, term) || matchesText(j.location, term) ||
+        (j.searchTags ?? []).some(t => matchesText(t, term)));
   }, [recruiterJobs, search, status, seniority]);
 
   // Onboarding (S28): un reclutador sin empresa debe crearla primero.
@@ -85,7 +86,7 @@ export function JobsList() {
           <Input className="pl-10" placeholder="Buscar por título, ubicación o habilidad…" value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <Select value={status} onValueChange={setStatus}>
-          <SelectTrigger className="w-[150px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-[170px]" aria-label="Filtrar por estado"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos los estados</SelectItem>
             <SelectItem value="published">Publicadas</SelectItem>
@@ -94,14 +95,10 @@ export function JobsList() {
           </SelectContent>
         </Select>
         <Select value={seniority} onValueChange={setSeniority}>
-          <SelectTrigger className="w-[150px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-[170px]" aria-label="Filtrar por seniority"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos los niveles</SelectItem>
-            <SelectItem value="intern">Intern</SelectItem>
-            <SelectItem value="junior">Junior</SelectItem>
-            <SelectItem value="mid">Mid-level</SelectItem>
-            <SelectItem value="senior">Senior</SelectItem>
-            <SelectItem value="lead">Lead</SelectItem>
+            {SENIORITY_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
@@ -119,7 +116,7 @@ export function JobsList() {
                             {statusText[job.status]}
                         </Badge>
                     </div>
-                    <CardDescription className="capitalize">{job.location} | {job.seniority}</CardDescription>
+                    <CardDescription>{job.location} | {seniorityLabel(job.seniority)}</CardDescription>
                 </CardHeader>
                 <CardContent className="flex-grow">
                     <ApplicantsCount jobId={job.id} />

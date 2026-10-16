@@ -8,12 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth, useCollection, useDoc } from "@/firebase";
-import { callAuthedApi } from "@/lib/api-client";
+import { aiUnavailableMessage, callAuthedApi } from "@/lib/api-client";
 import { useApp } from "@/components/providers/app-provider";
 import { useToast } from "@/hooks/use-toast";
 import type { Candidate, MatchStatus, Recommendation } from "@/lib/types";
 
 import { MATCH_THRESHOLD } from "@/lib/constants";
+import { yearsLabel } from "@/lib/format";
 
 const statusOf = (r: Recommendation): MatchStatus => r.status ?? "pending";
 
@@ -57,7 +58,7 @@ function RecommendedRow({ rec }: { rec: Recommendation }) {
           </div>
           <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
             {candidate?.location && <span className="flex items-center"><MapPin className="h-4 w-4 mr-1.5" />{candidate.location}</span>}
-            <span className="flex items-center"><Briefcase className="h-4 w-4 mr-1.5" />{candidate?.yearsOfExperience ?? 0} años exp.</span>
+            <span className="flex items-center"><Briefcase className="h-4 w-4 mr-1.5" />{yearsLabel(candidate?.yearsOfExperience)} de exp.</span>
             {candidate?.email && (
               <a className="flex items-center text-primary hover:underline" href={`mailto:${candidate.email}`}>
                 <Mail className="h-4 w-4 mr-1.5" />Contactar
@@ -133,10 +134,12 @@ export function RecommendedCandidates({ jobId }: { jobId: string }) {
     setRunning(true);
     try {
       const res = await callAuthedApi(auth, "/api/recommendations/generate-for-job", { jobId });
-      toast({ title: "Recomendaciones actualizadas", description: `${res.processed} candidatos evaluados por la IA.` });
+      const reused = res.cached ? ` (${res.cached} sin cambios desde la última vez)` : "";
+      const limit = res.aiLimit ? " La IA alcanzó su límite de uso por hoy y no pudo evaluar a los demás." : "";
+      toast({ title: "Recomendaciones actualizadas", description: `${res.processed} candidatos revisados${reused}.${limit}` });
     } catch (e) {
       console.error(e);
-      toast({ title: "No se pudo recalcular", variant: "destructive" });
+      toast({ title: "No se pudo recalcular", description: aiUnavailableMessage(e), variant: "destructive" });
     } finally {
       setRunning(false);
     }

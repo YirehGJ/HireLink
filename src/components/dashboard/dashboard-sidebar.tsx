@@ -31,8 +31,9 @@ import { Icons } from "@/components/icons";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
 import { useApp } from "@/components/providers/app-provider";
 import { useAuth } from "@/firebase";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/user-avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { markIntentionalSignOut } from "@/lib/auth-flags";
 import type { UserRole } from "@/lib/types";
 
 /**
@@ -86,6 +87,7 @@ export function DashboardSidebar() {
 
   const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault();
+    markIntentionalSignOut();
     if (auth) await signOut(auth);
     setUser(null);
     router.push('/');
@@ -135,10 +137,7 @@ export function DashboardSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="h-12">
               <div className="flex w-full items-center gap-3">
-                <Avatar className="h-9 w-9 border">
-                  <AvatarImage src={`https://picsum.photos/seed/${user.id}/100/100`} />
-                  <AvatarFallback>{user.fullName.charAt(0)}</AvatarFallback>
-                </Avatar>
+                <UserAvatar name={user.fullName} seed={user.id} className="h-9 w-9 border" />
                 <div className="flex flex-col text-left overflow-hidden">
                   <span className="text-sm font-semibold truncate">{user.fullName}</span>
                   <span className="text-xs text-muted-foreground truncate">{user.email}</span>

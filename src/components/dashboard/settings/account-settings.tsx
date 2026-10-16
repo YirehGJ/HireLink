@@ -27,7 +27,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const accountFormSchema = z
   .object({
-    fullName: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres." }),
+    fullName: z.string().trim().min(2, { message: "El nombre debe tener al menos 2 caracteres." }).max(120, { message: "El nombre no puede pasar de 120 caracteres." }),
     email: z.string().email({ message: "Formato de email inválido." }),
     currentPassword: z.string().optional(),
     newPassword: z.string().optional(),
@@ -64,6 +64,8 @@ export function AccountSettings() {
   const auth = useAuth();
   const firestore = useFirestore();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  // Las cuentas creadas con Google no tienen contraseña propia en HireLink.
+  const hasPasswordLogin = !!auth?.currentUser?.providerData.some((p) => p.providerId === "password");
 
   const form = useForm<AccountFormValues>({
     resolver: zodResolver(accountFormSchema),
@@ -101,20 +103,26 @@ export function AccountSettings() {
     try {
       const updates: Promise<any>[] = [];
       const updatedUserData: any = {};
-      
+      const changingPassword = hasPasswordLogin && !!data.newPassword && !!data.currentPassword;
+
+      // Primero se verifica la contraseña actual: si es incorrecta no se aplica ningún cambio
+      // (antes se guardaba el nombre y luego se avisaba del error de contraseña).
+      if (changingPassword) {
+        const credential = EmailAuthProvider.credential(user.email, data.currentPassword!);
+        await reauthenticateWithCredential(auth.currentUser, credential);
+      }
+
       // Update display name if changed
       if (data.fullName !== user.fullName) {
         updates.push(updateProfile(auth.currentUser, { displayName: data.fullName }));
         updates.push(updateDoc(doc(firestore, "users", user.id), { fullName: data.fullName }));
         updatedUserData.fullName = data.fullName;
       }
-      
+
       await Promise.all(updates);
 
-      if (data.newPassword && data.currentPassword) {
-        const credential = EmailAuthProvider.credential(user.email, data.currentPassword);
-        await reauthenticateWithCredential(auth.currentUser, credential);
-        await updatePassword(auth.currentUser, data.newPassword);
+      if (changingPassword) {
+        await updatePassword(auth.currentUser, data.newPassword!);
       }
 
       // Update local app state
@@ -194,45 +202,53 @@ export function AccountSettings() {
         <Separator className="my-6"/>
 
         <h4 className="text-md font-medium text-foreground">Cambiar Contraseña</h4>
-        <FormField
-          control={form.control}
-          name="currentPassword"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Contraseña Actual</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="********" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="newPassword"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nueva Contraseña</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="Mínimo 8 caracteres" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="confirmPassword"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Confirmar Nueva Contraseña</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="Repite la nueva contraseña" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {hasPasswordLogin ? (
+          <>
+            <FormField
+              control={form.control}
+              name="currentPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Contraseña Actual</FormLabel>
+                  <FormControl>
+                    <Input type="password" placeholder="********" autoComplete="current-password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="newPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nueva Contraseña</FormLabel>
+                  <FormControl>
+                    <Input type="password" placeholder="Mínimo 8 caracteres" autoComplete="new-password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirmar Nueva Contraseña</FormLabel>
+                  <FormControl>
+                    <Input type="password" placeholder="Repite la nueva contraseña" autoComplete="new-password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Iniciaste sesión con tu cuenta de Google, por lo que la contraseña se administra desde Google y no desde HireLink.
+          </p>
+        )}
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Guardar Cambios

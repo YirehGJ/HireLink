@@ -3,6 +3,7 @@ import { adminDb } from "@/firebase/admin";
 import { generateJobDescription } from "@/ai/flows/generate-job-description-flow";
 import { enforceRateLimit, errorResponse, HttpError, requireUser } from "@/lib/server/guard";
 import { runAi } from "@/lib/server/ai-runner";
+import { fixEscapedNewlines } from "@/lib/format";
 
 export const maxDuration = 60;
 
@@ -26,7 +27,7 @@ export async function POST(request: Request) {
     const searchTags = tags.filter((t: unknown) => typeof t === "string").map((t: string) => t.slice(0, 60));
 
     const data = await runAi(() => generateJobDescription({ title, seniority, searchTags }));
-    return NextResponse.json(data);
+    return NextResponse.json({ ...data, descriptionMd: fixEscapedNewlines(data.descriptionMd) });
   } catch (e) {
     return errorResponse(e);
   }

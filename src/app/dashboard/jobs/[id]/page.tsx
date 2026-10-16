@@ -19,16 +19,19 @@ import { JobStatusActions } from "@/components/dashboard/recruiter/job-status-ac
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { ApplyButton } from "@/components/dashboard/candidate/apply-button";
+import { MarkdownLite } from "@/lib/markdown";
+import { seniorityLabel } from "@/lib/format";
 
 const JobViewForCandidate = ({ job }: { job: Job }) => {
     const { data: org } = useDoc<Organization>(`organizations/${job.organizationRef}`);
+    const tags = (job.searchTags ?? []).filter(Boolean);
     return (
         <Card className="max-w-4xl mx-auto">
             <CardHeader>
                 <div className="flex justify-between items-start gap-4 flex-wrap">
                     <div>
                         <CardTitle>{job.title}</CardTitle>
-                        <CardDescription>{org?.name ? `${org.name} · ` : ''}{job.location} · {job.seniority}</CardDescription>
+                        <CardDescription>{org?.name ? `${org.name} · ` : ''}{job.location} · {seniorityLabel(job.seniority)}</CardDescription>
                     </div>
                     <ApplyButton job={job} />
                 </div>
@@ -47,24 +50,24 @@ const JobViewForCandidate = ({ job }: { job: Job }) => {
                     </div>
                      <div className="flex items-center gap-2">
                         <Briefcase className="h-4 w-4" />
-                        <span className="capitalize">{job.seniority}</span>
+                        <span>{seniorityLabel(job.seniority)}</span>
                     </div>
                      <div className="flex items-center gap-2">
                         <Globe className="h-4 w-4" />
                         <span>{job.remoteAllowed ? "Remoto permitido" : "Solo presencial"}</span>
                     </div>
                 </div>
-                <div className="prose prose-sm dark:prose-invert max-w-none">
-                    <p className="whitespace-pre-line">{job.descriptionMd}</p>
-                </div>
-                <div className="mt-6">
-                    <h4 className="font-semibold mb-2">Habilidades Requeridas</h4>
-                    <div className="flex flex-wrap gap-2">
-                        {job.searchTags.map(tag => (
-                            <Badge key={tag} variant="secondary">{tag}</Badge>
-                        ))}
+                <MarkdownLite text={job.descriptionMd} className="text-sm leading-relaxed" />
+                {tags.length > 0 && (
+                    <div className="mt-6">
+                        <h4 className="font-semibold mb-2">Habilidades Requeridas</h4>
+                        <div className="flex flex-wrap gap-2">
+                            {tags.map((tag, i) => (
+                                <Badge key={`${tag}-${i}`} variant="secondary">{tag}</Badge>
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )}
                 {org?.description && (
                     <div className="mt-6">
                         <h4 className="font-semibold mb-2">Sobre la empresa</h4>
@@ -105,7 +108,8 @@ export default function JobDetailsPage({ params }: { params: { id: string } }) {
     const jobWithId = { ...job, id: params.id };
     const jobApplicants = applications ?? [];
 
-    const backLink = role === 'candidate' ? '/dashboard/applications' : role === 'admin' ? '/dashboard/admin/jobs' : '/dashboard/jobs';
+    // El candidato llega desde Explorar o desde sus recomendaciones: «Volver» lo regresa a Explorar.
+    const backLink = role === 'candidate' ? '/dashboard/explore' : role === 'admin' ? '/dashboard/admin/jobs' : '/dashboard/jobs';
 
     if (role !== 'candidate' && !canManage) {
         return (
@@ -182,7 +186,7 @@ export default function JobDetailsPage({ params }: { params: { id: string } }) {
                         <RecommendedCandidates jobId={params.id} />
                     </TabsContent>
                     <TabsContent value="interviews" className="mt-6">
-                        <InterviewsCalendar jobId={params.id} />
+                        <InterviewsCalendar jobId={params.id} organizationRef={job.organizationRef} />
                     </TabsContent>
                 </Tabs>
             )}
