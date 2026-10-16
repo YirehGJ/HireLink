@@ -15,7 +15,7 @@ export const inDays = (n, hour = 10, now = Date.now()) => {
 };
 
 // ---------------------------------------------------------------- Empresas
-export const organizations = [
+const baseOrganizations = [
   {
     key: "innovatek",
     id: "seed_org_innovatek",
@@ -40,18 +40,18 @@ export const organizations = [
 ];
 
 // ---------------------------------------------------------------- Usuarios
-export const admins = [
+const baseAdmins = [
   { key: "admin", email: "admin@example.com", fullName: "Administrador Prueba" },
 ];
 
-export const recruiters = [
+const baseRecruiters = [
   { key: "rec_innovatek", email: "reclutar@example.com", fullName: "Reclutador Prueba", org: "innovatek", phone: "+52 33 5550 0101" },
   { key: "rec_creativa", email: "sofia.ramirez@example.com", fullName: "Sofía Ramírez Ortega", org: "creativa", phone: "+52 55 5550 0202" },
   { key: "rec_softmex", email: "marco.delgado@example.com", fullName: "Marco Delgado Ruiz", org: "softmex", phone: "+52 81 5550 0303" },
 ];
 
 // ---------------------------------------------------------------- Candidatos
-export const candidates = [
+const baseCandidates = [
   {
     key: "demo",
     email: "candidato@example.com",
@@ -270,7 +270,7 @@ export const candidates = [
 
 // ---------------------------------------------------------------- Vacantes
 // `ago` = días desde su publicación; status por defecto "published".
-export const jobs = [
+const baseJobs = [
   {
     key: "fullstack", org: "innovatek", ago: 1, seniority: "senior", remoteAllowed: true, contractType: "Full-time",
     title: "Desarrollador Full Stack Senior (React y Node.js)", location: "Guadalajara, Jalisco, México",
@@ -329,7 +329,7 @@ export const jobs = [
 
 // ---------------------------------------------------------------- Postulaciones
 // status: applied | screening | assessment | interview | offer | hired | rejected | withdrawn
-export const applications = [
+const baseApplications = [
   { cand: "mariana", job: "fullstack", status: "interview", source: "recommendation", ago: 5, shortlisted: true, notes: "Muy buen perfil técnico y de liderazgo. Entrevista de video agendada." },
   { cand: "demo", job: "fullstack", status: "screening", source: "ai_match", ago: 2, shortlisted: false },
   { cand: "diego", job: "frontend_jr", status: "applied", source: "recommendation", ago: 2 },
@@ -344,7 +344,7 @@ export const applications = [
 
 // ---------------------------------------------------------------- Recomendaciones (IA)
 // status del match: pending | accepted | rejected_by_recruiter | rejected_by_candidate
-export const recommendations = [
+const baseRecommendations = [
   { cand: "demo", job: "fullstack", score: 0.78, status: "accepted", reasons: ["React sólido", "Node.js con experiencia", "Seniority acorde al puesto"] },
   { cand: "demo", job: "frontend_jr", score: 0.52, status: "pending", reasons: ["Dominio de React", "Seniority superior al puesto"] },
   { cand: "demo", job: "qa", score: 0.18, status: "pending", reasons: ["Sin experiencia en pruebas automatizadas"] },
@@ -362,14 +362,14 @@ export const recommendations = [
 
 // ---------------------------------------------------------------- Entrevistas
 // `inDays` positivo = futura. type: phone | video | onsite
-export const interviews = [
+const baseInterviews = [
   { cand: "mariana", job: "fullstack", type: "video", inDays: 2, hour: 11, location: "Videollamada (enlace enviado por correo)", notes: "Entrevista técnica con el líder de ingeniería." },
   { cand: "ana", job: "ux_senior", type: "onsite", inDays: 4, hour: 16, location: "Oficinas de Creativa Digital, Ciudad de México", notes: "Presentación de portafolio." },
   { cand: "fernanda", job: "qa", type: "phone", inDays: 1, hour: 9, location: "Llamada telefónica", notes: "Revisión de la prueba técnica." },
 ];
 
 // ---------------------------------------------------------------- Avisos in-app
-export const notifications = [
+const baseNotifications = [
   { to: "demo", type: "match_accepted", title: "¡La empresa aceptó tu match!", body: "\"Desarrollador Full Stack Senior (React y Node.js)\" quiere avanzar contigo. Revisa tus postulaciones.", href: "/dashboard/applications", ago: 1, read: false },
   { to: "demo", type: "new_recommendation", title: "Nueva recomendación de empleo", body: "Desarrollador Frontend Junior — 52% de compatibilidad. Está en espera de la revisión de la empresa.", href: "/dashboard", ago: 3, read: true },
   { to: "mariana", type: "interview_scheduled", title: "Entrevista agendada", body: "Desarrollador Full Stack Senior: te agendaron una entrevista (videollamada).", href: "/dashboard/applications", ago: 1, read: false },
@@ -380,10 +380,25 @@ export const notifications = [
 ];
 
 // ---------------------------------------------------------------- Auditoría
-export const auditLogs = [
+const baseAuditLogs = [
   { actor: "rec_innovatek", action: "job_created", targetType: "job", targetKey: "fullstack", details: "Publicó \"Desarrollador Full Stack Senior (React y Node.js)\"", ago: 1 },
   { actor: "rec_creativa", action: "job_created", targetType: "job", targetKey: "ux_senior", details: "Publicó \"Diseñador UX/UI Senior\"", ago: 0 },
   { actor: "rec_softmex", action: "job_status_changed", targetType: "job", targetKey: "arquitecto", details: "\"Arquitecto de Software\" → Cerrada", ago: 8 },
   { actor: "rec_innovatek", action: "application_status_changed", targetType: "application", targetKey: "fullstack", details: "Desarrollador Full Stack Senior → Entrevista", ago: 1 },
   { actor: "admin", action: "user_status_changed", targetType: "user", targetKey: "demo", details: "Cuenta de demostración verificada", ago: 9 },
 ];
+
+// ---------------------------------------------------------------- Conjunto completo
+// Base (cuentas y datos de la demostración) + volumen (10 o más registros por función).
+import * as volumen from "./seed-data-volumen.mjs";
+
+export const organizations = [...baseOrganizations, ...volumen.organizations];
+export const admins = baseAdmins;
+export const recruiters = [...baseRecruiters, ...volumen.recruiters];
+export const candidates = [...baseCandidates, ...volumen.candidates];
+export const jobs = [...baseJobs, ...volumen.jobs];
+export const applications = [...baseApplications, ...volumen.applications];
+export const recommendations = [...baseRecommendations, ...volumen.recommendations];
+export const interviews = [...baseInterviews, ...volumen.interviews];
+export const notifications = [...baseNotifications, ...volumen.notifications];
+export const auditLogs = [...baseAuditLogs, ...volumen.auditLogs];

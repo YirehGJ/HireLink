@@ -8,7 +8,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "dev:staging": "node scripts/dev-staging.mjs",
+    "dev:staging": "node scripts/dev-staging.mjs dev",
+    "build:staging": "node scripts/dev-staging.mjs build",
+    "start:staging": "node scripts/dev-staging.mjs start",
+    "test:unit": "node --import ./qa-tests/unitarias/registrar.mjs --test \"qa-tests/unitarias/*.test.mjs\"",
     "seed": "node scripts/seed.mjs",
     "seed:apply": "node scripts/seed.mjs --apply",
     "seed:reset": "node scripts/seed.mjs --reset --apply"
