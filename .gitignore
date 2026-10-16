@@ -64,3 +64,11 @@ rename-test-accounts.mjs
 
 # scratch working directory (Word document build scripts, unrelated to the app)
 /scratch
+
+# pruebas funcionales con navegador: CV generados, estado y resultados de cada ejecución
+/qa-tests/cvs/
+/qa-tests/resultados/
+/qa-tests/.estado.json
+
+# respaldos que escribe scripts/limpiar-huerfanos.mjs antes de borrar
+/scripts/respaldos/
