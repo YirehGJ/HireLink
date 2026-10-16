@@ -17,7 +17,7 @@ probar con libertad sin riesgo para los datos y los usuarios reales.
 - **Producción:** funcionando en `https://hire-link-dun.vercel.app` con el proyecto `hirelink-fd1fe`.
 - **Staging:** el proyecto `hirelink-staging` ya existe (plan Spark, sin costo). Tiene Firestore,
   Authentication con correo y contraseña, una aplicación web registrada, las mismas reglas que el
-  repositorio y los datos de ejemplo cargados (13 cuentas y 82 documentos).
+  repositorio y los datos de ejemplo cargados (31 cuentas y 210 documentos, ver más abajo).
 - **Desarrollo contra staging:** `npm run dev:staging` levanta la aplicación en
   `http://localhost:3100` con las variables de `.env.staging`, sin tocar `.env.local` ni producción.
 - **Pendiente:** cargar las variables de staging en Vercel con ámbito **Preview** y autorizar el
@@ -57,10 +57,13 @@ Esta guía se siguió para crear `hirelink-staging`; se conserva para poder repe
 
 ## Datos de ejemplo
 
-El script `scripts/seed.mjs` crea un conjunto realista y ficticio: 3 empresas, 3 reclutadores,
-9 candidatos con perfil (incluido el de demostración), 9 vacantes (7 publicadas, 1 borrador y 1 cerrada) publicadas en fechas distintas, postulaciones en cada
-estado del pipeline, recomendaciones de la IA, entrevistas próximas, avisos y auditoría. Las
-cuentas están en [CUENTAS_DEMO.md](CUENTAS_DEMO.md).
+El script `scripts/seed.mjs` crea un conjunto realista y ficticio con **10 o más registros en cada
+función**: 10 empresas, 10 reclutadores, 20 candidatos con perfil (incluido el de demostración),
+22 vacantes (18 publicadas, 2 borradores y 2 cerradas) en fechas distintas, 34 postulaciones en cada
+estado del pipeline, 36 recomendaciones de la IA, 13 entrevistas (futuras y ya realizadas), 18 avisos
+y 14 registros de auditoría; en total 31 cuentas y 210 documentos. Los datos base están en
+`scripts/seed-data.mjs` y los adicionales en `scripts/seed-data-volumen.mjs`. Las cuentas están en
+[CUENTAS_DEMO.md](CUENTAS_DEMO.md).
 
 ```bash
 # 1) Simulación: valida los datos y muestra qué crearía. No escribe nada.
@@ -84,12 +87,46 @@ Protecciones del script:
 - Las fechas son relativas a "hoy", de modo que los filtros por fecha de publicación siempre
   tienen vacantes de hoy, de esta semana, de este mes y más antiguas.
 
+## Probar la compilación de producción contra staging
+
+```bash
+npm run build:staging   # valida tipos y lint con las variables de .env.staging
+npm run start:staging   # sirve la compilación en http://localhost:3100 (sin recarga en caliente)
+```
+
+Las pruebas con navegador de `qa-tests/` y las de `security-tests/` se ejecutan sobre este servidor.
+Las funciones de Vercel corren en UTC; para reproducirlo en local, define `TZ=UTC` antes de
+`npm run start:staging`.
+
+## Cupo de la IA (Groq)
+
+La IA usa el plan gratuito de Groq. Para `openai/gpt-oss-120b` el proveedor informa en sus errores 429 un
+límite de 8 000 tokens por minuto y de **200 000 tokens por día**. La clave de Groq es la **misma** en
+staging y en producción, así que los dos entornos **comparten el cupo**: durante las pruebas de la Semana 4
+las ejecuciones en staging lo agotaron también para producción. El cupo se recupera de forma continua (la
+ventana es de 24 horas): lo que se gasta hoy se libera mañana a la misma hora.
+
+Consumen tokens cada análisis de CV, cada descripción generada y cada par candidato y vacante que se
+evalúa. Guardar el perfil o pulsar «Buscar candidatos» evalúa varios pares, pero desde la Semana 4 solo se
+vuelven a evaluar los que cambiaron: cada recomendación guarda una huella (`inputHash`) de lo que vio el
+modelo y, si el perfil y la vacante siguen igual, se reutiliza el puntaje sin llamar a la IA.
+
+Qué hacer cuando se agote:
+
+- La aplicación responde con «La IA alcanzó su límite de uso gratuito por hoy» (HTTP 503) en lugar de
+  «Error interno», y no lo reporta a Sentry como un error.
+- Cada modelo tiene su propio cupo. Se puede definir `GROQ_MODEL_ID=openai/gpt-oss-20b` en las variables de
+  Vercel y volver a desplegar, o esperar a que se libere.
+- Las pruebas largas en staging deben correr con el modelo de respaldo para no gastar el cupo de producción
+  (en PowerShell: `$env:GROQ_MODEL_ID = 'openai/gpt-oss-20b'` antes de `npm run start:staging`).
+
 ## Reglas de oro
 
 1. Las pruebas de seguridad (`security-tests/`) y el script de datos **nunca** se ejecutan contra
-   producción.
+   producción (las de seguridad se niegan a hacerlo salvo `--allow-production`).
 2. Un cambio en `firestore.rules` se publica primero en staging, se prueba y después en producción.
-3. Cada entorno tiene sus propias claves; las de producción no se copian a staging.
+3. Cada entorno tiene sus propias claves de Firebase; las de producción no se copian a staging. La única
+   excepción es la clave de Groq, que se comparte (ver la sección anterior).
 4. Antes de dar por bueno un despliegue, abrir `/api/health?deep=1` en ese entorno.
 
 ## Verificar un entorno

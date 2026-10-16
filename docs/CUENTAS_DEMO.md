@@ -27,16 +27,45 @@ reales y no deben usarse con datos personales verdaderos.
 | Candidata | `fernanda.ortiz@example.com` | Fernanda Ortiz Lara | QA Engineer |
 | Candidato | `jorge.villalobos@example.com` | Jorge Villalobos Cruz | Líder técnico (no disponible) |
 
+### Reclutadores adicionales (una empresa cada uno)
+
+| Correo | Nombre | Empresa |
+|---|---|---|
+| `laura.beltran@example.com` | Laura Beltrán Cruz | Aurora Fintech |
+| `ricardo.fuentes@example.com` | Ricardo Fuentes Maya | Nubia Cloud Services |
+| `daniela.cortes@example.com` | Daniela Cortés Rivas | Salud Digital MX |
+| `hector.aguilar@example.com` | Héctor Aguilar Domínguez | EduTec Latinoamérica |
+| `paola.ibarra@example.com` | Paola Ibarra Quintero | Agroanalítica del Bajío |
+| `emilio.garza@example.com` | Emilio Garza Treviño | Movilidad Urbana Labs |
+| `karla.medina@example.com` | Karla Medina Escobar | Retail Omnicanal |
+
+### Candidatos adicionales
+
+| Correo | Nombre | Perfil |
+|---|---|---|
+| `luis.ramos@example.com` | Luis Fernando Ramos Aguilar | Científico de datos (Senior) |
+| `paulina.castillo@example.com` | Paulina Castillo Ríos | Product Manager (Senior) |
+| `andres.gutierrez@example.com` | Andrés Gutiérrez Mora | Desarrollo móvil con Flutter (Mid) |
+| `monica.reyes@example.com` | Mónica Reyes Villanueva | Investigación UX (Mid) |
+| `ivan.santillan@example.com` | Iván Santillán Pedraza | DevOps y SRE (Senior, no disponible) |
+| `gabriela.montes@example.com` | Gabriela Montes Orozco | Frontend (Mid) |
+| `oscar.dominguez@example.com` | Óscar Domínguez Lira | Ciberseguridad (Mid) |
+| `natalia.cervantes@example.com` | Natalia Cervantes Ponce | Backend con Python (Mid) |
+| `samuel.vargas@example.com` | Samuel Vargas Echeverría | Soporte TI (Junior) |
+| `rebeca.zamora@example.com` | Rebeca Zamora Íñiguez | Scrum Master y líder de proyectos (Lead) |
+| `elena.navarro@example.com` | Elena Navarro Pineda | Inteligencia de negocios (Junior) |
+
 ## Qué datos acompañan a las cuentas
 
 | Elemento | Detalle |
 |---|---|
-| Empresas | Innovatek Soluciones, Creativa Digital y Softmex Consultores |
-| Vacantes | 9: 7 publicadas, 1 en borrador y 1 cerrada, con seniority y modalidad variados |
-| Fechas de publicación | Hoy, hace 1, 2, 3, 6, 10, 18, 27 y 40 días (sirven para probar el filtro por fecha) |
-| Postulaciones | 10, en los estados Postulado, En revisión, Evaluación, Entrevista, Oferta, Contratado, Rechazado y Retirado |
-| Recomendaciones de la IA | 13, en espera, aceptadas, rechazadas por la empresa y rechazadas por el candidato |
-| Entrevistas | 3 próximas: videollamada, presencial y telefónica |
+| Empresas | 10: Innovatek Soluciones, Creativa Digital, Softmex Consultores, Aurora Fintech, Nubia Cloud Services, Salud Digital MX, EduTec Latinoamérica, Agroanalítica del Bajío, Movilidad Urbana Labs y Retail Omnicanal |
+| Vacantes | 22: 18 publicadas, 2 en borrador y 2 cerradas, con seniority y modalidad variados |
+| Fechas de publicación | De hoy a hace 45 días (sirven para probar el filtro por fecha) |
+| Postulaciones | 34, en los estados Postulado, En revisión, Evaluación, Entrevista, Oferta, Contratado, Rechazado y Retirado |
+| Recomendaciones de la IA | 36, en espera, aceptadas, rechazadas por la empresa y rechazadas por el candidato |
+| Entrevistas | 13: videollamada, presencial y telefónica, futuras y ya realizadas |
+| Avisos y auditoría | 18 avisos dentro de la aplicación y 14 registros de auditoría |
 
 ## Recorrido sugerido de 5 minutos
 

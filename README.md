@@ -68,9 +68,22 @@ Proyecto académico (Seminario de Integración: Desarrollo) en producción en
 - Endpoints autenticados (verificación de ID token) con límite de uso por usuario
   (`enforceRateLimit` en [`src/lib/server/guard.ts`](src/lib/server/guard.ts)) y
   cabeceras de seguridad HTTP ([`next.config.mjs`](next.config.mjs)).
-- Batería de pruebas automatizadas contra el proyecto real con cuentas desechables:
-  reglas de Firestore, endpoints de la API y carga con usuarios simultáneos — ver
-  [`security-tests/README.md`](security-tests/README.md) para los resultados.
+- Batería de pruebas automatizadas con cuentas desechables: reglas de Firestore,
+  endpoints de la API y carga con usuarios simultáneos — ver
+  [`security-tests/README.md`](security-tests/README.md) para los resultados. Se ejecutan
+  contra staging (`--env .env.staging`) y se niegan a correr contra producción.
+
+---
+
+## Pruebas
+
+| Qué | Cómo | Dónde |
+|---|---|---|
+| Unitarias del motor de recomendaciones y del cupo de la IA (sin red ni tokens) | `npm run test:unit` | [`qa-tests/unitarias/`](qa-tests/unitarias) |
+| Funcionales con navegador: recorren la aplicación con datos realistas | `node qa-tests/funcional-1.mjs <etiqueta>` y `funcional-2.mjs` | [`qa-tests/README.md`](qa-tests/README.md) |
+| Sondas de defectos (una por hallazgo, antes y después de corregir) | `node qa-tests/defectos.mjs <etiqueta>` | [`qa-tests/README.md`](qa-tests/README.md) |
+| Seguridad, API y carga | `node security-tests/sec-test.mjs --env .env.staging` (y `flow-test`, `api-test`) | [`security-tests/README.md`](security-tests/README.md) |
+| Compilación, tipos y lint | `npm run build:staging` | [`docs/ENTORNOS.md`](docs/ENTORNOS.md) |
 
 ---
 
@@ -97,6 +110,7 @@ FIREBASE_PRIVATE_KEY="..."   # con los \n literales del JSON descargado
 GROQ_API_KEY="..."
 
 # Opcionales (la app funciona sin ellas; ver docs/EMAIL_SETUP.md y docs/SENTRY_SETUP.md)
+GROQ_MODEL_ID=""   # modelo de Groq; vacío = openai/gpt-oss-120b. Respaldo si se agota su cupo: openai/gpt-oss-20b
 RESEND_API_KEY=""
 EMAIL_FROM=""
 NEXT_PUBLIC_APP_URL=""
@@ -158,6 +172,9 @@ escribir en producción sin `--allow-production`. Cómo separar desarrollo, stag
   notificaciones, envío de correo).
 - `firestore.rules`: reglas de seguridad de Firestore.
 - `security-tests/`: pruebas automatizadas de seguridad, API y regresión.
+- `qa-tests/`: pruebas unitarias y funcionales con navegador, y sondas de defectos.
+- `scripts/`: datos de ejemplo (`seed.mjs`), entorno de staging (`dev-staging.mjs`) y limpieza de
+  datos huérfanos (`limpiar-huerfanos.mjs`, simulación por defecto).
 - `docs/`: decisiones de diseño, cronograma y documentación de las integraciones
   opcionales.
 
@@ -165,6 +182,11 @@ escribir en producción sin `--allow-production`. Cómo separar desarrollo, stag
 
 - [docs/CRONOGRAMA_FINAL.md](docs/CRONOGRAMA_FINAL.md) — estado real por semana y
   cronograma de cierre.
+- [docs/ENTORNOS.md](docs/ENTORNOS.md) — desarrollo, staging y producción, datos de
+  ejemplo y cupo de la IA.
+- [docs/CUENTAS_DEMO.md](docs/CUENTAS_DEMO.md) — cuentas y datos de demostración.
+- [docs/CONTEXTO_PROYECTO.md](docs/CONTEXTO_PROYECTO.md) — resumen del proyecto para quien se
+  incorpora.
 - [docs/DECISION_STORAGE_CV.md](docs/DECISION_STORAGE_CV.md) — por qué no se
   almacena el archivo del CV.
 - [docs/DECISION_SEARCH.md](docs/DECISION_SEARCH.md) — por qué la búsqueda es en el

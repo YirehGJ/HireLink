@@ -25,7 +25,7 @@ Leyenda: ✅ hecho y verificado · 🟡 parcial · ❌ no hecho · ➖ cambió p
 | S09 | Notificaciones in-app | ✅ | Campana con contador en tiempo real; eventos de postulación, estado, entrevista y match |
 | S10 | Entrevistas | ✅ | Agenda con fecha/hora/tipo, calendario y aviso al candidato |
 | S11 | Reglas v1 + emuladores | 🟡 | Reglas endurecidas y 59 pruebas automáticas, pero contra el proyecto real, no con Emulator Suite |
-| S12 | QA + accesibilidad + responsive | 🟡 | QA funcional y de seguridad ✅. **Sin medir** Lighthouse, accesibilidad ni revisión móvil |
+| S12 | QA + accesibilidad + responsive | 🟡 | QA funcional (regresión con navegador en `qa-tests/`) y de seguridad ✅. **Sin medir** Lighthouse, accesibilidad ni revisión móvil |
 | S13 | Release + demo | 🟡 | Cuentas de prueba y demo posible. Faltan seed script, guía de uso y video |
 
 ### Cronograma 2026 (S14–S30)
@@ -56,6 +56,21 @@ Leyenda: ✅ hecho y verificado · 🟡 parcial · ❌ no hecho · ➖ cambió p
 - Migración de IA a Groq con reintentos, cola por instancia y límites de uso.
 - Auditoría de seguridad: 12 vulnerabilidades corregidas, cabeceras de seguridad, endpoints autenticados y con límite de uso.
 - Prueba de carga: 100 usuarios distintos simultáneos, 100/100 correctas.
+- **Revisión funcional de extremo a extremo con datos realistas** (extra de la Semana 4; informe «Informe extra:
+  hallazgos no contemplados y pruebas» en la carpeta de entregas). Se cargaron 10 o más registros por función y se
+  recorrieron los tres roles; salieron 40 puntos de mejora que este cronograma no contemplaba (9 de impacto alto, 20
+  medio y 11 bajo), todos corregidos: guardado del perfil tras analizar un CV, calendario de entrevistas del reclutador,
+  eliminación de vacantes en cascada, recuperación de contraseña real, hora correcta en los avisos, guard de sesión y
+  de rol, cupo diario de la IA, entre otros. Los riesgos que requieren una decisión del equipo (R1 a R10) quedaron
+  documentados en el informe.
+- **Pruebas nuevas** (`qa-tests/`): unitarias del motor de recomendaciones (`npm run test:unit`, sin red ni tokens),
+  regresión funcional con navegador (`funcional-1.mjs` y `funcional-2.mjs`) y sondas de defectos (`defectos.mjs`). Las
+  baterías de `security-tests/` ahora aceptan `--env` y se niegan a correr contra producción.
+- **Datos de ejemplo con volumen** (31 cuentas, 210 documentos) y script de limpieza de datos huérfanos
+  (`scripts/limpiar-huerfanos.mjs`, simulación por defecto).
+- **Cupo de la IA gratuita**: 200 000 tokens al día compartidos entre staging y producción. Los puntajes que no
+  cambiaron se reutilizan sin llamar a la IA, el agotamiento del cupo se explica en pantalla y `GROQ_MODEL_ID`
+  permite cambiar de modelo (ver [ENTORNOS.md](ENTORNOS.md)).
 
 ### Plan de demo (Notion) — ¿se puede hacer hoy?
 
@@ -75,7 +90,7 @@ producto estable, documentado y probado con usuarios, y reservar tiempo para la 
 | 1 | 21–27 sep | **Estabilizar producción** ✅ | Confirmar despliegue en Vercel con las 4 variables; probar los 3 roles en la URL pública; revisar cuotas de Firebase (Spark/Blaze) y Groq; congelar `main` como línea base v0.9-rc. **Cerrada el 7 de octubre:** variables de Firebase Admin completas y clave de Groq corregida; análisis de CV (≈7 s) y recomendaciones verificados en producción. Límite conocido: la cuenta gratuita de Groq permite 8 000 tokens por minuto, así que recalcular recomendaciones con 5 vacantes tarda cerca de 50 s | Backend |
 | 2 | 28 sep–4 oct | **Cerrar S19/S20/S24** ✅ | Decisión escrita sobre Storage (recomendado: no subir el PDF y documentarlo); vista previa de experiencia/educación en el asistente de CV; plantilla de correo (o dejarlo documentado como v2) | Backend + Frontend |
 | 3 | 5–11 oct | **Cerrar S25/S26** ✅ | Sentry (error tracking) en cliente y API; filtro por fecha y por "seniority objetivo"; documento "búsqueda en cliente vs servicio externo" | Backend + Frontend |
-| 4 | 12–18 oct | **Datos y entornos (S29 parte 1)** 🟡 | Script `seed` con datos de ejemplo realistas ✅; entornos dev/staging/prod ✅ proyecto `hirelink-staging` creado, con reglas publicadas y datos cargados, y `npm run dev:staging` (queda cargar las variables Preview en Vercel); cuentas demo documentadas ✅ | Backend + Docs/QA |
+| 4 | 12–18 oct | **Datos y entornos (S29 parte 1)** 🟡 | Script `seed` con datos de ejemplo realistas y con volumen (31 cuentas, 210 documentos) ✅; entornos dev/staging/prod ✅ proyecto `hirelink-staging` creado, con reglas publicadas y datos cargados, y `npm run dev:staging` (queda cargar las variables Preview en Vercel); cuentas demo documentadas ✅; revisión funcional con datos realistas y su informe extra ✅ | Backend + Docs/QA |
 | 5 | 19–25 oct | **Performance y calidad (S27)** | Medir con Lighthouse; code splitting de la página de perfil (pdf.js); actualizar dependencias (`next`, `pdfjs-dist`, `firebase`) y repetir `security-tests/`; limpiar imports | Frontend + Backend |
 | 6 | 26 oct–1 nov | **Accesibilidad y móvil (S12/S28)** | Contraste, foco y teclado; revisión mobile-first de las vistas clave; tours/hints del primer ingreso; meta Lighthouse ≥ 80 | Frontend + Producto |
 | 7 | 2–8 nov | **Piloto (S29 parte 2)** | 2–5 reclutadores y ~10 candidatos reales; guion de tareas; formulario de feedback; bitácora de errores en Notion | Producto + Docs/QA |
