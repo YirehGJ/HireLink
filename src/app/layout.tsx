@@ -33,6 +33,13 @@ export default function RootLayout({
     <html lang="es" suppressHydrationWarning className={`${inter.variable} ${nunito.variable}`}>
       <head />
       <body className="font-body antialiased">
+        {/* Primer elemento al que llega Tab: salta el menú y va directo al contenido (`<main id="contenido">`). */}
+        <a
+          href="#contenido"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground focus:shadow-lg"
+        >
+          Saltar al contenido principal
+        </a>
         <ThemeProvider
             attribute="class"
             defaultTheme="system"

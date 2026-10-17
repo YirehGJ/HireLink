@@ -10,7 +10,7 @@ const alertVariants = cva(
       variant: {
         default: "bg-background text-foreground",
         destructive:
-          "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
+          "border-destructive/50 text-destructive-text dark:border-destructive [&>svg]:text-destructive-text",
       },
     },
     defaultVariants: {
@@ -32,11 +32,13 @@ const Alert = React.forwardRef<
 ))
 Alert.displayName = "Alert"
 
+// El título de un aviso no es un encabezado de la página (como h5 rompía el orden de los niveles): se lee dentro del
+// role="alert". Es un <p> y no un <div> para que no le afecte el selector `[&>svg+div]` de las variantes.
 const AlertTitle = React.forwardRef<
   HTMLParagraphElement,
-  React.HTMLAttributes<HTMLHeadingElement>
+  React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
-  <h5
+  <p
     ref={ref}
     className={cn("mb-1 font-medium leading-none tracking-tight", className)}
     {...props}

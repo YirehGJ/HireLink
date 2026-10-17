@@ -177,7 +177,7 @@ export function ApplicantDetailsDialog({ open, onOpenChange, app, candidate, rec
           )}
 
           <div>
-            <h4 className="text-sm font-semibold mb-2">Habilidades</h4>
+            <h3 className="text-sm font-semibold mb-2">Habilidades</h3>
             <div className="flex flex-wrap gap-2">
               {(candidate?.skills ?? []).length === 0 && (
                 <p className="text-sm text-muted-foreground">Sin habilidades registradas.</p>
@@ -190,7 +190,7 @@ export function ApplicantDetailsDialog({ open, onOpenChange, app, candidate, rec
 
           {(candidate?.experience?.length ?? 0) > 0 && (
             <div>
-              <h4 className="text-sm font-semibold mb-2 flex items-center gap-1.5"><Briefcase className="h-4 w-4" />Experiencia</h4>
+              <h3 className="text-sm font-semibold mb-2 flex items-center gap-1.5"><Briefcase className="h-4 w-4" />Experiencia</h3>
               <ul className="space-y-2">
                 {candidate!.experience!.map((e, i) => (
                   <li key={i} className="text-sm">
@@ -205,7 +205,7 @@ export function ApplicantDetailsDialog({ open, onOpenChange, app, candidate, rec
 
           {(candidate?.education?.length ?? 0) > 0 && (
             <div>
-              <h4 className="text-sm font-semibold mb-2 flex items-center gap-1.5"><GraduationCap className="h-4 w-4" />Educación</h4>
+              <h3 className="text-sm font-semibold mb-2 flex items-center gap-1.5"><GraduationCap className="h-4 w-4" />Educación</h3>
               <ul className="space-y-2">
                 {candidate!.education!.map((e, i) => (
                   <li key={i} className="text-sm">
@@ -226,7 +226,7 @@ export function ApplicantDetailsDialog({ open, onOpenChange, app, candidate, rec
           </div>
 
           <div className="space-y-3 rounded-lg border p-4">
-            <h4 className="text-sm font-semibold flex items-center gap-2"><CalendarPlus className="h-4 w-4" />Agendar entrevista</h4>
+            <h3 className="text-sm font-semibold flex items-center gap-2"><CalendarPlus className="h-4 w-4" />Agendar entrevista</h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="space-y-1">
                 <Label htmlFor="int-date">Fecha</Label>

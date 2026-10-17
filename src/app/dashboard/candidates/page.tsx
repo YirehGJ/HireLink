@@ -91,7 +91,7 @@ export default function CandidatesPage() {
                     </div>
                 ) : filtered.length === 0 ? (
                     <div className="text-center py-16 border-2 border-dashed rounded-lg">
-                        <h3 className="text-xl font-semibold">No se encontraron candidatos</h3>
+                        <h2 className="text-xl font-semibold">No se encontraron candidatos</h2>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">

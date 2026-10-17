@@ -68,27 +68,27 @@ export default function AdminOverviewPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                     <Link href="/dashboard/admin/users" className="bg-card p-6 rounded-lg hover:bg-muted/50 transition-colors flex flex-col items-center text-center">
                         <Users className="h-10 w-10 mb-2 text-primary"/>
-                        <h3 className="text-lg font-semibold">Gestionar Usuarios</h3>
+                        <h2 className="text-lg font-semibold">Gestionar Usuarios</h2>
                         <p className="text-sm text-muted-foreground">Roles, estados y modo &quot;ver como&quot;.</p>
                     </Link>
                     <Link href="/dashboard/admin/organizations" className="bg-card p-6 rounded-lg hover:bg-muted/50 transition-colors flex flex-col items-center text-center">
                         <Building2 className="h-10 w-10 mb-2 text-primary"/>
-                        <h3 className="text-lg font-semibold">Organizaciones</h3>
+                        <h2 className="text-lg font-semibold">Organizaciones</h2>
                         <p className="text-sm text-muted-foreground">Empresas y sus reclutadores.</p>
                     </Link>
                     <Link href="/dashboard/admin/jobs" className="bg-card p-6 rounded-lg hover:bg-muted/50 transition-colors flex flex-col items-center text-center">
                         <Briefcase className="h-10 w-10 mb-2 text-primary"/>
-                        <h3 className="text-lg font-semibold">Gestionar Vacantes</h3>
+                        <h2 className="text-lg font-semibold">Gestionar Vacantes</h2>
                         <p className="text-sm text-muted-foreground">Moderar y supervisar publicaciones.</p>
                     </Link>
                     <Link href="/dashboard/admin/audit" className="bg-card p-6 rounded-lg hover:bg-muted/50 transition-colors flex flex-col items-center text-center">
                         <Shield className="h-10 w-10 mb-2 text-primary"/>
-                        <h3 className="text-lg font-semibold">Auditoría y KPIs</h3>
+                        <h2 className="text-lg font-semibold">Auditoría y KPIs</h2>
                         <p className="text-sm text-muted-foreground">Actividad y embudo de selección.</p>
                     </Link>
                     <Link href="/dashboard/profile" className="bg-card p-6 rounded-lg hover:bg-muted/50 transition-colors flex flex-col items-center text-center">
                         <User className="h-10 w-10 mb-2 text-primary"/>
-                        <h3 className="text-lg font-semibold">Ver mi Perfil</h3>
+                        <h2 className="text-lg font-semibold">Ver mi Perfil</h2>
                         <p className="text-sm text-muted-foreground">Información de tu cuenta.</p>
                     </Link>
                 </div>

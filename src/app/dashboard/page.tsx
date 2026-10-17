@@ -7,6 +7,7 @@ import { useApp } from "@/components/providers/app-provider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RecommendationFeed } from "@/components/dashboard/candidate/recommendation-feed";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { CandidateFirstSteps } from "@/components/dashboard/first-steps";
 import { getGreeting } from "@/lib/utils";
 
 export default function DashboardPage() {
@@ -55,6 +56,7 @@ export default function DashboardPage() {
         title="Tus Próximas Oportunidades"
         description="Basado en tu perfil, estas son las vacantes que mejor se ajustan a ti."
       />
+      <CandidateFirstSteps />
       <RecommendationFeed />
     </div>
   );

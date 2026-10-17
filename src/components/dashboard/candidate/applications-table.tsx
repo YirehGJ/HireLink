@@ -58,16 +58,16 @@ function ApplicationRow({ app }: { app: Application }) {
   const { data: job, loading } = useDoc<Job>(`jobs/${app.jobRef}`);
 
   return (
-    <TableRow>
-        <TableCell className="font-medium">{job?.title ?? (loading ? 'Cargando...' : 'Vacante eliminada')}</TableCell>
+    <TableRow className="block px-1 py-2 md:table-row md:p-0">
+        <TableCell className="block px-3 py-1.5 font-medium md:table-cell md:p-4">{job?.title ?? (loading ? 'Cargando...' : 'Vacante eliminada')}</TableCell>
         <TableCell className="text-muted-foreground hidden md:table-cell">{job?.location ?? 'N/A'}</TableCell>
-        <TableCell className="text-muted-foreground hidden sm:table-cell">{format(toJsDate(app.appliedAt), 'dd/MM/yyyy')}</TableCell>
-        <TableCell>
+        <TableCell className="text-muted-foreground hidden md:table-cell">{format(toJsDate(app.appliedAt), 'dd/MM/yyyy')}</TableCell>
+        <TableCell className="block px-3 py-1.5 md:table-cell md:p-4">
             <Badge variant={statusVariantMap[app.status] || 'outline'} className="capitalize">
                 {statusTextMap[app.status]}
             </Badge>
         </TableCell>
-        <TableCell className="text-right">
+        <TableCell className="block px-3 py-1.5 md:table-cell md:p-4 md:text-right">
             {job ? (
               <Button variant="ghost" size="sm" asChild>
                   <Link href={`/dashboard/jobs/${app.jobRef}`}>
@@ -86,7 +86,7 @@ export function ApplicationsTable({ applications }: ApplicationsTableProps) {
     return (
       <div className="text-center py-16 border-2 border-dashed rounded-lg bg-card/50">
         <FileText className="h-12 w-12 mx-auto text-muted-foreground" />
-        <h3 className="text-xl font-semibold mt-4">Aún no has aplicado a ninguna vacante</h3>
+        <h2 className="text-xl font-semibold mt-4">Aún no has aplicado a ninguna vacante</h2>
         <p className="text-muted-foreground mt-2">Explora tus recomendaciones y encuentra tu próxima oportunidad.</p>
         <Button asChild className="mt-4">
             <Link href="/dashboard/explore">Explorar Vacantes</Link>
@@ -104,11 +104,11 @@ export function ApplicationsTable({ applications }: ApplicationsTableProps) {
       <CardContent>
         <div className="border rounded-lg overflow-hidden">
             <Table>
-                <TableHeader>
+                <TableHeader className="hidden md:table-header-group">
                     <TableRow>
                         <TableHead>Vacante</TableHead>
                         <TableHead className="hidden md:table-cell">Ubicación</TableHead>
-                        <TableHead className="hidden sm:table-cell">Fecha</TableHead>
+                        <TableHead className="hidden md:table-cell">Fecha</TableHead>
                         <TableHead>Estado</TableHead>
                         <TableHead className="text-right">Acciones</TableHead>
                     </TableRow>

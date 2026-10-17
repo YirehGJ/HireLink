@@ -25,7 +25,7 @@ export function UserAvatar({ name, seed, className }: { name?: string | null; se
     <Avatar className={className}>
       <AvatarFallback
         className="font-semibold text-white"
-        style={{ backgroundColor: `hsl(${hue} 45% 38%)` }}
+        style={{ backgroundColor: `hsl(${hue} 45% 30%)` }}
         aria-label={name ?? "Usuario"}
       >
         {initialsOf(name)}

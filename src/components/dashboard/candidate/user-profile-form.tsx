@@ -559,6 +559,7 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
                     </Alert>
                     <Input
                         id="cv-upload"
+                        aria-label="Elegir el CV en PDF (máximo 5 MB)"
                         type="file"
                         accept=".pdf"
                         onChange={handleCvUpload}

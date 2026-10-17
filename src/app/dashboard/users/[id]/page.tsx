@@ -94,7 +94,7 @@ export default function UserProfilePage() {
 
                     {user.role === 'candidate' && (
                         <div className="space-y-3 border-t pt-4">
-                            <h4 className="font-semibold">Perfil profesional</h4>
+                            <h3 className="font-semibold">Perfil profesional</h3>
                             {!candidate ? (
                                 <p className="text-sm text-muted-foreground">Este candidato aún no completa su perfil.</p>
                             ) : (

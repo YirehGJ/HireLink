@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { JobsList } from "@/components/dashboard/recruiter/jobs-list";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { RecruiterFirstSteps } from "@/components/dashboard/first-steps";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { useApp } from '@/components/providers/app-provider';
@@ -53,6 +54,7 @@ export default function JobsDashboardPage() {
                 description="Administra tus publicaciones y encuentra al candidato ideal."
                 actions={recruiterActions}
             />
+            <RecruiterFirstSteps />
             <JobsList />
         </div>
     );

@@ -29,11 +29,13 @@ const CardHeader = React.forwardRef<
 ))
 CardHeader.displayName = "CardHeader"
 
+// El título de una tarjeta es un h2 (el h1 es el título de la página, que pone DashboardHeader); las pantallas
+// donde la tarjeta es lo único que hay (inicio de sesión, registro) lo piden con `as="h1"`.
 const CardTitle = React.forwardRef<
   HTMLHeadingElement,
-  React.HTMLAttributes<HTMLHeadingElement>
->(({ className, ...props }, ref) => (
-  <h1
+  React.HTMLAttributes<HTMLHeadingElement> & { as?: "h1" | "h2" | "h3" }
+>(({ className, as: Heading = "h2", ...props }, ref) => (
+  <Heading
     ref={ref}
     className={cn(
       "text-2xl font-bold font-headline leading-none tracking-tight md:text-3xl",

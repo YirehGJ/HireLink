@@ -60,7 +60,7 @@ const JobViewForCandidate = ({ job }: { job: Job }) => {
                 <MarkdownLite text={job.descriptionMd} className="text-sm leading-relaxed" />
                 {tags.length > 0 && (
                     <div className="mt-6">
-                        <h4 className="font-semibold mb-2">Habilidades Requeridas</h4>
+                        <h3 className="font-semibold mb-2">Habilidades Requeridas</h3>
                         <div className="flex flex-wrap gap-2">
                             {tags.map((tag, i) => (
                                 <Badge key={`${tag}-${i}`} variant="secondary">{tag}</Badge>
@@ -70,7 +70,7 @@ const JobViewForCandidate = ({ job }: { job: Job }) => {
                 )}
                 {org?.description && (
                     <div className="mt-6">
-                        <h4 className="font-semibold mb-2">Sobre la empresa</h4>
+                        <h3 className="font-semibold mb-2">Sobre la empresa</h3>
                         <p className="text-sm text-muted-foreground whitespace-pre-line">{org.description}</p>
                     </div>
                 )}

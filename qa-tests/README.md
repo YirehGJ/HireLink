@@ -1,12 +1,17 @@
 # Pruebas de calidad (`qa-tests/`)
 
-Tres tipos de prueba, de la más rápida a la más completa:
+Cinco tipos de prueba, de la más rápida a la más completa:
 
 | Tipo | Qué hace | Necesita |
 |---|---|---|
-| **Unitarias** (`unitarias/`) | Comprueban el motor de recomendaciones y el manejo del cupo de la IA con una base de datos y un modelo simulados | Solo Node 22 o superior |
+| **Unitarias** (`unitarias/`) | Comprueban el motor de recomendaciones, el manejo del cupo de la IA y la versión del worker de pdf.js con una base de datos y un modelo simulados | Solo Node 22 o superior |
 | **Funcionales** (`funcional-1.mjs`, `funcional-2.mjs`) | Recorren la aplicación como una persona, con un navegador real | Staging, navegador y `puppeteer-core` |
 | **Sondas de defectos** (`defectos.mjs`) | Cada sonda comprueba un defecto concreto y dice si todavía existe | Staging, navegador y `puppeteer-core` |
+| **Accesibilidad y celular** (`accesibilidad.mjs`) | Teclado, menú del celular, foco en diálogos, HTML estático y guía de primeros pasos; no usa la IA | Staging, navegador y `puppeteer-core` |
+| **CV en PDF** (`cv-pdf.mjs`) | pdf.js 6 lee los CV de prueba y solo se descarga al subir un archivo; la IA se simula, no gasta tokens | Staging, navegador, `puppeteer-core` y los CV de `crear-cvs.py` |
+
+Aparte están las **mediciones** de `medicion/` (Lighthouse y axe-core), que no aprueban ni reprueban: producen los números de
+rendimiento y accesibilidad que se comparan entre versiones.
 
 Complementan a [`security-tests/`](../security-tests/README.md), que prueban reglas, API y carga sin navegador.
 
@@ -64,6 +69,8 @@ python qa-tests/crear-cvs.py                       # crea 10 CV en PDF en qa-tes
 node qa-tests/funcional-1.mjs corrida              # F0 a F4: limpieza, registro, empresas, vacantes, perfiles con CV
 node qa-tests/funcional-2.mjs corrida              # F5 a F13: el resto de las funciones
 node qa-tests/defectos.mjs corrida                 # sondas de defectos P01 a P23
+node qa-tests/accesibilidad.mjs corrida            # teclado, celular y primeros pasos (57 comprobaciones, sin IA)
+node qa-tests/cv-pdf.mjs corrida                   # lectura de PDF con pdf.js (la IA se simula)
 ```
 
 El primer argumento es una etiqueta para nombrar los resultados. Después de la etiqueta se pueden indicar fases o
@@ -96,6 +103,36 @@ Las sondas de [`defectos.mjs`](defectos.mjs) comprueban un defecto concreto cada
 `defecto: true` si todavía existe. Se ejecutaron antes y después de cada corrección para demostrar que el cambio
 funciona.
 
+## Accesibilidad, teclado y celular (`accesibilidad.mjs`)
+
+Lo que axe-core no puede comprobar solo. No usa la IA, así que se puede correr cuantas veces haga falta. Crea dos cuentas
+(`qa.a11y.*@example.com`) para ver la guía de primeros pasos y las elimina al terminar.
+
+| Bloque | Qué comprueba |
+|---|---|
+| Páginas públicas | Un solo `<main>` y un solo `<h1>`; el primer Tab llega a «Saltar al contenido principal» y Enter lleva el foco al contenido; el formulario de inicio de sesión y el de registro vienen en el HTML inicial; orden del teclado en el inicio de sesión |
+| Escritorio con sesión | Landmarks (barra lateral, navegación `Menú principal`, `main`), `aria-current` en la opción actual, el salto de contenido, el foco visible del menú |
+| Celular (375 px) | Ninguna de las cinco pantallas principales desborda; barra superior con botón de menú (44 x 44 px) y campana; el panel se abre con Enter, tiene fondo opaco, atrapa el foco, se cierra con Esc, devuelve el foco al botón y se cierra al elegir una opción |
+| Diálogos | Los detalles del candidato reciben el foco al abrir y lo devuelven al botón al cerrar con Esc |
+| Primeros pasos | Una candidata nueva ve «0 de 3 completados» (el CV es opcional), puede cerrar la guía y no vuelve a verla; un reclutador nuevo (`?role=recruiter`) ve «0 de 2»; una cuenta con perfil y postulaciones no la ve |
+
+## Mediciones de rendimiento y accesibilidad (`medicion/`)
+
+```bash
+npm i --no-save puppeteer-core lighthouse axe-core
+node qa-tests/medicion/rendimiento.mjs antes1              # Lighthouse: 13 páginas en celular y escritorio
+node qa-tests/medicion/rendimiento.mjs despues1 cand_inicio cand_perfil   # solo algunas páginas
+$env:LH_MODOS = 'celular'                                   # PowerShell: solo celular
+node qa-tests/medicion/accesibilidad-axe.mjs corrida        # axe-core WCAG 2.2 AA, escritorio y celular
+$env:A11Y_ESQUEMA = 'light'                                 # tema claro (por defecto se audita el oscuro)
+python qa-tests/medicion/comparar.py "antes1,antes2,antes3" "despues1,despues2,despues3"
+python qa-tests/medicion/resumen-axe.py corrida
+```
+
+Lighthouse simula la red y la CPU de un celular de gama media y varía de una corrida a otra (de 5 a 10 puntos), por eso se
+repite tres veces y se compara la **mediana**. Antes de cada medición se vacía la caché HTTP. Los resultados quedan en
+`qa-tests/resultados/medicion/` (ignorado por Git).
+
 ## Resultados
 
 Todo se escribe en `qa-tests/resultados/` (ignorado por Git): un `.json` por ejecución
@@ -122,4 +159,5 @@ FALLA [F4] Perfil del candidato | guardar perfil  -> no aparece el aviso de éxi
 - **Los datos son ficticios** (correos `@example.com`) y la contraseña es la de las cuentas de demostración
   ([docs/CUENTAS_DEMO.md](../docs/CUENTAS_DEMO.md)). F0 los elimina al empezar, así que la suite se puede repetir.
 - **No se prueban** el inicio de sesión con Google (ventana emergente del proveedor), el envío real de correos
-  (Resend está apagado por defecto), la accesibilidad formal ni los dispositivos móviles reales.
+  (Resend está apagado por defecto), los lectores de pantalla ni los dispositivos móviles reales (el celular se emula a
+  375 px con el navegador).

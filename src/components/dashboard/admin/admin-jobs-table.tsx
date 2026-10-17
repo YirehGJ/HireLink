@@ -169,7 +169,7 @@ export function AdminJobsTable() {
                             <span>{job.status === 'closed' ? 'Reactivar Vacante' : 'Desactivar Vacante'}</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive" onSelect={() => setToDelete(job)}>
+                        <DropdownMenuItem className="text-destructive-text" onSelect={() => setToDelete(job)}>
                             <Trash2 className="mr-2 h-4 w-4" />
                             <span>Eliminar Vacante</span>
                         </DropdownMenuItem>

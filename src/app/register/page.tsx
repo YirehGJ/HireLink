@@ -2,11 +2,11 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import React, { Suspense } from "react";
+import React from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 
@@ -17,8 +17,6 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth, useFirestore } from "@/firebase";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Icons } from "@/components/icons";
 import { userService } from "@/firebase/firestore/user-service";
 import { clearIntentionalSignOut } from "@/lib/auth-flags";
 
@@ -35,19 +33,29 @@ type RegisterValues = z.infer<typeof registerSchema>;
 
 function RegisterPageContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { toast } = useToast();
   const auth = useAuth();
   const firestore = useFirestore();
 
-  const defaultRole = searchParams.get("role") === "recruiter" ? "recruiter" : "candidate";
   const [showPassword, setShowPassword] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
   const form = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { fullName: "", email: "", password: "", role: defaultRole as any },
+    defaultValues: { fullName: "", email: "", password: "", role: "candidate" },
   });
+
+  // «/register?role=recruiter» (desde la página principal) deja elegido el tipo de cuenta. Se lee al entrar (no al
+  // dibujar) para que la página se genere como HTML estático y el formulario aparezca antes de que cargue el JS.
+  // El selector se vuelve a montar con `key` en lugar de cambiarle el valor: un Select de Radix controlado que cambia
+  // de valor justo al montarse manda un valor vacío al formulario («Invalid enum value»).
+  const [roleFromUrl, setRoleFromUrl] = React.useState<RegisterValues["role"]>("candidate");
+  React.useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("role") === "recruiter") {
+      setRoleFromUrl("recruiter");
+      form.setValue("role", "recruiter");
+    }
+  }, [form]);
 
   async function onRegister(values: RegisterValues) {
     if (!auth || !firestore) return;
@@ -77,7 +85,7 @@ function RegisterPageContent() {
     <FormCard
       title="Únete a HireLink"
       description="Crea tu perfil y empieza hoy mismo."
-      footerContent={<>¿Ya tienes cuenta? <Button variant="link" asChild className="p-0 h-auto"><Link href="/login">Inicia sesión</Link></Button></>}
+      footerContent={<>¿Ya tienes cuenta? <Button variant="link" asChild className="h-auto px-0 py-1.5"><Link href="/login">Inicia sesión</Link></Button></>}
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onRegister)} className="space-y-4">
@@ -104,7 +112,7 @@ function RegisterPageContent() {
           <FormField control={form.control} name="role" render={({ field }) => (
             <FormItem>
               <FormLabel>Tipo de cuenta</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select key={roleFromUrl} onValueChange={field.onChange} defaultValue={roleFromUrl}>
                 <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                 <SelectContent>
                   <SelectItem value="candidate">Candidato (Busco empleo)</SelectItem>
@@ -122,9 +130,5 @@ function RegisterPageContent() {
 }
 
 export default function RegisterPage() {
-  return (
-    <Suspense fallback={<div className="p-8 text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto"/></div>}>
-      <RegisterPageContent />
-    </Suspense>
-  )
+  return <RegisterPageContent />;
 }

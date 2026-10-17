@@ -44,7 +44,7 @@ export function RecommendationFeed() {
   if (items.length === 0) {
     return (
       <div className="text-center py-16 border-2 border-dashed rounded-lg">
-        <h3 className="text-xl font-semibold">No hay recomendaciones por ahora</h3>
+        <h2 className="text-xl font-semibold">No hay recomendaciones por ahora</h2>
         <p className="text-muted-foreground mt-2">Asegúrate de que tu perfil y CV estén completos y actualizados, o explora todas las vacantes.</p>
       </div>
     );

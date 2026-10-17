@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -12,71 +13,34 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarSeparator,
+  useSidebar,
 } from "@/components/ui/sidebar";
-import {
-  Briefcase,
-  Home,
-  Settings,
-  User,
-  Shield,
-  LogOut,
-  Users,
-  FileText,
-  LayoutDashboard,
-  Search,
-  Building2,
-} from "lucide-react";
+import { LogOut } from "lucide-react";
 import { signOut } from "firebase/auth";
 import { Icons } from "@/components/icons";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
+import { NAV_CONFIG, homeFor } from "@/components/dashboard/nav-config";
 import { useApp } from "@/components/providers/app-provider";
 import { useAuth } from "@/firebase";
 import { UserAvatar } from "@/components/user-avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { markIntentionalSignOut } from "@/lib/auth-flags";
-import type { UserRole } from "@/lib/types";
 
 /**
- * @fileOverview Refactorización de Sidebar utilizando un mapa de navegación (Code Smell #7).
- * Mejora la mantenibilidad y elimina condicionales excesivos.
+ * Menú lateral. En escritorio es un panel fijo; en el celular es un panel que se abre con el botón de la barra
+ * superior (MobileTopBar) y se cierra al elegir una opción. Las opciones salen de `nav-config.ts`.
  */
-
-interface NavItem {
-  label: string;
-  icon: any;
-  href: string;
-}
-
-const NAV_CONFIG: Record<UserRole, NavItem[]> = {
-  candidate: [
-    { label: "Inicio", icon: Home, href: "/dashboard" },
-    { label: "Explorar Vacantes", icon: Search, href: "/dashboard/explore" },
-    { label: "Mi Perfil", icon: User, href: "/dashboard/profile" },
-    { label: "Mis Postulaciones", icon: FileText, href: "/dashboard/applications" },
-    { label: "Configuración", icon: Settings, href: "/dashboard/settings" },
-  ],
-  recruiter: [
-    { label: "Vacantes", icon: Briefcase, href: "/dashboard/jobs" },
-    { label: "Candidatos", icon: Users, href: "/dashboard/candidates" },
-    { label: "Perfil", icon: User, href: "/dashboard/profile" },
-    { label: "Configuración", icon: Settings, href: "/dashboard/settings" },
-  ],
-  admin: [
-    { label: "Panel Principal", icon: LayoutDashboard, href: "/dashboard/admin/overview" },
-    { label: "Gestión Usuarios", icon: Users, href: "/dashboard/admin/users" },
-    { label: "Organizaciones", icon: Building2, href: "/dashboard/admin/organizations" },
-    { label: "Gestión Vacantes", icon: Briefcase, href: "/dashboard/admin/jobs" },
-    { label: "Auditoría", icon: Shield, href: "/dashboard/admin/audit" },
-    { label: "Mi Perfil", icon: User, href: "/dashboard/profile" },
-    { label: "Configuración", icon: Settings, href: "/dashboard/settings" },
-  ],
-};
-
 export function DashboardSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const auth = useAuth();
   const { user, role, setUser, isMounted, readOnly } = useApp();
+  const { isMobile, setOpenMobile } = useSidebar();
+
+  // En el celular, al navegar se cierra el panel.
+  useEffect(() => {
+    setOpenMobile(false);
+  }, [pathname, setOpenMobile]);
 
   const isActive = (path: string) => {
     if (["/dashboard", "/dashboard/jobs", "/dashboard/admin/overview"].includes(path)) {
@@ -95,7 +59,7 @@ export function DashboardSidebar() {
 
   if (!isMounted || !role || !user) {
     return (
-      <Sidebar variant="sidebar" collapsible="none" className="border-r">
+      <Sidebar variant="sidebar" role="complementary" aria-label="Barra lateral">
         <SidebarHeader className="h-20 flex items-center px-4"><Skeleton className="h-8 w-32" /></SidebarHeader>
         <SidebarContent className="p-4 space-y-4">
           {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-10 w-full" />)}
@@ -106,30 +70,32 @@ export function DashboardSidebar() {
   }
 
   const navItems = NAV_CONFIG[role] || [];
-  const dashboardHome = navItems[0]?.href || '/dashboard';
 
   return (
-    <Sidebar variant="sidebar" collapsible="none">
+    <Sidebar variant="sidebar" role="complementary" aria-label="Barra lateral">
       <SidebarHeader className="h-20 items-center justify-between flex-row px-4">
-        <Link href={dashboardHome} className="flex items-center gap-2">
+        <Link href={homeFor(role)} className="flex items-center gap-2">
           <Icons.logo className="h-8 w-8 text-primary" />
           <span className="text-xl font-bold font-headline tracking-tighter">HireLink</span>
         </Link>
-        {!readOnly && <NotificationBell uid={user.id} />}
+        {/* En el celular la campana vive en la barra superior (MobileTopBar), siempre a la vista. */}
+        {!readOnly && !isMobile && <NotificationBell uid={user.id} />}
       </SidebarHeader>
       <SidebarContent>
-        <SidebarMenu className="px-2">
-          {navItems.map((item) => (
-            <SidebarMenuItem key={item.href}>
-              <SidebarMenuButton asChild isActive={isActive(item.href)} tooltip={item.label}>
-                <Link href={item.href}>
-                  <item.icon />
-                  <span>{item.label}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
+        <nav aria-label="Menú principal">
+          <SidebarMenu className="px-2">
+            {navItems.map((item) => (
+              <SidebarMenuItem key={item.href}>
+                <SidebarMenuButton asChild isActive={isActive(item.href)} tooltip={item.label}>
+                  <Link href={item.href} aria-current={isActive(item.href) ? "page" : undefined}>
+                    <item.icon />
+                    <span>{item.label}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </nav>
       </SidebarContent>
       <SidebarFooter className="p-2 gap-2">
         <SidebarSeparator className="mb-2" />
@@ -146,7 +112,7 @@ export function DashboardSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild onClick={handleLogout} className="text-destructive hover:text-destructive">
+            <SidebarMenuButton asChild onClick={handleLogout} className="text-destructive-text hover:text-destructive-text">
               <Link href="/"><LogOut /><span>Cerrar Sesión</span></Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

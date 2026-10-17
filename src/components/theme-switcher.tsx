@@ -23,20 +23,21 @@ export function ThemeSwitcher() {
     setTheme(isDark ? 'light' : 'dark')
   }
 
-  // Prevents hydration mismatch
+  // Prevents hydration mismatch. Se reserva el mismo espacio que ocupa el interruptor para que la barra de la página
+  // principal no se mueva cuando aparece (era un salto de diseño de 0.08 en Lighthouse).
   if (!mounted) {
-    return null
+    return <div className="h-6 w-[100px] max-[420px]:w-11" aria-hidden="true" />
   }
 
   return (
     <div className="flex items-center space-x-2">
-      <Sun className="h-5 w-5" />
+      <Sun className="h-5 w-5 max-[420px]:hidden" aria-hidden="true" />
       <Switch
         id="theme-switch"
         checked={isDark}
         onCheckedChange={toggleTheme}
       />
-      <Moon className="h-5 w-5" />
+      <Moon className="h-5 w-5 max-[420px]:hidden" aria-hidden="true" />
       <Label htmlFor="theme-switch" className="sr-only">
         Cambiar entre tema claro y oscuro
       </Label>

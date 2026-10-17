@@ -45,7 +45,7 @@ export function RecommendationCard({ recommendation, job }: RecommendationCardPr
       <CardContent className="flex-grow">
         <p className="text-sm text-muted-foreground line-clamp-2">{stripMarkdown(job.descriptionMd)}</p>
         <div className="mt-4">
-            <h4 className="text-sm font-semibold mb-2 text-foreground">Razones Principales</h4>
+            <h3 className="text-sm font-semibold mb-2 text-foreground">Razones Principales</h3>
             <div className="flex flex-wrap gap-2">
                 {recommendation.reasons.map((reason, i) => (
                     <TooltipProvider key={i}>

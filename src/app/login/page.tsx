@@ -2,11 +2,11 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import React, { Suspense } from "react";
+import React from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import {
   GoogleAuthProvider,
@@ -39,14 +39,14 @@ type LoginValues = z.infer<typeof loginSchema>;
 
 function LoginPageContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { toast } = useToast();
   const auth = useAuth();
   const firestore = useFirestore();
   const [showPassword, setShowPassword] = React.useState(false);
   const [loadingType, setLoadingType] = React.useState<'email' | 'google' | null>(null);
-  // Si el guard del dashboard mandó aquí, se vuelve a la página que se intentaba abrir.
-  const nextPath = safeNextPath(searchParams.get("next")) ?? "/dashboard";
+  // Si el guard del dashboard mandó aquí, se vuelve a la página que se intentaba abrir. Se lee al entrar (no al
+  // dibujar) para que la página se pueda generar como HTML estático y el formulario aparezca antes de que cargue el JS.
+  const goToNext = () => router.push(safeNextPath(new URLSearchParams(window.location.search).get("next")) ?? "/dashboard");
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -73,7 +73,7 @@ function LoginPageContent() {
       const { user } = await signInWithEmailAndPassword(auth, values.email.trim(), values.password);
       await userService.ensureProfileExists(firestore, user.uid, user.email!, user.displayName || values.email.split('@')[0]);
       clearIntentionalSignOut();
-      router.push(nextPath);
+      goToNext();
     } catch (error) {
       handleAuthError(error);
     } finally {
@@ -91,7 +91,7 @@ function LoginPageContent() {
       const { user } = await signInWithPopup(auth, provider, browserPopupRedirectResolver);
       await userService.ensureProfileExists(firestore, user.uid, user.email!, user.displayName || "Usuario Google");
       clearIntentionalSignOut();
-      router.push(nextPath);
+      goToNext();
     } catch (error) {
       handleAuthError(error);
     } finally {
@@ -106,7 +106,7 @@ function LoginPageContent() {
       footerContent={
         <>
           ¿Aún no tienes cuenta?{' '}
-          <Button variant="link" asChild className="p-0 h-auto font-semibold">
+          <Button variant="link" asChild className="h-auto px-0 py-1.5 font-semibold">
             <Link href="/register">Regístrate</Link>
           </Button>
         </>
@@ -162,7 +162,7 @@ function LoginPageContent() {
                   </FormItem>
                 )}
               />
-              <Button variant="link" asChild className="p-0 h-auto text-xs"><Link href="/forgot-password">¿Olvidaste tu contraseña?</Link></Button>
+              <Button variant="link" asChild className="h-auto px-0 py-2 text-xs"><Link href="/forgot-password">¿Olvidaste tu contraseña?</Link></Button>
             </div>
             <Button type="submit" className="w-full" disabled={!!loadingType}>
               {loadingType === 'email' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -182,9 +182,5 @@ function LoginPageContent() {
 }
 
 export default function LoginPage() {
-  return (
-    <Suspense fallback={<div className="p-8 text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto" /></div>}>
-      <LoginPageContent />
-    </Suspense>
-  );
+  return <LoginPageContent />;
 }

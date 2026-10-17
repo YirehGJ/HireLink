@@ -171,7 +171,7 @@ export function AccountSettings() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <h4 className="text-md font-medium text-foreground">Perfil</h4>
+        <h3 className="text-md font-medium text-foreground">Perfil</h3>
         <FormField
           control={form.control}
           name="fullName"
@@ -201,7 +201,7 @@ export function AccountSettings() {
 
         <Separator className="my-6"/>
 
-        <h4 className="text-md font-medium text-foreground">Cambiar Contraseña</h4>
+        <h3 className="text-md font-medium text-foreground">Cambiar Contraseña</h3>
         {hasPasswordLogin ? (
           <>
             <FormField

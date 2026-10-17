@@ -1,6 +1,5 @@
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from '@/components/icons';
@@ -12,35 +11,35 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-20 items-center justify-between">
+        <div className="flex min-h-20 flex-wrap items-center justify-between gap-x-4 gap-y-1 py-2">
           <Link href="/" className="flex items-center gap-2">
             <Icons.logo className="h-8 w-8 text-primary" />
             <span className="text-xl font-bold font-headline tracking-tighter">
               HireLink
             </span>
           </Link>
-          <nav className="flex items-center gap-2">
+          <nav className="ml-auto flex items-center gap-1 sm:gap-2" aria-label="Acceso">
             <ThemeSwitcher />
-            <Button variant="ghost" asChild>
+            <Button variant="ghost" className="h-10 px-3 sm:h-11 sm:px-6" asChild>
               <Link href="/login">Iniciar Sesión</Link>
             </Button>
-            <Button asChild>
+            <Button className="h-10 px-3 sm:h-11 sm:px-6" asChild>
               <Link href="/register">Registrarse</Link>
             </Button>
           </nav>
         </div>
       </header>
 
-      <main className="flex-1">
+      <main id="contenido" tabIndex={-1} className="flex-1 focus:outline-none">
         <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 text-center">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-4xl md:text-6xl font-bold font-headline tracking-tighter text-foreground">
-              Conectamos Talento con Oportunidades, <br/> con el Poder de la <span className="text-secondary">IA Explicable</span>
+              Conectamos Talento con Oportunidades, <br/> con el Poder de la <span className="text-link">IA Explicable</span>
             </h1>
             <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
               HireLink es la plataforma líder que utiliza inteligencia artificial para analizar perfiles, recomendar vacantes y transparentar el porqué de cada recomendación.
             </p>
-            <div className="mt-8 flex justify-center gap-4">
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
               <Button size="lg" asChild>
                 <Link href="/register">Encontrar mi próximo empleo</Link>
               </Button>
@@ -65,7 +64,7 @@ export default function Home() {
                   <div className="mx-auto bg-primary/10 text-primary p-3 rounded-full w-fit">
                     <BrainCircuit className="h-8 w-8" />
                   </div>
-                  <CardTitle className="mt-4 font-headline">IA Explicable</CardTitle>
+                  <CardTitle as="h3" className="mt-4 font-headline">IA Explicable</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <CardDescription>
@@ -75,10 +74,10 @@ export default function Home() {
               </Card>
               <Card className="text-center bg-transparent dark:bg-card/50 border-0 md:border shadow-none md:shadow-sm">
                 <CardHeader>
-                  <div className="mx-auto bg-secondary/10 text-secondary p-3 rounded-full w-fit">
+                  <div className="mx-auto bg-secondary/10 text-link p-3 rounded-full w-fit">
                     <Briefcase className="h-8 w-8" />
                   </div>
-                  <CardTitle className="mt-4 font-headline">Para Candidatos</CardTitle>
+                  <CardTitle as="h3" className="mt-4 font-headline">Para Candidatos</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <CardDescription>
@@ -91,7 +90,7 @@ export default function Home() {
                   <div className="mx-auto bg-green-500/10 text-green-500 p-3 rounded-full w-fit">
                     <Users className="h-8 w-8" />
                   </div>
-                  <CardTitle className="mt-4 font-headline">Para Reclutadores</CardTitle>
+                  <CardTitle as="h3" className="mt-4 font-headline">Para Reclutadores</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <CardDescription>

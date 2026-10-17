@@ -74,7 +74,7 @@ export default function ForgotPasswordPage() {
       title="Recuperar Contraseña"
       description="Ingresa tu email para recibir instrucciones y reestablecerla."
       footerContent={
-        <Button variant="link" asChild className="p-0 h-auto font-semibold">
+        <Button variant="link" asChild className="h-auto px-0 py-1.5 font-semibold">
             <Link href="/login">Volver a inicio de sesión</Link>
         </Button>
       }

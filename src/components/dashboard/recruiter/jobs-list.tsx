@@ -54,7 +54,7 @@ export function JobsList() {
     return (
       <div className="text-center py-16 border-2 border-dashed rounded-lg space-y-3">
         <Building2 className="h-10 w-10 mx-auto text-muted-foreground" />
-        <h3 className="text-xl font-semibold">Primero crea el perfil de tu empresa</h3>
+        <h2 className="text-xl font-semibold">Primero crea el perfil de tu empresa</h2>
         <p className="text-muted-foreground">Necesitas una organización para publicar vacantes y recibir candidatos.</p>
         <Button asChild><Link href="/dashboard/profile">Crear perfil de la empresa</Link></Button>
       </div>
@@ -72,7 +72,7 @@ export function JobsList() {
   if (!recruiterJobs || recruiterJobs.length === 0) {
       return (
           <div className="text-center py-16 border-2 border-dashed rounded-lg">
-              <h3 className="text-xl font-semibold">No tienes vacantes creadas</h3>
+              <h2 className="text-xl font-semibold">No tienes vacantes creadas</h2>
               <p className="text-muted-foreground mt-2">¡Crea tu primera vacante para empezar a reclutar!</p>
           </div>
       );
@@ -83,7 +83,7 @@ export function JobsList() {
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[220px] max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input className="pl-10" placeholder="Buscar por título, ubicación o habilidad…" value={search} onChange={e => setSearch(e.target.value)} />
+          <Input className="pl-10" placeholder="Buscar por título, ubicación o habilidad…" aria-label="Buscar vacantes" value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <Select value={status} onValueChange={setStatus}>
           <SelectTrigger className="w-[170px]" aria-label="Filtrar por estado"><SelectValue /></SelectTrigger>

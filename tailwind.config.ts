@@ -44,7 +44,10 @@ export default {
         destructive: {
           DEFAULT: 'hsl(var(--destructive))',
           foreground: 'hsl(var(--destructive-foreground))',
+          // Para texto sobre el fondo de la página (el DEFAULT es para rellenos y no llega a 4.5:1 como texto).
+          text: 'hsl(var(--destructive-text))',
         },
+        link: 'hsl(var(--link))',
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',

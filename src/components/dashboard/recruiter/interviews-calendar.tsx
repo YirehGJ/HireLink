@@ -117,7 +117,7 @@ export function InterviewsCalendar({ jobId, organizationRef, candidateUid }: Int
                     {loading ? (
                         <p className="text-sm text-muted-foreground text-center py-8">Cargando…</p>
                     ) : error ? (
-                        <p className="text-sm text-destructive text-center py-8" role="alert">
+                        <p className="text-sm text-destructive-text text-center py-8" role="alert">
                             No se pudieron cargar las entrevistas. Recarga la página e inténtalo de nuevo.
                         </p>
                     ) : selectedDayInterviews.length > 0 ? (

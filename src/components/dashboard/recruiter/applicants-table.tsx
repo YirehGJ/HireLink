@@ -115,12 +115,12 @@ function ApplicantRow({
 
   return (
     <>
-    <TableRow>
-        <TableCell className="font-medium">
+    <TableRow className="block px-1 py-2 md:table-row md:p-0">
+        <TableCell className="block px-3 py-1.5 font-medium md:table-cell md:p-4">
             <div className="flex items-center gap-3">
                 <UserAvatar name={name} seed={app.candidateRef} />
                 <div>
-                    <button type="button" className="text-left hover:underline" onClick={() => setDetailsOpen(true)}>{name}</button>
+                    <button type="button" className="py-1 text-left hover:underline" onClick={() => setDetailsOpen(true)}>{name}</button>
                     <p className="text-sm text-muted-foreground">{candidate?.headline}{candidate?.location ? ` · ${candidate.location}` : ''}</p>
                 </div>
             </div>
@@ -133,13 +133,13 @@ function ApplicantRow({
             )}
         </TableCell>
         <TableCell className="text-muted-foreground hidden md:table-cell">{formatDate(app.appliedAt)}</TableCell>
-        <TableCell>
+        <TableCell className="block px-3 py-1.5 md:table-cell md:p-4">
             <Badge variant={statusVariantMap[app.status] || 'outline'} className="capitalize whitespace-nowrap">
                 {applicationStatusText[app.status]}
             </Badge>
         </TableCell>
-        <TableCell className="text-right">
-            <div className="flex items-center justify-end gap-2">
+        <TableCell className="block px-3 py-1.5 md:table-cell md:p-4 md:text-right">
+            <div className="flex flex-wrap items-center gap-2 md:justify-end">
                 <Button variant="ghost" size="icon" onClick={toggleShortlist} disabled={readOnly} aria-label={app.shortlisted ? "Quitar de shortlist" : "Agregar a shortlist"} title="Shortlist">
                     <Star className={`h-4 w-4 ${app.shortlisted ? 'fill-yellow-400 text-yellow-500' : ''}`} />
                 </Button>
@@ -197,7 +197,7 @@ export function ApplicantsTable({ applicants, jobId, jobTitle, organizationRef }
     return (
       <Card className="text-center py-16">
         <FileText className="h-12 w-12 mx-auto text-muted-foreground" />
-        <h3 className="text-xl font-semibold mt-4">Aún no hay candidatos</h3>
+        <h2 className="text-xl font-semibold mt-4">Aún no hay candidatos</h2>
         <p className="text-muted-foreground mt-2">Cuando los candidatos apliquen a esta vacante, los verás aquí.</p>
       </Card>
     );
@@ -216,7 +216,7 @@ export function ApplicantsTable({ applicants, jobId, jobTitle, organizationRef }
             <Label htmlFor="only-shortlist">Solo shortlist</Label>
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px]"><SelectValue placeholder="Estado" /></SelectTrigger>
+            <SelectTrigger className="w-[180px]" aria-label="Filtrar por estado"><SelectValue placeholder="Estado" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos los estados</SelectItem>
               {Object.entries(applicationStatusText).map(([value, label]) => (
@@ -229,7 +229,7 @@ export function ApplicantsTable({ applicants, jobId, jobTitle, organizationRef }
       <CardContent>
         <div className="border rounded-lg overflow-hidden">
             <Table>
-                <TableHeader>
+                <TableHeader className="hidden md:table-header-group">
                     <TableRow>
                         <TableHead>Candidato</TableHead>
                         <TableHead className="hidden lg:table-cell">Match IA</TableHead>

@@ -15,15 +15,27 @@
     --secondary: 271 83% 54%; /* #9333EA */
     --secondary-foreground: 210 40% 98%;
     --muted: 220 14.3% 95.9%; /* #F1F2F5 -> Similar to #F3F4F6 */
-    --muted-foreground: 220 8.9% 46.1%; /* #6B7280 */
+    --muted-foreground: 220 8.9% 42.5%; /* #636976: 5:1 sobre el fondo muted (con #6B7280 eran 4.4:1) */
     --accent: 259 81% 94%; /* #E9D5FF */
     --accent-foreground: 258 69% 30%; /* Darker purple for text on accent */
-    --destructive: 0 84.2% 60.2%; /* #EF4444 */
+    --destructive: 0 72% 48%; /* #D32222: el texto claro llega a 5:1 (con #EF4444 eran 3.6:1) */
     --destructive-foreground: 210 40% 98%;
+    /* Colores para TEXTO (no para rellenos): llegan a 4.5:1 sobre el fondo de cada tema. */
+    --destructive-text: 0 72% 45%; /* mensajes de error, 6:1 sobre blanco */
+    --link: 271 83% 54%; /* enlaces, 5.4:1 sobre blanco */
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 258 69% 50%; /* #6D28D9 */
     --radius: 1rem;
+    /* Menú lateral. Sin estas variables el panel del menú del celular quedaba transparente y se veía la página detrás. */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 224 71.4% 4.1%;
+    --sidebar-primary: 258 69% 50%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 259 81% 94%;
+    --sidebar-accent-foreground: 258 69% 30%;
+    --sidebar-border: 214.3 31.8% 91.4%;
+    --sidebar-ring: 258 69% 50%;
   }
 
   .dark {
@@ -35,17 +47,27 @@
     --popover-foreground: 215 20.2% 98.2%;
     --primary: 258 69% 60%; /* Lighter purple for dark mode */
     --primary-foreground: 210 40% 98%;
-    --secondary: 271 83% 64%; /* Lighter purple for dark mode */
+    --secondary: 271 70% 52%; /* Relleno de insignias y botones: el texto claro llega a 5.8:1 (con 64% de luminosidad era 3.8:1) */
     --secondary-foreground: 210 40% 98%;
     --muted: 220 13% 12%; /* #1F2937 */
-    --muted-foreground: 220 8.9% 46.1%; /* #9CA3AF */
+    --muted-foreground: 218 11% 65%; /* #9CA3AF: contraste de 7:1 sobre el fondo oscuro (antes repetía el gris del tema claro, 3.8:1) */
     --accent: 259 50% 20%; /* Darker lilac for dark mode */
     --accent-foreground: 259 81% 94%; /* #E9D5FF */
-    --destructive: 0 72.2% 50.6%; /* #EF4444 */
+    --destructive: 0 72.2% 50.6%; /* #DC2626 */
     --destructive-foreground: 210 40% 98%;
+    --destructive-text: 0 91% 71%; /* #F87171, 6.7:1 sobre el fondo oscuro */
+    --link: 270 95% 75%; /* #C084FC, 7:1 sobre el fondo oscuro */
     --border: 220 13% 22%; /* #374151 */
     --input: 220 13% 22%;
     --ring: 258 69% 60%;
+    --sidebar-background: 222.9 30.3% 8.6%;
+    --sidebar-foreground: 215 20.2% 98.2%;
+    --sidebar-primary: 258 69% 60%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 259 50% 20%;
+    --sidebar-accent-foreground: 259 81% 94%;
+    --sidebar-border: 220 13% 22%;
+    --sidebar-ring: 258 69% 60%;
   }
 }
 
