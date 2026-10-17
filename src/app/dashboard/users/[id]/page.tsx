@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 import { ArrowLeft, Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
@@ -16,7 +16,8 @@ import { useApp } from "@/components/providers/app-provider";
 import { yearsLabel } from "@/lib/format";
 import type { Candidate, Organization, User } from "@/lib/types";
 
-export default function UserProfilePage({ params }: { params: { id: string } }) {
+export default function UserProfilePage() {
+    const params = useParams<{ id: string }>();
     const router = useRouter();
     const { startViewAs } = useApp();
     const { data: userDoc, loading } = useDoc<User>(`users/${params.id}`);

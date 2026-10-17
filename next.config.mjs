@@ -27,6 +27,8 @@ const nextConfig = {
       { source: '/:path*', headers: securityHeaders },
       // Las respuestas de la API nunca deben guardarse en caché.
       { source: '/api/:path*', headers: [{ key: 'Cache-Control', value: 'no-store' }] },
+      // El worker de pdf.js lleva la versión en el nombre: se puede guardar en caché para siempre.
+      { source: '/pdf.worker.:version.min.mjs', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] },
     ];
   },
 };
@@ -40,4 +42,7 @@ export default withSentryConfig(nextConfig, {
   authToken: process.env.SENTRY_AUTH_TOKEN,
   widenClientFileUpload: false,
   disableLogger: true,
+  // Sentry se usa solo para capturar errores: se quita del bundle el código de trazas de rendimiento y de
+  // mensajes de depuración (pesa decenas de kB en cada página).
+  webpack: { treeshake: { removeDebugLogging: true, removeTracing: true } },
 });

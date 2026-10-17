@@ -5,13 +5,11 @@ import { createContext, useContext } from "react";
 import type { FirebaseApp } from "firebase/app";
 import type { Auth } from "firebase/auth";
 import type { Firestore } from "firebase/firestore";
-import type { FirebaseStorage } from "firebase/storage";
 
 interface FirebaseContextValue {
   app: FirebaseApp | null;
   auth: Auth | null;
   firestore: Firestore | null;
-  storage: FirebaseStorage | null;
 }
 
 const FirebaseContext = createContext<FirebaseContextValue | null>(null);
@@ -27,10 +25,9 @@ export function FirebaseProvider({
   app,
   auth,
   firestore,
-  storage,
   children,
 }: FirebaseProviderProps) {
-  const value = { app, auth, firestore, storage };
+  const value = { app, auth, firestore };
   return (
     <FirebaseContext.Provider value={value}>{children}</FirebaseContext.Provider>
   );
@@ -69,9 +66,3 @@ export function useFirestore() {
   return useFirebase().firestore;
 }
 
-/**
- * Hook to access the Firebase Storage instance.
- */
-export function useStorage() {
-  return useFirebase().storage;
-}

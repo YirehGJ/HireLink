@@ -51,5 +51,9 @@ llamadas de red ni tiene costo, y la app funciona igual.
   stack traces en Sentry muestran el código minificado en vez del original).
 - Alertas por correo/Slack configuradas en el dashboard de Sentry cuando ocurre
   un error nuevo (se configura del lado de Sentry, no en el código).
-- Session Replay o Performance Monitoring más allá del `tracesSampleRate: 0.1`
-  actual (10% de las peticiones), si se necesita más detalle de diagnóstico.
+- Session Replay o Performance Monitoring, si se necesita más detalle de
+  diagnóstico. Desde la Semana 5 el código de trazas de rendimiento se quita
+  del bundle (`webpack.treeshake.removeTracing` en `next.config.mjs`) porque
+  Sentry se usa solo para errores y ese código pesaba decenas de kB en cada
+  página; para volver a activarlo, quita esa opción y agrega
+  `tracesSampleRate` en los tres `sentry.*.config.ts`.

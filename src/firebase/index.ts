@@ -1,25 +1,16 @@
 // src/firebase/index.ts
-import { getApp, getApps, initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
-import { firebaseConfig } from "./config";
+import { app, auth, db } from "./config";
 
 /**
- * Initializes Firebase and returns the app, auth, firestore, and storage instances.
- * It ensures that Firebase is initialized only once.
+ * Devuelve la app, Authentication y Firestore. Todo se inicializa una sola vez en `./config`.
+ * (Storage ya no se carga: el PDF del CV no se sube, ver docs/DECISION_STORAGE_CV.md.)
  */
 export function initializeFirebase() {
-  const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-  const auth = getAuth(app);
-  const firestore = getFirestore(app);
-  const storage = getStorage(app);
-
-  return { app, auth, firestore, storage };
+  return { app, auth, firestore: db };
 }
 
 // Export providers and hooks for easy access
-export { FirebaseProvider, useFirebase, useFirebaseApp, useAuth, useFirestore, useStorage } from './provider';
+export { FirebaseProvider, useFirebase, useFirebaseApp, useAuth, useFirestore } from './provider';
 export { FirebaseClientProvider } from './client-provider';
 export { useUser } from './auth/use-user';
 export { useCollection } from './firestore/use-collection';

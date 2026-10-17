@@ -10,6 +10,7 @@ import React, { Suspense } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import {
   GoogleAuthProvider,
+  browserPopupRedirectResolver,
   signInWithPopup,
   signInWithEmailAndPassword,
   setPersistence,
@@ -87,7 +88,7 @@ function LoginPageContent() {
     try {
       await setPersistence(auth, browserLocalPersistence);
       const provider = new GoogleAuthProvider();
-      const { user } = await signInWithPopup(auth, provider);
+      const { user } = await signInWithPopup(auth, provider, browserPopupRedirectResolver);
       await userService.ensureProfileExists(firestore, user.uid, user.email!, user.displayName || "Usuario Google");
       clearIntentionalSignOut();
       router.push(nextPath);

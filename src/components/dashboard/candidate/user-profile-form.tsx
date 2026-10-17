@@ -7,7 +7,6 @@ import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { Loader2, Trash2, PlusCircle, FileUp, BrainCircuit, Sparkles, Briefcase, GraduationCap } from "lucide-react";
 import React from "react";
-import * as pdfjsLib from "pdfjs-dist";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +24,7 @@ import { candidateService } from "@/firebase/firestore/candidate-service";
 import { callAuthedApi } from "@/lib/api-client";
 import { useApp } from "@/components/providers/app-provider";
 import { SENIORITY_OPTIONS } from "@/lib/format";
+import { extractPdfText } from "@/lib/pdf-text";
 
 // Años y niveles son números enteros: antes un valor con decimales (la IA devuelve «4.8» o «2.5») hacía que el
 // navegador bloqueara el envío sin mostrar ningún aviso y «Guardar Perfil» parecía no funcionar.
@@ -89,9 +89,6 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
   const [cvAnalysis, setCvAnalysis] = React.useState<{ summary: string; text: string } | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  React.useEffect(() => {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
-  }, []);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -193,19 +190,8 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
     });
 
     try {
-        const pdfData = new Uint8Array(await file.arrayBuffer());
-        // isEvalSupported:false neutraliza la vulnerabilidad de ejecución de código de
-        // pdf.js (CVE-2024-4367) al abrir PDFs maliciosos; también se limita el tamaño.
-        if (file.size > 5 * 1024 * 1024) throw new Error("El PDF supera los 5 MB.");
-        const doc = await pdfjsLib.getDocument({ data: pdfData, isEvalSupported: false } as any).promise;
-        let text = '';
-        for (let i = 1; i <= doc.numPages; i++) {
-            const page = await doc.getPage(i);
-            const content = await page.getTextContent();
-            text += content.items.map((item: any) => item.str).join(' ') + '\n';
-        }
-
-        const cleanedText = text.replace(/[ \t]+/g, ' ').replace(/\n\s*\n/g, '\n').trim();
+        // pdf.js se carga aquí, solo cuando se sube un CV (ver src/lib/pdf-text.ts).
+        const cleanedText = await extractPdfText(file);
         if (cleanedText.length < 30) {
             throw new Error("El PDF no contiene texto legible (¿es una imagen escaneada?).");
         }

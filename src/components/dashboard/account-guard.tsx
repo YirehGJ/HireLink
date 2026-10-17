@@ -11,13 +11,49 @@ import { useApp } from "@/components/providers/app-provider";
 import { useAuth, useUser } from "@/firebase";
 import { markIntentionalSignOut, wasIntentionalSignOut } from "@/lib/auth-flags";
 
-function GuardSkeleton() {
+// Título de cada pantalla (el mismo que muestra su encabezado). Mientras se confirma la sesión y se carga el rol, el
+// esqueleto ya muestra el título: aparece con el HTML inicial, antes de que cargue el JavaScript y Firestore, y la
+// persona sabe dónde está en vez de ver cajas grises. Es lo que más baja el tiempo hasta el contenido principal (LCP).
+const TITULOS: Record<string, string> = {
+  "/dashboard/explore": "Explorar Vacantes",
+  "/dashboard/profile": "Mi Perfil Profesional",
+  "/dashboard/applications": "Mis Postulaciones",
+  "/dashboard/settings": "Configuración",
+  "/dashboard/jobs": "Gestión de Vacantes",
+  "/dashboard/jobs/new": "Crear Nueva Vacante",
+  "/dashboard/candidates": "Explorar Candidatos",
+  "/dashboard/admin/overview": "Panel de Administración",
+  "/dashboard/admin/users": "Gestión de Usuarios",
+  "/dashboard/admin/organizations": "Organizaciones",
+  "/dashboard/admin/jobs": "Gestión de Vacantes",
+  "/dashboard/admin/audit": "Auditoría y Equidad",
+};
+const TITULO_INICIO_CANDIDATO = "Tus Próximas Oportunidades";
+// Último rol conocido en este navegador: solo sirve para elegir el título provisional de /dashboard (el inicio
+// del candidato; reclutadores y administradores son redirigidos a su propia pantalla).
+const ULTIMO_ROL_KEY = "hirelink:ultimo-rol";
+
+function GuardSkeleton({ pathname }: { pathname: string }) {
+  const [ultimoRol, setUltimoRol] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    try {
+      setUltimoRol(localStorage.getItem(ULTIMO_ROL_KEY));
+    } catch {
+      /* sin almacenamiento: se muestra el esqueleto sin título */
+    }
+  }, []);
+  const path = pathname.replace(/\/+$/, "") || "/";
+  const titulo = path === "/dashboard" ? (ultimoRol === "candidate" ? TITULO_INICIO_CANDIDATO : undefined) : TITULOS[path];
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-8" aria-busy="true" aria-label="Cargando">
-      <div className="space-y-2">
+      <div>
         <Skeleton className="h-5 w-48" />
-        <Skeleton className="h-9 w-64" />
-        <Skeleton className="h-5 w-80" />
+        {titulo ? (
+          <h1 className="text-2xl md:text-3xl font-bold font-headline tracking-tight">{titulo}</h1>
+        ) : (
+          <Skeleton className="my-1 h-9 w-64" />
+        )}
+        <Skeleton className="mt-1 h-6 w-80" />
       </div>
       <Skeleton className="h-64 w-full" />
     </div>
@@ -43,7 +79,16 @@ export function AccountGuard({ children }: { children: React.ReactNode }) {
     router.replace(`/login?next=${encodeURIComponent(pathname)}`);
   }, [authLoading, authUser, pathname, router]);
 
-  if (authLoading || !authUser || !isMounted || !user) return <GuardSkeleton />;
+  React.useEffect(() => {
+    if (!user?.role) return;
+    try {
+      localStorage.setItem(ULTIMO_ROL_KEY, user.role);
+    } catch {
+      /* sin almacenamiento */
+    }
+  }, [user?.role]);
+
+  if (authLoading || !authUser || !isMounted || !user) return <GuardSkeleton pathname={pathname} />;
 
   if (user.status === "suspended" && !readOnly) {
     return (

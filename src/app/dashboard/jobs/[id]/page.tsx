@@ -8,7 +8,7 @@ import { useDoc, useCollection } from "@/firebase";
 import type { Job, Application, Organization } from "@/lib/types";
 import { ArrowLeft, Calendar, FileText, Info, MapPin, Briefcase, Globe, Building2, Zap } from "lucide-react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { JobForm } from "@/components/dashboard/recruiter/job-form";
 import { ApplicantsTable } from "@/components/dashboard/recruiter/applicants-table";
@@ -79,7 +79,8 @@ const JobViewForCandidate = ({ job }: { job: Job }) => {
     );
 };
 
-export default function JobDetailsPage({ params }: { params: { id: string } }) {
+export default function JobDetailsPage() {
+    const params = useParams<{ id: string }>();
     const { role, user, isMounted } = useApp();
     const { data: job, loading: jobLoading } = useDoc<Job>(`jobs/${params.id}`);
 
