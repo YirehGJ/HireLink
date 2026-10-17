@@ -1,14 +1,16 @@
 // Regresión: las mismas escrituras que hace la app, con las reglas endurecidas. Solo datos desechables.
 import fs from 'fs';
-import admin from 'firebase-admin';
+import { initializeApp as initAdmin, cert } from 'firebase-admin/app';
+import { getAuth as getAdminAuth } from 'firebase-admin/auth';
+import { getFirestore as getAdminFirestore } from 'firebase-admin/firestore';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, collection, getDocs, query, where, writeBatch, serverTimestamp, deleteDoc } from 'firebase/firestore';
 
 import { loadEnv } from './env.mjs';
 const { get } = loadEnv();
-admin.initializeApp({ credential: admin.credential.cert({ projectId: get('FIREBASE_PROJECT_ID'), clientEmail: get('FIREBASE_CLIENT_EMAIL'), privateKey: get('FIREBASE_PRIVATE_KEY').replace(/\\n/g, '\n') }) });
-const adb = admin.firestore(); const aauth = admin.auth();
+initAdmin({ credential: cert({ projectId: get('FIREBASE_PROJECT_ID'), clientEmail: get('FIREBASE_CLIENT_EMAIL'), privateKey: get('FIREBASE_PRIVATE_KEY').replace(/\\n/g, '\n') }) });
+const adb = getAdminFirestore(); const aauth = getAdminAuth();
 const PASS = 'TestPass1234';
 const cfg = { apiKey: get('NEXT_PUBLIC_FB_API_KEY'), authDomain: get('NEXT_PUBLIC_FB_AUTH_DOMAIN'), projectId: get('NEXT_PUBLIC_FB_PROJECT_ID'), appId: get('NEXT_PUBLIC_FB_APP_ID') };
 const EM = ['flow.rec@example.com', 'flow.cand@example.com', 'flow.rec2@example.com'];

@@ -2,7 +2,6 @@
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bell, Lock, Paintbrush, User } from 'lucide-react';
 import { ThemeSwitcher } from "@/components/dashboard/settings/theme-switcher";
 import { AccountSettings } from "@/components/dashboard/settings/account-settings";
 import { NotificationSettings } from "@/components/dashboard/settings/notification-settings";

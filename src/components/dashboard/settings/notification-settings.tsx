@@ -13,12 +13,9 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2 } from "lucide-react";
 import React from "react";
 import { useAuth, useFirestore, useDoc } from "@/firebase";
@@ -47,7 +44,7 @@ export function NotificationSettings() {
   const auth = useAuth();
   const firestore = useFirestore();
   const { user } = useApp();
-  const { data: savedPrefs, loading } = useDoc<NotificationsFormValues>(
+  const { data: savedPrefs } = useDoc<NotificationsFormValues>(
     user ? `users/${user.id}/settings/notifications` : null
   );
   const [isSubmitting, setIsSubmitting] = React.useState(false);

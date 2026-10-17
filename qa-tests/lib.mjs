@@ -6,7 +6,9 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import admin from 'firebase-admin';
+import { initializeApp, cert } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
+import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 
 export const HERE = path.dirname(fileURLToPath(import.meta.url));
 export const ROOT = path.resolve(HERE, '..');
@@ -36,17 +38,16 @@ if (PRODUCTION_PROJECT_IDS.includes(ENV.FIREBASE_PROJECT_ID)) {
   process.exit(2);
 }
 console.log(`Proyecto de pruebas: ${ENV.FIREBASE_PROJECT_ID}  |  aplicación: ${BASE}`);
-admin.initializeApp({
-  credential: admin.credential.cert({
+initializeApp({
+  credential: cert({
     projectId: ENV.FIREBASE_PROJECT_ID,
     clientEmail: ENV.FIREBASE_CLIENT_EMAIL,
     privateKey: ENV.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
   }),
 });
-export { admin };
-export const db = admin.firestore();
-export const auth = admin.auth();
-export const TS = admin.firestore.Timestamp;
+export const db = getFirestore();
+export const auth = getAuth();
+export const TS = Timestamp;
 export const uidOf = async (email) => (await auth.getUserByEmail(email)).uid;
 export const tryUid = async (email) => { try { return await uidOf(email); } catch { return null; } };
 

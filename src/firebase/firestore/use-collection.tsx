@@ -10,7 +10,6 @@ import {
   orderBy,
   limit,
   startAfter,
-  type Firestore,
   type CollectionReference,
   type Query,
   type WhereFilterOp,

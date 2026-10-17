@@ -2,14 +2,16 @@
 // Uso: node security-tests/api-test.mjs http://localhost:3000 [--env .env.staging]
 // Usa SOLO cuentas/datos desechables (sec.*) que se eliminan al terminar.
 import fs from 'fs';
-import admin from 'firebase-admin';
+import { initializeApp, cert } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
+import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { loadEnv, positionalArgs } from './env.mjs';
 
 const BASE = positionalArgs[0] || 'http://localhost:3000';
 const { get } = loadEnv();
-admin.initializeApp({ credential: admin.credential.cert({ projectId: get('FIREBASE_PROJECT_ID'), clientEmail: get('FIREBASE_CLIENT_EMAIL'), privateKey: get('FIREBASE_PRIVATE_KEY').replace(/\\n/g, '\n') }) });
-const adb = admin.firestore();
-const aauth = admin.auth();
+initializeApp({ credential: cert({ projectId: get('FIREBASE_PROJECT_ID'), clientEmail: get('FIREBASE_CLIENT_EMAIL'), privateKey: get('FIREBASE_PRIVATE_KEY').replace(/\\n/g, '\n') }) });
+const adb = getFirestore();
+const aauth = getAuth();
 const KEY = get('NEXT_PUBLIC_FB_API_KEY');
 const PASS = 'TestPass1234';
 const EMAILS = ['sec.reca', 'sec.recb', 'sec.cand1', 'sec.cand2', 'sec.susp'].map((s) => `${s}@example.com`);
@@ -97,7 +99,7 @@ try {
   await adb.doc(`jobs/${jobDel.id}/applications/${uids.cand1}`).set({ candidateRef: uids.cand1, jobRef: jobDel.id, status: 'screening' });
   await adb.doc(`users/${uids.cand1}/applications/${jobDel.id}`).set({ candidateRef: uids.cand1, jobRef: jobDel.id, status: 'screening' });
   await adb.doc(`recommendations/${uids.cand1}_${jobDel.id}`).set({ candidateRef: uids.cand1, jobRef: jobDel.id, score: 0.8, status: 'pending', reasons: [] });
-  const iv = await adb.collection('interviews').add({ jobRef: jobDel.id, jobTitle: 'SEC Job a eliminar', organizationRef: orgA.id, candidateRef: uids.cand1, candidateName: 'Cand Uno', interviewerRef: uids.reca, type: 'video', scheduledStart: admin.firestore.Timestamp.fromDate(new Date(Date.now() + 864e5)), location: 'x' }); created.push(iv.path);
+  const iv = await adb.collection('interviews').add({ jobRef: jobDel.id, jobTitle: 'SEC Job a eliminar', organizationRef: orgA.id, candidateRef: uids.cand1, candidateName: 'Cand Uno', interviewerRef: uids.reca, type: 'video', scheduledStart: Timestamp.fromDate(new Date(Date.now() + 864e5)), location: 'x' }); created.push(iv.path);
   expect('N01 candidato elimina una vacante', (await api('/api/jobs/delete', T.cand1, { jobId: jobDel.id })).status, 403);
   expect('N02 reclutador B elimina la vacante de A', (await api('/api/jobs/delete', T.recb, { jobId: jobDel.id })).status, 403);
   expect('N03 eliminar una vacante inexistente', (await api('/api/jobs/delete', T.reca, { jobId: 'no-existe-sec' })).status, 404);

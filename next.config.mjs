@@ -20,8 +20,7 @@ const securityHeaders = [
 const nextConfig = {
   poweredByHeader: false, // no revela que se usa Next.js
   reactStrictMode: true,
-  // Habilita instrumentation.ts, que inicializa Sentry en el servidor/edge.
-  experimental: { instrumentationHook: true },
+  // instrumentation.ts (inicializa Sentry en el servidor/edge) es estable desde Next 15: ya no requiere un flag.
   async headers() {
     return [
       { source: '/:path*', headers: securityHeaders },
