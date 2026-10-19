@@ -39,7 +39,7 @@ Proyecto académico (Seminario de Integración: Desarrollo) en producción en
 
 ## Stack técnico
 
-- **Frontend:** Next.js 14 (App Router), React, TypeScript, Tailwind CSS + shadcn/ui.
+- **Frontend:** Next.js 15 (App Router), React 18, TypeScript, Tailwind CSS + shadcn/ui. Requiere Node 22.
 - **Backend y datos:** Firebase (Authentication, Firestore en tiempo real, Admin SDK
   para los Route Handlers autenticados).
 - **IA:** [Genkit](https://firebase.google.com/docs/genkit) orquestando un modelo
@@ -81,6 +81,8 @@ Proyecto académico (Seminario de Integración: Desarrollo) en producción en
 |---|---|---|
 | Unitarias del motor de recomendaciones y del cupo de la IA (sin red ni tokens) | `npm run test:unit` | [`qa-tests/unitarias/`](qa-tests/unitarias) |
 | Funcionales con navegador: recorren la aplicación con datos realistas | `node qa-tests/funcional-1.mjs <etiqueta>` y `funcional-2.mjs` | [`qa-tests/README.md`](qa-tests/README.md) |
+| Teclado, celular y primeros pasos con navegador (sin IA) | `node qa-tests/accesibilidad.mjs <etiqueta>` | [`qa-tests/README.md`](qa-tests/README.md) |
+| Rendimiento y accesibilidad (Lighthouse y axe-core) | `node qa-tests/medicion/rendimiento.mjs <etiqueta>` y `accesibilidad-axe.mjs` | [`qa-tests/README.md`](qa-tests/README.md) |
 | Sondas de defectos (una por hallazgo, antes y después de corregir) | `node qa-tests/defectos.mjs <etiqueta>` | [`qa-tests/README.md`](qa-tests/README.md) |
 | Seguridad, API y carga | `node security-tests/sec-test.mjs --env .env.staging` (y `flow-test`, `api-test`) | [`security-tests/README.md`](security-tests/README.md) |
 | Compilación, tipos y lint | `npm run build:staging` | [`docs/ENTORNOS.md`](docs/ENTORNOS.md) |
@@ -172,7 +174,8 @@ escribir en producción sin `--allow-production`. Cómo separar desarrollo, stag
   notificaciones, envío de correo).
 - `firestore.rules`: reglas de seguridad de Firestore.
 - `security-tests/`: pruebas automatizadas de seguridad, API y regresión.
-- `qa-tests/`: pruebas unitarias y funcionales con navegador, y sondas de defectos.
+- `qa-tests/`: pruebas unitarias y funcionales con navegador, de accesibilidad, sondas de defectos y mediciones.
+- `public/`: estáticos, incluido el worker de pdf.js con la versión en el nombre.
 - `scripts/`: datos de ejemplo (`seed.mjs`), entorno de staging (`dev-staging.mjs`) y limpieza de
   datos huérfanos (`limpiar-huerfanos.mjs`, simulación por defecto).
 - `docs/`: decisiones de diseño, cronograma y documentación de las integraciones
@@ -180,6 +183,15 @@ escribir en producción sin `--allow-production`. Cómo separar desarrollo, stag
 
 ### Documentación
 
+- [CHANGELOG.md](CHANGELOG.md) y [docs/RELEASE_v1.0.md](docs/RELEASE_v1.0.md) — cambios de la versión 1.0
+  (preparada, sin publicar).
+- [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md), [docs/GUIA_DEVS.md](docs/GUIA_DEVS.md) y
+  [docs/GUIA_USO.md](docs/GUIA_USO.md) — cómo está hecho, cómo trabajar en el código y cómo usar la plataforma.
+- [docs/CHECKLIST_SEGURIDAD_PRIVACIDAD.md](docs/CHECKLIST_SEGURIDAD_PRIVACIDAD.md) y
+  [docs/BACKLOG_V2.md](docs/BACKLOG_V2.md) — seguridad y privacidad al cierre, y lo que queda para la versión 2.
+- [docs/piloto/README.md](docs/piloto/README.md) — plan y materiales del piloto con personas reales.
+- [docs/GUION_DEMO_FINAL.md](docs/GUION_DEMO_FINAL.md) y [docs/DEFENSA.md](docs/DEFENSA.md) — demostración final y
+  preparación de la defensa.
 - [docs/CRONOGRAMA_FINAL.md](docs/CRONOGRAMA_FINAL.md) — estado real por semana y
   cronograma de cierre.
 - [docs/ENTORNOS.md](docs/ENTORNOS.md) — desarrollo, staging y producción, datos de

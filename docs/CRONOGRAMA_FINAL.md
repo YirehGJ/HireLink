@@ -25,8 +25,8 @@ Leyenda: ✅ hecho y verificado · 🟡 parcial · ❌ no hecho · ➖ cambió p
 | S09 | Notificaciones in-app | ✅ | Campana con contador en tiempo real; eventos de postulación, estado, entrevista y match |
 | S10 | Entrevistas | ✅ | Agenda con fecha/hora/tipo, calendario y aviso al candidato |
 | S11 | Reglas v1 + emuladores | 🟡 | Reglas endurecidas y 59 pruebas automáticas, pero contra el proyecto real, no con Emulator Suite |
-| S12 | QA + accesibilidad + responsive | 🟡 | QA funcional (regresión con navegador en `qa-tests/`) y de seguridad ✅. **Sin medir** Lighthouse, accesibilidad ni revisión móvil |
-| S13 | Release + demo | 🟡 | Cuentas de prueba y demo posible. Faltan seed script, guía de uso y video |
+| S12 | QA + accesibilidad + responsive | ✅ | QA funcional (regresión con navegador en `qa-tests/`) y de seguridad ✅. Lighthouse, accesibilidad y celular medidos y corregidos en las Semanas 5 y 6 (0 violaciones de axe-core, 81 y 82 puntos en celular). Falta probar con un lector de pantalla |
+| S13 | Release + demo | 🟡 | Cuentas de prueba, script `seed`, guía de uso ([GUIA_USO.md](GUIA_USO.md)) y guion de la demostración ([GUION_DEMO_FINAL.md](GUION_DEMO_FINAL.md)) ✅. Falta el video de la demostración |
 
 ### Cronograma 2026 (S14–S30)
 
@@ -45,10 +45,10 @@ Leyenda: ✅ hecho y verificado · 🟡 parcial · ❌ no hecho · ➖ cambió p
 | S24 | Notificaciones | ✅ | Tiempo real + correo real vía Resend (apagado hasta poner `RESEND_API_KEY`, ver [EMAIL_SETUP.md](EMAIL_SETUP.md)) |
 | S25 | Auditoría y observabilidad | ✅ | `auditLogs` y pantalla de admin ✅. Error tracking con Sentry integrado (`@sentry/nextjs`, cliente/servidor/edge) y **activo en producción** desde el 8 de octubre (evento de prueba recibido en el panel) — ver [SENTRY_SETUP.md](SENTRY_SETUP.md) |
 | S26 | Búsqueda avanzada | ✅ | Filtro por fecha de publicación en vacantes y por "seniority objetivo" en candidatos (campo nuevo `targetSeniority`); decisión cliente vs Algolia documentada en [DECISION_SEARCH.md](DECISION_SEARCH.md) |
-| S27 | Performance y DX | ❌ | Sin trabajo dedicado. La página de perfil pesa 90 kB y hay 100 vulnerabilidades de dependencias |
-| S28 | Onboarding y A11y | 🟡 | Elección de rol al registrarse y aviso para crear empresa ✅. Tours, accesibilidad y revisión móvil ❌ |
-| S29 | Pre-lanzamiento / pilotos | 🟡 | Hecho: script `seed` ([scripts/seed.mjs](../scripts/seed.mjs)), guía de entornos ([ENTORNOS.md](ENTORNOS.md)) y cuentas demo ([CUENTAS_DEMO.md](CUENTAS_DEMO.md)). Proyecto de Firebase de staging creado y con datos. Falta cargar variables Preview en Vercel y el piloto con usuarios reales |
-| S30 | Lanzamiento 0.9 | 🟡 | Panel de métricas ✅, checklist de seguridad ✅ (`security-tests/`). Faltan diagrama de arquitectura, guía para devs y backlog v2 |
+| S27 | Performance y DX | ✅ | pdf.js solo al subir un CV (ruta del perfil de 94 kB a 14 kB), Firebase Auth sin iframe, Next 15.5.28, firebase-admin 14.5 y pdf.js 6.4.299. `npm audit`: de 96 avisos (2 críticos) a 84 (0 críticos). Lighthouse en celular: de 65 a 67 puntos a 81 y 82 (mediana de tres). El cliente `firebase` sigue en 10.14.1: la 13 sumaba 68 kB por ruta y solo quitaba un aviso alto |
+| S28 | Onboarding y A11y | ✅ | Elección de rol y aviso para crear empresa ✅, guía de primeros pasos con avance real ✅, accesibilidad (axe-core sin violaciones en los dos temas, teclado y «Saltar al contenido») ✅ y menú y vistas para celular ✅. Falta probar con un lector de pantalla |
+| S29 | Pre-lanzamiento / pilotos | 🟡 | Hecho: script `seed` ([scripts/seed.mjs](../scripts/seed.mjs)), guía de entornos ([ENTORNOS.md](ENTORNOS.md)) y cuentas demo ([CUENTAS_DEMO.md](CUENTAS_DEMO.md)). Proyecto de Firebase de staging creado y con datos. Materiales del piloto listos (`docs/piloto/`: plan, guion de tareas, formulario SUS, aviso de privacidad, bitácora y proceso de corrección) ✅. Falta cargar variables Preview en Vercel y **realizar** el piloto con personas reales |
+| S30 | Lanzamiento 0.9 | ✅ | Panel de métricas ✅, checklist de seguridad y privacidad final ✅ ([CHECKLIST_SEGURIDAD_PRIVACIDAD.md](CHECKLIST_SEGURIDAD_PRIVACIDAD.md)), diagrama de arquitectura ✅ ([ARQUITECTURA.md](ARQUITECTURA.md)), guía para desarrolladores ✅ ([GUIA_DEVS.md](GUIA_DEVS.md)) y backlog v2 ✅ ([BACKLOG_V2.md](BACKLOG_V2.md)) |
 
 ### Hecho fuera del cronograma original
 
@@ -91,12 +91,12 @@ producto estable, documentado y probado con usuarios, y reservar tiempo para la 
 | 2 | 28 sep–4 oct | **Cerrar S19/S20/S24** ✅ | Decisión escrita sobre Storage (recomendado: no subir el PDF y documentarlo); vista previa de experiencia/educación en el asistente de CV; plantilla de correo (o dejarlo documentado como v2) | Backend + Frontend |
 | 3 | 5–11 oct | **Cerrar S25/S26** ✅ | Sentry (error tracking) en cliente y API; filtro por fecha y por "seniority objetivo"; documento "búsqueda en cliente vs servicio externo" | Backend + Frontend |
 | 4 | 12–18 oct | **Datos y entornos (S29 parte 1)** 🟡 | Script `seed` con datos de ejemplo realistas y con volumen (31 cuentas, 210 documentos) ✅; entornos dev/staging/prod ✅ proyecto `hirelink-staging` creado, con reglas publicadas y datos cargados, y `npm run dev:staging` (queda cargar las variables Preview en Vercel); cuentas demo documentadas ✅; revisión funcional con datos realistas y su informe extra ✅ | Backend + Docs/QA |
-| 5 | 19–25 oct | **Performance y calidad (S27)** | Medir con Lighthouse; code splitting de la página de perfil (pdf.js); actualizar dependencias (`next`, `pdfjs-dist`, `firebase`) y repetir `security-tests/`; limpiar imports | Frontend + Backend |
-| 6 | 26 oct–1 nov | **Accesibilidad y móvil (S12/S28)** | Contraste, foco y teclado; revisión mobile-first de las vistas clave; tours/hints del primer ingreso; meta Lighthouse ≥ 80 | Frontend + Producto |
-| 7 | 2–8 nov | **Piloto (S29 parte 2)** | 2–5 reclutadores y ~10 candidatos reales; guion de tareas; formulario de feedback; bitácora de errores en Notion | Producto + Docs/QA |
-| 8 | 9–15 nov | **Corrección del piloto** | Triage y arreglo de bugs por prioridad; re-ejecutar las 3 baterías de `security-tests/`; segunda ronda corta con 2–3 usuarios | Todo el equipo |
-| 9 | 16–22 nov | **Documentación y demo (S13/S30)** | Diagrama de arquitectura; guía para nuevos devs y de uso; checklist de seguridad y privacidad final; video de demo; backlog v2 (correo, Storage, Algolia, facturación) | Docs/QA + Producto |
-| 10 | 23–29 nov | **Cierre y buffer** | Release **v1.0**; ensayo de la defensa con el plan de demo; hotfixes; entrega final. **30 nov: buffer** | Todo el equipo |
+| 5 | 19–25 oct | **Performance y calidad (S27)** ✅ | Medir con Lighthouse; code splitting de la página de perfil (pdf.js); actualizar dependencias (`next`, `pdfjs-dist`, `firebase`) y repetir `security-tests/`; limpiar imports | Frontend + Backend |
+| 6 | 26 oct–1 nov | **Accesibilidad y móvil (S12/S28)** ✅ | Contraste, foco y teclado; revisión mobile-first de las vistas clave; tours/hints del primer ingreso; meta Lighthouse ≥ 80. **Hecha el 17 de octubre:** axe-core sin violaciones, menú del celular, guía de primeros pasos y Lighthouse de 81 y 82 en las páginas clave | Frontend + Producto |
+| 7 | 2–8 nov | **Piloto (S29 parte 2)** 🟡 | 2–5 reclutadores y ~10 candidatos reales; guion de tareas; formulario de feedback; bitácora de errores en Notion. **Materiales listos** (`docs/piloto/`, bitácora en CSV); las sesiones con personas se hacen del 3 al 6 de noviembre | Producto + Docs/QA |
+| 8 | 9–15 nov | **Corrección del piloto** 🟡 | Triage y arreglo de bugs por prioridad; re-ejecutar las 3 baterías de `security-tests/`; segunda ronda corta con 2–3 usuarios. **Proceso listo** ([piloto/TRIAGE_Y_CORRECCION.md](piloto/TRIAGE_Y_CORRECCION.md)); baterías de línea base en verde (61/61, 67/67, 23/23); los hallazgos del piloto aún no existen | Todo el equipo |
+| 9 | 16–22 nov | **Documentación y demo (S13/S30)** 🟡 | Diagrama de arquitectura; guía para nuevos devs y de uso; checklist de seguridad y privacidad final; video de demo; backlog v2 (correo, Storage, Algolia, facturación). **Hechos** todos menos el video de la demostración | Docs/QA + Producto |
+| 10 | 23–29 nov | **Cierre y buffer** 🟡 | Release **v1.0**; ensayo de la defensa con el plan de demo; hotfixes; entrega final. **30 nov: buffer**. **Preparados:** [RELEASE_v1.0.md](RELEASE_v1.0.md), [CHANGELOG.md](../CHANGELOG.md) y [DEFENSA.md](DEFENSA.md); la versión no está publicada y los ensayos con personas están pendientes | Todo el equipo |
 
 ### Hitos
 
@@ -104,9 +104,9 @@ producto estable, documentado y probado con usuarios, y reservar tiempo para la 
 |---|---|
 | 27 sep | Producción verificada (v0.9-rc) |
 | 18 oct | Datos de ejemplo y 3 entornos listos |
-| 1 nov | Producto pulido: Lighthouse ≥ 80, accesibilidad y móvil revisados |
+| 1 nov | Producto pulido: Lighthouse ≥ 80, accesibilidad y móvil revisados (hecho el 17 de octubre) |
 | 8 nov | Piloto realizado |
-| 22 nov | Documentación y video completos |
+| 22 nov | Documentación y video completos (documentación hecha; falta el video) |
 | 29 nov | Release v1.0 + ensayo de defensa |
 
 ### Riesgos y mitigación
@@ -121,8 +121,8 @@ producto estable, documentado y probado con usuarios, y reservar tiempo para la 
 
 ### Definición de "terminado" para el 30 de noviembre
 
-- Producción en Vercel estable, con los 3 roles funcionando.
-- Las 3 baterías de `security-tests/` en verde.
-- Lighthouse ≥ 80 en las páginas clave y accesibilidad básica revisada.
-- Piloto documentado con feedback atendido.
-- Documentación (arquitectura, flujos, guía de uso) y video de demo.
+- Producción en Vercel estable, con los 3 roles funcionando. *Pendiente de publicar la versión 1.0.*
+- Las 3 baterías de `security-tests/` en verde. ✅ (61/61, 67/67 y 23/23 el 17 de octubre)
+- Lighthouse ≥ 80 en las páginas clave y accesibilidad básica revisada. ✅
+- Piloto documentado con feedback atendido. *Pendiente: se realiza del 3 al 6 de noviembre.*
+- Documentación (arquitectura, flujos, guía de uso) y video de demo. ✅ la documentación; *falta el video.*

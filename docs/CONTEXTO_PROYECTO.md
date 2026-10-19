@@ -3,7 +3,7 @@
 Documento de contexto para quien vaya a trabajar en el proyecto (persona o asistente de IA).
 Léelo completo antes de tocar código: resume qué es HireLink, cómo está construido, qué se ha
 hecho, qué problemas aparecieron, qué decisiones se tomaron y qué falta. Última actualización:
-**15 de octubre de 2026**.
+**18 de octubre de 2026**.
 
 > Si eres un asistente de IA: este archivo es la fuente de contexto. No contiene secretos y no
 > debes pedirlos ni inventarlos. Cuando algo no esté aquí, léelo del código o de `docs/` antes de
@@ -50,7 +50,7 @@ Artificial para Conectar, Comprender y Vincular Talento con Oportunidades Labora
 
 | Capa | Tecnología |
 |---|---|
-| Frontend | Next.js 14.2 (App Router, carpeta `src/`), React, TypeScript, Tailwind CSS, shadcn/ui |
+| Frontend | Next.js 15.5 (App Router, carpeta `src/`), React 18.3, TypeScript, Tailwind CSS, shadcn/ui; Node 22 |
 | Datos y autenticación | Firebase Authentication y Firestore (tiempo real); Firebase Admin en los Route Handlers |
 | IA | Genkit con el conector OpenAI-compatible hacia Groq, modelo `openai/gpt-oss-120b` por defecto (`src/ai/model.ts`, `src/ai/genkit.ts`); se puede cambiar con `GROQ_MODEL_ID` |
 | Despliegue | Vercel, CI/CD automático desde `main` |
@@ -170,11 +170,14 @@ docs/                     Guías y decisiones (ver sección 9)
   esté suspendida, y el rol. `enforceRateLimit(db, uid, clave, max, ventanaSeg)` limita el uso y
   responde 429. `errorResponse()` convierte errores en respuestas y **solo reporta a Sentry los
   inesperados** (los 401, 403 y 429 no), esperando el envío con `Sentry.flush(2000)`.
-- **Cabeceras HTTP de seguridad** en `next.config.mjs`. pdf.js con `eval` desactivado
-  (CVE-2024-4367).
+- **Cabeceras HTTP de seguridad** en `next.config.mjs`. pdf.js 6.4.299 (la vulnerabilidad CVE-2024-4367 se
+  corrigió desde la 4.2.67), cargado solo al subir un CV y con su worker servido desde `public/`.
 - **Baterías automatizadas** (`security-tests/`, cuentas desechables): se ejecutan contra staging
-  con `--env .env.staging` y se niegan a correr contra producción. Última ejecución, el 16 de
-  octubre de 2026 con la compilación final: reglas 61/61, API y carga 67/67, flujos 23/23.
+  con `--env .env.staging` y se niegan a correr contra producción. Última ejecución, el 17 de
+  octubre de 2026 con Next 15.5.28 y firebase-admin 14.5.0: reglas 61/61, API y carga 67/67, flujos 23/23.
+- **Dependencias:** `npm audit` pasó de 96 avisos (2 críticos, 30 altos) a 84 (0 críticos, 20 altos); lo que queda y por qué
+  está en `docs/CHECKLIST_SEGURIDAD_PRIVACIDAD.md`. El cliente `firebase` sigue en 10.14.1: la 13.0.0 compila y pasa las
+  pruebas unitarias, pero suma unos 68 kB de JavaScript por ruta y solo quita un aviso alto, así que se descartó.
 - Se corrigieron 12 vulnerabilidades en la ronda inicial (lista en `security-tests/README.md`).
 
 ---
@@ -236,10 +239,12 @@ postulaciones y entrevistas; `funcional-1.mjs` las elimina y las vuelve a crear 
 | 3 (5 al 11 oct) | Cumplida | Sentry en cliente y API, filtro por fecha, seniority objetivo del candidato y su filtro, decisión de búsqueda |
 | 4 (12 al 18 oct) | Cumplida (falta Preview en Vercel) | Script `seed` con volumen, proyecto de staging con reglas y datos, `dev:staging`, cuentas demo documentadas |
 | 4, extra | Hecho (15 oct) | Revisión funcional de extremo a extremo con datos realistas: 40 puntos de mejora corregidos, pruebas nuevas (`qa-tests/`) y un informe extra en la carpeta de entregas (ver sección 7) |
-| 5 (19 al 25 oct) | Por hacer | Lighthouse, dividir pdf.js, actualizar dependencias, repetir pruebas de seguridad |
-| 6 (26 oct al 1 nov) | Por hacer | Accesibilidad y móvil, tours, Lighthouse de al menos 80 |
-| 7 (2 al 8 nov) | Por hacer | Piloto con 2 a 5 reclutadores y unos 10 candidatos |
-| 8 a 10 (9 al 29 nov) | Por hacer | Corrección del piloto, documentación final, demo, versión 1.0; 30 nov de margen |
+| 5 (19 al 25 oct) | Hecha el 17 oct | pdf.js solo al subir un CV (perfil de 94 a 14 kB), Next 15.5.28, firebase-admin 14.5, avisos de dependencias 96 a 84, Lighthouse en celular de 65-67 a 81-82; imports sin uso a cero |
+| 6 (26 oct al 1 nov) | Hecha el 17 oct | Accesibilidad (axe-core sin violaciones en dos temas), menú del celular, guía de primeros pasos, foco devuelto en diálogos; `qa-tests/accesibilidad.mjs` (57 comprobaciones) y `qa-tests/medicion/` |
+| 7 (2 al 8 nov) | Preparada | Piloto: materiales en `docs/piloto/` (plan, guion, formulario SUS, aviso, bitácora); **las sesiones con personas se hacen del 3 al 6 de noviembre y sus resultados no existen todavía** |
+| 8 (9 al 15 nov) | Preparada | Proceso de corrección (`docs/piloto/TRIAGE_Y_CORRECCION.md`) y línea base de las baterías; sin hallazgos del piloto aún |
+| 9 (16 al 22 nov) | Hecha menos el video | `ARQUITECTURA.md`, `GUIA_DEVS.md`, `GUIA_USO.md`, `CHECKLIST_SEGURIDAD_PRIVACIDAD.md`, `BACKLOG_V2.md`, `GUION_DEMO_FINAL.md`; falta el video de la demostración |
+| 10 (23 al 29 nov) | Preparada | Versión 1.0 lista y **sin publicar** (`CHANGELOG.md`, `docs/RELEASE_v1.0.md`), guía de defensa (`docs/DEFENSA.md`); falta la aprobación del equipo, los ensayos y los resultados del piloto; 30 nov de margen |
 
 ---
 
@@ -297,7 +302,11 @@ del proyecto (fuera del repositorio).
 | Decisiones | `docs/DECISION_SEARCH.md`, `docs/DECISION_STORAGE_CV.md` |
 | Diagramas de la tesis | `docs/DIAGRAMAS_MERMAID.md` |
 | Pruebas de seguridad | `security-tests/README.md` |
-| Pruebas unitarias, funcionales con navegador y sondas | `qa-tests/README.md` |
+| Pruebas unitarias, funcionales con navegador, accesibilidad, sondas y mediciones (Lighthouse, axe-core) | `qa-tests/README.md` |
+| Arquitectura, guía para desarrolladores y guía de uso | `docs/ARQUITECTURA.md`, `docs/GUIA_DEVS.md`, `docs/GUIA_USO.md` |
+| Seguridad y privacidad final, backlog de la versión 2 | `docs/CHECKLIST_SEGURIDAD_PRIVACIDAD.md`, `docs/BACKLOG_V2.md` |
+| Piloto con personas reales | `docs/piloto/README.md` |
+| Demostración final, defensa y versión 1.0 | `docs/GUION_DEMO_FINAL.md`, `docs/DEFENSA.md`, `docs/RELEASE_v1.0.md`, `CHANGELOG.md` |
 | Cupo de la IA y modelo de respaldo | `docs/ENTORNOS.md` (sección «Cupo de la IA») |
 
 Aviso: `docs/API_DOCUMENTATION.md` está **desactualizado** (menciona Gemini y Server Actions);
@@ -315,7 +324,10 @@ la realidad son Route Handlers autenticados y Groq. No lo uses como fuente sin c
 | Limpiar datos huérfanos de producción | `scripts/limpiar-huerfanos.mjs` (simulación primero; con `--apply` hace respaldo). La revisión de solo lectura encontró 13 postulaciones de vacantes eliminadas y 1 sin copia. Requiere autorización del equipo | Alta |
 | Decisiones de producto y privacidad | R1 a R5 y R8 del informe extra: visibilidad de los perfiles para cualquier reclutador, aviso de privacidad y eliminar cuenta, rol al registrarse con Google, retirar postulación, salario y contrato, clave de Groq separada para staging | Alta |
 | Repetir las fases con IA con el modelo de producción | La regresión final usó `gpt-oss-20b` porque el cupo de `gpt-oss-120b` se agotó; repetir F3, F4, F8, F9 y F9b cuando se libere | Media |
-| Semana 5 | Lighthouse, dividir pdf.js en la página de perfil, actualizar `next`, `pdfjs-dist`, `firebase` | Media |
+| Publicar la versión 1.0 | Fusionar `semana5` a `main`, `git push` (despliega en producción), publicar las reglas, verificar con `/api/health` y etiquetar `v1.0.0`; requiere la aprobación del equipo (`docs/RELEASE_v1.0.md`) | Alta |
+| Piloto | Realizar las sesiones, llenar la bitácora y el formulario, y completar los marcadores **[completar]** de `docs/DEFENSA.md` | Alta |
+| Lector de pantalla y celulares reales | No se han probado; las pruebas de accesibilidad son automáticas y con el celular emulado a 375 px | Media |
+| Video de la demostración | Grabarlo con la versión 1.0 desplegada | Media |
 | Tesis | Actualizar tabla de entornos (7.7.1) y plan (8.3) con staging creado y Semana 4 cumplida | Media |
 | Sentry | Probar error del navegador, alertas por correo, mapas de código | Baja |
 | Resend | Configurar la clave para activar correos | Baja |
