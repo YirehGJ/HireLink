@@ -1,0 +1,62 @@
+# Backlog de la versión 2
+
+Lo que quedó fuera de la versión 1.0 por decisión de alcance, costo o privacidad, ordenado por prioridad. Cada punto indica
+de dónde viene (informe extra de la Semana 4, piloto o cronograma original), el esfuerzo estimado (S: menos de 1 día,
+M: de 1 a 3 días, L: más de 3 días) y lo que habría que decidir antes de empezar.
+
+## Prioridad alta: privacidad y confianza
+
+| # | Qué | Origen | Esfuerzo | Por qué importa | Decisión previa |
+|---|---|---|---|---|---|
+| 1 | Aviso de privacidad y consentimiento en el registro | R2 | S | La plataforma guarda CV, correo y experiencia sin consentimiento explícito | Texto legal revisado por alguien que sepa |
+| 2 | «Eliminar mi cuenta» con borrado en cascada (perfil, postulaciones, recomendaciones, entrevistas, avisos) | R2 | M | Derecho de cancelación; ya existe el patrón de borrado en cascada de `/api/jobs/delete` | Qué se conserva en auditoría |
+| 3 | Visibilidad del perfil controlada por la persona candidata | R1 | M | Hoy cualquier reclutador ve correo y texto del CV de todos | Qué ve una empresa antes de una postulación o match |
+| 4 | Verificación de reclutadores y empresas | R1 | M | Cualquiera puede registrarse como reclutador | Proceso de aprobación por un administrador |
+| 5 | Elegir el rol al entrar por primera vez con Google | R3 | S | Hoy queda como candidato y solo un administrador puede cambiarlo | Ninguna |
+| 6 | Content-Security-Policy y proteger el detalle de `/api/health` | R6 | M | Reduce el daño de un XSS y la información que se expone | Primero en modo solo reporte |
+
+## Prioridad alta: operación de la IA
+
+| # | Qué | Origen | Esfuerzo | Por qué importa | Decisión previa |
+|---|---|---|---|---|---|
+| 7 | Clave de Groq separada para staging y producción | R8 | S | Hoy las pruebas pueden agotar la IA de producción | Cuenta distinta (el cupo es por organización) |
+| 8 | Plan de pago o cola de evaluaciones en segundo plano | R8 | L | El plan gratuito evalúa de 5 a 9 pares por llamada y 200 000 tokens al día | Presupuesto |
+| 9 | Registrar el consumo de tokens por acción | Semana 4 | S | Hoy solo se estima; con el dato se pueden poner alertas | Dónde guardarlo (Firestore o Sentry) |
+
+## Prioridad media: producto
+
+| # | Qué | Origen | Esfuerzo | Por qué importa | Decisión previa |
+|---|---|---|---|---|---|
+| 10 | Retirar una postulación desde «Mis postulaciones» | R4 | S | Las reglas lo permiten pero no hay pantalla | Si se avisa a la empresa |
+| 11 | Salario y tipo de contrato en el formulario y en la ficha | R5 | S | Existen en el modelo y en los datos de ejemplo | Mostrar rango o monto |
+| 12 | Paginación en Explorar Candidatos y separar el texto del CV | R7 | M | Hoy se descargan todos los perfiles con el CV completo | Dónde guardar el texto (documento privado) |
+| 13 | Correo real con Resend (aviso de entrevista, estado, match) | Cronograma S24 | S | Ya está implementado y apagado; solo falta la clave y un dominio | Dominio para el remitente |
+| 14 | Subir y guardar el PDF del CV | Cronograma S05 | M | Permite ver el CV original | Requiere plan Blaze de Firebase ([DECISION_STORAGE_CV.md](DECISION_STORAGE_CV.md)) |
+| 15 | Búsqueda en servicio externo (Algolia) | Cronograma S26 | M | Búsqueda por texto completo con volumen alto | Costo ([DECISION_SEARCH.md](DECISION_SEARCH.md)) |
+| 16 | Comentarios internos del equipo reclutador sobre un candidato | Piloto | M | Varias personas de la misma empresa | Visibilidad entre reclutadores |
+
+## Prioridad media: calidad
+
+| # | Qué | Origen | Esfuerzo | Por qué importa |
+|---|---|---|---|---|
+| 17 | Probar las reglas con Firebase Emulator Suite | Cronograma S11 | M | Hoy se prueban contra un proyecto real |
+| 18 | Pruebas con navegador en cada despliegue (integración continua) | Semana 4 | M | Hoy se ejecutan a mano |
+| 19 | Accesibilidad: revisión con lector de pantalla y con personas usuarias | Semana 6 | M | Las pruebas automáticas cubren una parte de las barreras |
+| 20 | Variables Preview en Vercel y dominio autorizado en Authentication de staging | Semana 4 | S | Cada rama tendría su entorno de prueba |
+| 21 | Actualizar a la siguiente versión mayor de las dependencias con avisos sin corrección | Semana 5 | M | Quedan 20 avisos altos (cadena de Firebase, Genkit y herramientas de compilación). Se probó `firebase` 13.0.0: compila y pasa las pruebas unitarias, pero suma unos 68 kB por ruta y solo quita un aviso alto |
+
+## Ideas para después
+
+- Aplicación instalable (PWA) y avisos push.
+- Reportes y exportación a CSV para empresas.
+- Plantillas de vacante y de correo por empresa.
+- Varios idiomas.
+- Panel con métricas de tiempo de contratación por empresa.
+- Facturación y planes para empresas.
+
+## Cómo se decide qué entra primero
+
+1. Lo que protege datos personales (puntos 1 a 6).
+2. Lo que evita que la IA deje de funcionar (7 a 9).
+3. Lo que una persona del piloto pidió dos veces.
+4. El resto, por esfuerzo.
