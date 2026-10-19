@@ -13,7 +13,7 @@ Se ejecutan desde la raíz del proyecto.
 
 | Script | Qué prueba | Comando |
 |---|---|---|
-| `sec-test.mjs` | Reglas de Firestore: escalada de privilegios, aislamiento entre empresas, cuentas suspendidas, datos ajenos, integridad de postulaciones, validación de tamaño (57 pruebas de ataque/permiso) | `node security-tests/sec-test.mjs --env .env.staging` |
+| `sec-test.mjs` | Reglas de Firestore: escalada de privilegios, aislamiento entre empresas, cuentas suspendidas, datos ajenos, integridad de postulaciones, validación de tamaño (61 pruebas de ataque/permiso) | `node security-tests/sec-test.mjs --env .env.staging` |
 | `api-test.mjs` | Endpoints `/api/*`: autenticación, roles, aislamiento, validación de entrada, idempotencia, límites de uso, cabeceras de seguridad y carga con 100 usuarios simultáneos | `npm run build:staging && npm run start:staging` y luego `node security-tests/api-test.mjs http://localhost:3100 --env .env.staging` |
 | `flow-test.mjs` | Regresión: los flujos normales de la app (registro, empresa, vacante, postulación, estados, entrevistas) siguen funcionando con las reglas endurecidas | `node security-tests/flow-test.mjs --env .env.staging` |
 
