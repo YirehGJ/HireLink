@@ -7,6 +7,7 @@ Este documento es el plan del piloto. Los materiales que lo acompañan están en
 | [GUION_TAREAS.md](GUION_TAREAS.md) | Tareas que realiza cada persona, con el criterio de éxito de cada una |
 | [FORMULARIO_FEEDBACK.md](FORMULARIO_FEEDBACK.md) | Preguntas del formulario (consentimiento, facilidad de uso SUS y comentarios) |
 | [AVISO_PRIVACIDAD_PILOTO.md](AVISO_PRIVACIDAD_PILOTO.md) | Texto de consentimiento para quienes participan |
+| [HOJA_MODERADOR.md](HOJA_MODERADOR.md) | Lista de verificación, guion de apertura y cierre, pistas permitidas y tabla del observador |
 | [MENSAJES_INVITACION.md](MENSAJES_INVITACION.md) | Mensajes listos para invitar, confirmar, recordar y dar seguimiento a quienes participan |
 | [bitacora.csv](bitacora.csv) | Plantilla de la bitácora de errores (se abre con Excel) |
 | [TRIAGE_Y_CORRECCION.md](TRIAGE_Y_CORRECCION.md) | Cómo se clasifican y corrigen los hallazgos en la Semana 8 |
