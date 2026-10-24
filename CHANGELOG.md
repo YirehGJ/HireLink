@@ -4,6 +4,22 @@ Todos los cambios importantes de HireLink, de lo más reciente a lo más antiguo
 `v1.0.0` (commit `302e211`, 19 de octubre de 2026) es la última publicada; antes, `v0.9-rc` (commit `94c6762`,
 24 de septiembre de 2026). Cómo se publicó y cómo se revierte: [docs/RELEASE_v1.0.md](docs/RELEASE_v1.0.md).
 
+## [1.0.1] sin publicar
+
+### Corregido
+- **La IA devolvía un JSON incompleto y la persona veía «Error interno».** Cuando el modelo contestaba un JSON válido al que le faltaba una
+  propiedad (por ejemplo `education` al analizar un CV), Genkit lanzaba «Schema validation failed» y `runAi` no lo reconocía como una salida
+  malformada: no reintentaba y la API respondía 500. Con el modelo de respaldo pasaba en cerca de 1 de cada 3 análisis. Ahora se reintenta de
+  inmediato hasta dos veces (antes, una) y, si la salida sigue sin servir, la API responde 502 con «La IA devolvió una respuesta incompleta.
+  Inténtalo de nuevo.», que el análisis de CV y la descripción de la vacante muestran en pantalla. Aplica a las tres funciones de IA (análisis de CV,
+  descripción de la vacante y recomendaciones).
+- La prueba del worker de pdf.js fallaba en Windows al cambiar de rama porque Git lo escribía con CRLF (`core.autocrlf`): `.gitattributes` lo
+  deja sin conversión.
+
+### Pruebas
+- Unitarias de 26 a 32: reintento con `Schema validation failed`, 502 claro tras reintentar, un `INVALID_ARGUMENT` que no es de esquema no se
+  reintenta, y el mensaje llega a la pantalla.
+
 ## [1.0.0] 19 de octubre de 2026
 
 ### Añadido

@@ -25,7 +25,8 @@ No usan red, Firebase ni IA (no gastan tokens), así que se pueden ejecutar siem
 habilidades (`overlapScore`), el caché por huella de `evaluateMatch` (sin cambios no se llama a la IA; si cambia el
 perfil o la vacante se vuelve a evaluar sin pisar la decisión del reclutador; no se guardan recomendaciones de una
 vacante eliminada), la política de reintentos de la IA (`runAi` espera lo que pide el proveedor en el límite por
-minuto, reintenta una vez una salida malformada y, si el cupo diario se agotó, responde de inmediato con un 503
+minuto, reintenta hasta dos veces una salida malformada, sea JSON roto o JSON que no cumple el esquema (`Schema validation failed`),
+y responde un 502 claro si sigue mal; si el cupo diario se agotó, responde de inmediato con un 503
 claro) y las funciones de formato (`fixEscapedNewlines`, etiquetas, años, direcciones http y búsqueda sin acentos).
 Cargan directamente los archivos de `src/` con un cargador propio (`unitarias/cargador.mjs`) que sustituye lo que
 hablaría con servicios externos.

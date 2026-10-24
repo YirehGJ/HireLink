@@ -9,7 +9,8 @@ globalThis.__ia = { llamadas: [], responder: async () => ({ score: 0.8, reasons:
 globalThis.__avisos = [];
 
 const { evaluateMatch, overlapScore, matchHash, isUpToDate } = await import('../../src/lib/server/matching.ts');
-const { runAi, isQuotaExhausted, AI_QUOTA_MESSAGE } = await import('../../src/lib/server/ai-runner.ts');
+const { runAi, isQuotaExhausted, AI_QUOTA_MESSAGE, AI_INCOMPLETE_MESSAGE } = await import('../../src/lib/server/ai-runner.ts');
+const { ApiError, aiUnavailableMessage } = await import('../../src/lib/api-client.ts');
 
 // ------------------------------------------------------------------ base de datos en memoria
 function crearDb(inicial = {}) {
@@ -231,7 +232,19 @@ test('runAi espera lo que pide el proveedor en el límite por minuto (antes espe
   assert.ok(Date.now() - inicio >= 2200, 'espera al menos lo que pidió el proveedor');
 });
 
-test('runAi reintenta una sola vez, y sin esperar, una salida malformada del modelo', async () => {
+// Lo que lanza Genkit cuando el modelo contesta un JSON válido al que le falta una propiedad del esquema (visto con
+// openai/gpt-oss-20b al analizar un CV: faltaba `education`). Antes de la corrección no se reintentaba y la persona veía «Error interno».
+const errorEsquema = (campo = 'education') => Object.assign(
+  new Error(`INVALID_ARGUMENT: Schema validation failed. Parse Errors:\n\n- (root): must have required property '${campo}'\n\nProvided data:\n\n{\n  "headline": "Desarrolladora Front-End",\n  "skills": []\n}`),
+  { status: 'INVALID_ARGUMENT', code: 400, originalMessage: `Schema validation failed. Parse Errors:\n\n- (root): must have required property '${campo}'` },
+);
+const sinAvisos = async (fn) => {
+  const warn = console.warn;
+  console.warn = () => {}; // runAi deja una línea en el registro del servidor; aquí no hace falta verla
+  try { return await fn(); } finally { console.warn = warn; }
+};
+
+test('runAi reintenta, sin esperar, una salida malformada del modelo y se recupera', async () => {
   let intentos = 0;
   const inicio = Date.now();
   const r = await runAi(async () => {
@@ -243,9 +256,70 @@ test('runAi reintenta una sola vez, y sin esperar, una salida malformada del mod
   assert.equal(intentos, 2);
   assert.ok(Date.now() - inicio < 500, 'el reintento es inmediato');
 
+  // Se aceptan hasta dos reintentos (tres intentos en total): con el modelo de respaldo fallaba alrededor de 1 de cada 3 veces.
   intentos = 0;
-  await assert.rejects(runAi(async () => { intentos++; throw new SyntaxError("JSON5: invalid character '}' at 1:95"); }), SyntaxError);
-  assert.equal(intentos, 2, 'si sigue malformada, se rinde en el segundo intento (cada intento cuesta tokens)');
+  const r2 = await runAi(async () => {
+    intentos++;
+    if (intentos < 3) throw new SyntaxError("JSON5: invalid character '}' at 1:95");
+    return 'ok';
+  });
+  assert.equal(r2, 'ok');
+  assert.equal(intentos, 3);
+});
+
+test('si la salida sigue malformada tras los reintentos, runAi responde un 502 claro (ya no «Error interno»)', async () => {
+  let intentos = 0;
+  await sinAvisos(() => assert.rejects(
+    runAi(async () => { intentos++; throw new SyntaxError("JSON5: invalid character '}' at 1:95"); }),
+    (e) => e.status === 502 && e.message === AI_INCOMPLETE_MESSAGE,
+  ));
+  assert.equal(intentos, 3, 'se rinde en el tercer intento (cada intento cuesta tokens)');
+});
+
+test('runAi reintenta un JSON que no cumple el esquema («Schema validation failed») y se recupera', async () => {
+  let intentos = 0;
+  const inicio = Date.now();
+  const r = await runAi(async () => {
+    intentos++;
+    if (intentos === 1) throw errorEsquema();
+    return { headline: 'Desarrolladora Front-End', education: [] };
+  });
+  assert.equal(intentos, 2);
+  assert.deepEqual(r.education, []);
+  assert.ok(Date.now() - inicio < 500, 'el reintento es inmediato');
+});
+
+test('si el JSON sigue sin cumplir el esquema, runAi responde un 502 claro y no repite sin fin', async () => {
+  let intentos = 0;
+  await sinAvisos(() => assert.rejects(
+    runAi(async () => { intentos++; throw errorEsquema('experience'); }),
+    (e) => e.status === 502 && e.message === AI_INCOMPLETE_MESSAGE,
+  ));
+  assert.equal(intentos, 3);
+});
+
+test('el mensaje del error de esquema se reconoce aunque Genkit solo conserve el texto original', async () => {
+  let intentos = 0;
+  const soloOriginal = () => Object.assign(new Error('fallo del modelo'), { originalMessage: "Schema validation failed. Parse Errors:\n\n- (root): must have required property 'summary'" });
+  const r = await runAi(async () => { intentos++; if (intentos === 1) throw soloOriginal(); return 'ok'; });
+  assert.equal(r, 'ok');
+  assert.equal(intentos, 2);
+});
+
+test('un INVALID_ARGUMENT que no es de esquema (p. ej. la petición es demasiado grande) no se reintenta ni se disfraza', async () => {
+  let intentos = 0;
+  const demasiadoGrande = Object.assign(new Error('INVALID_ARGUMENT: Request too large for model on tokens per minute (TPM): Limit 8000, Requested 12000.'), { status: 'INVALID_ARGUMENT', code: 400 });
+  await assert.rejects(runAi(async () => { intentos++; throw demasiadoGrande; }), (e) => e === demasiadoGrande);
+  assert.equal(intentos, 1);
+});
+
+test('el mensaje del 502 llega a la pantalla: aiUnavailableMessage lo muestra y no confunde una página de error de la plataforma', () => {
+  assert.match(AI_INCOMPLETE_MESSAGE, /incompleta/, 'el mensaje existe y explica qué pasó');
+  assert.equal(aiUnavailableMessage(new ApiError(AI_INCOMPLETE_MESSAGE, 502)), AI_INCOMPLETE_MESSAGE);
+  assert.equal(aiUnavailableMessage(new ApiError(AI_QUOTA_MESSAGE, 503)), AI_QUOTA_MESSAGE);
+  assert.equal(aiUnavailableMessage(new ApiError('Error 502', 502)), undefined, 'un 502 genérico (sin mensaje propio) no se muestra tal cual');
+  assert.equal(aiUnavailableMessage(new ApiError('Error interno', 500)), undefined);
+  assert.equal(aiUnavailableMessage(new Error('x')), undefined);
 });
 
 test('runAi no reintenta errores que no son transitorios', async () => {
