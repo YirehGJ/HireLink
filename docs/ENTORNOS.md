@@ -20,8 +20,10 @@ probar con libertad sin riesgo para los datos y los usuarios reales.
   repositorio y los datos de ejemplo cargados (31 cuentas y 210 documentos, ver más abajo).
 - **Desarrollo contra staging:** `npm run dev:staging` levanta la aplicación en
   `http://localhost:3100` con las variables de `.env.staging`, sin tocar `.env.local` ni producción.
-- **Pendiente:** cargar las variables de staging en Vercel con ámbito **Preview** y autorizar el
-  dominio de los despliegues de Preview en Authentication (pasos 2 y 7 de la guía).
+- **Staging en Vercel:** desde el 19 de octubre las variables de staging están cargadas con ámbito **Preview** (nueve variables: las seis de
+  `NEXT_PUBLIC_FB_*` salvo `MEASUREMENT_ID` y las tres de Firebase Admin) y el dominio de la rama está autorizado en Authentication de
+  `hirelink-staging`. Las siete variables `NEXT_PUBLIC_FB_*` de producción quedaron sin Preview. Cada rama distinta de `main` se despliega
+  con staging y no toca los datos reales.
 
 ## Crear el entorno de staging (30 minutos)
 

@@ -1,10 +1,10 @@
 # Registro de cambios
 
 Todos los cambios importantes de HireLink, de lo más reciente a lo más antiguo. Las versiones siguen la etiqueta de Git:
-`v0.9-rc` (commit `94c6762`, 24 de septiembre de 2026) es la última publicada; la **1.0.0** está preparada y se etiqueta
-cuando el equipo lo decida ([docs/RELEASE_v1.0.md](docs/RELEASE_v1.0.md)).
+`v1.0.0` (commit `302e211`, 19 de octubre de 2026) es la última publicada; antes, `v0.9-rc` (commit `94c6762`,
+24 de septiembre de 2026). Cómo se publicó y cómo se revierte: [docs/RELEASE_v1.0.md](docs/RELEASE_v1.0.md).
 
-## [1.0.0] preparada, sin publicar
+## [1.0.0] 19 de octubre de 2026
 
 ### Añadido
 - **Guía de primeros pasos** en el inicio del candidato y en las vacantes del reclutador: avance real, se puede cerrar y
@@ -48,6 +48,9 @@ cuando el equipo lo decida ([docs/RELEASE_v1.0.md](docs/RELEASE_v1.0.md)).
 - Esc cerraba primero un tooltip invisible del menú y había que pulsarlo dos veces.
 - `/register?role=recruiter` no dejaba elegido el tipo de cuenta.
 - La landing se desbordaba horizontalmente en pantallas de 375 px.
+- Toda la API de servidor respondía 500 en Vercel con `firebase-admin` 14.5: `jwks-rsa` 4 carga `jose` 6 con `require()` y el Node de Vercel no
+  lo admite (en Node 24, local, sí). Se fijó `jwks-rsa` 3.2.2 en `overrides`. Lo detectó el primer despliegue *Preview* de Vercel antes de
+  publicar; en local se reproduce con `NODE_OPTIONS=--no-experimental-require-module`.
 
 ### Seguridad
 - Avisos de `npm audit`: de 96 (2 críticos, 30 altos) a 84 (0 críticos, 20 altos). El detalle de lo que queda y por qué está en

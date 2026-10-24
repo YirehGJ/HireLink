@@ -187,7 +187,7 @@ docs/                     Guías y decisiones (ver sección 9)
 | Entorno | Dónde | Proyecto Firebase | Variables |
 |---|---|---|---|
 | Desarrollo | `npm run dev:staging` en `localhost:3100` | `hirelink-staging` | `.env.staging` (local, ignorado por Git) |
-| Staging | Despliegues Preview de Vercel | `hirelink-staging` | Variables de Vercel con ámbito **Preview** (pendiente) |
+| Staging | Despliegues Preview de Vercel | `hirelink-staging` | Variables de Vercel con ámbito **Preview** (cargadas el 19 de octubre; el dominio de la rama está autorizado en Authentication) |
 | Producción | Vercel, rama `main` | `hirelink-fd1fe` | Variables de Vercel con ámbito **Production** |
 
 Variables (solo nombres; los valores no se comparten): `NEXT_PUBLIC_FB_API_KEY`,
@@ -237,14 +237,14 @@ postulaciones y entrevistas; `funcional-1.mjs` las elimina y las vuelve a crear 
 | 1 (21 al 27 sep) | Cumplida el 7 oct | Producción estabilizada: variables corregidas, clave de IA saneada, recomendaciones ajustadas a los límites, `/api/health` |
 | 2 (28 sep al 4 oct) | Cumplida | Decisión sobre Storage de CV, vista previa de experiencia y educación, plantilla de correo |
 | 3 (5 al 11 oct) | Cumplida | Sentry en cliente y API, filtro por fecha, seniority objetivo del candidato y su filtro, decisión de búsqueda |
-| 4 (12 al 18 oct) | Cumplida (falta Preview en Vercel) | Script `seed` con volumen, proyecto de staging con reglas y datos, `dev:staging`, cuentas demo documentadas |
+| 4 (12 al 18 oct) | Cumplida (el Preview de Vercel quedó listo el 19 oct) | Script `seed` con volumen, proyecto de staging con reglas y datos, `dev:staging`, cuentas demo documentadas |
 | 4, extra | Hecho (15 oct) | Revisión funcional de extremo a extremo con datos realistas: 40 puntos de mejora corregidos, pruebas nuevas (`qa-tests/`) y un informe extra en la carpeta de entregas (ver sección 7) |
 | 5 (19 al 25 oct) | Hecha el 17 oct | pdf.js solo al subir un CV (perfil de 94 a 14 kB), Next 15.5.28, firebase-admin 14.5, avisos de dependencias 96 a 84, Lighthouse en celular de 65-67 a 81-82; imports sin uso a cero |
 | 6 (26 oct al 1 nov) | Hecha el 17 oct | Accesibilidad (axe-core sin violaciones en dos temas), menú del celular, guía de primeros pasos, foco devuelto en diálogos; `qa-tests/accesibilidad.mjs` (57 comprobaciones) y `qa-tests/medicion/` |
 | 7 (2 al 8 nov) | Preparada | Piloto: materiales en `docs/piloto/` (plan, guion, formulario SUS, aviso, bitácora); **las sesiones con personas se hacen del 3 al 6 de noviembre y sus resultados no existen todavía** |
 | 8 (9 al 15 nov) | Preparada | Proceso de corrección (`docs/piloto/TRIAGE_Y_CORRECCION.md`) y línea base de las baterías; sin hallazgos del piloto aún |
 | 9 (16 al 22 nov) | Hecha menos el video | `ARQUITECTURA.md`, `GUIA_DEVS.md`, `GUIA_USO.md`, `CHECKLIST_SEGURIDAD_PRIVACIDAD.md`, `BACKLOG_V2.md`, `GUION_DEMO_FINAL.md`; falta el video de la demostración |
-| 10 (23 al 29 nov) | Preparada | Versión 1.0 lista y **sin publicar** (`CHANGELOG.md`, `docs/RELEASE_v1.0.md`), guía de defensa (`docs/DEFENSA.md`); falta la aprobación del equipo, los ensayos y los resultados del piloto; 30 nov de margen |
+| 10 (23 al 29 nov) | Parcial | Versión 1.0.0 **publicada el 19 de octubre** (commit `302e211`, etiqueta `v1.0.0`; `CHANGELOG.md`, `docs/RELEASE_v1.0.md`) y guía de defensa (`docs/DEFENSA.md`); faltan publicar las reglas, la página de *Releases*, los ensayos y los resultados del piloto; 30 nov de margen |
 
 ---
 
@@ -319,12 +319,11 @@ la realidad son Route Handlers autenticados y Groq. No lo uses como fuente sin c
 
 | Pendiente | Detalle | Prioridad |
 |---|---|---|
-| Variables Preview en Vercel | Cargar las de staging con ámbito Preview y autorizar el dominio Preview en Authentication de `hirelink-staging` | Alta |
 | Publicar `firestore.rules` en producción | La validación de `targetSeniority` está en el repo y en staging, no en `hirelink-fd1fe` | Alta |
 | Limpiar datos huérfanos de producción | `scripts/limpiar-huerfanos.mjs` (simulación primero; con `--apply` hace respaldo). La revisión de solo lectura encontró 13 postulaciones de vacantes eliminadas y 1 sin copia. Requiere autorización del equipo | Alta |
 | Decisiones de producto y privacidad | R1 a R5 y R8 del informe extra: visibilidad de los perfiles para cualquier reclutador, aviso de privacidad y eliminar cuenta, rol al registrarse con Google, retirar postulación, salario y contrato, clave de Groq separada para staging | Alta |
 | Repetir las fases con IA con el modelo de producción | La regresión final usó `gpt-oss-20b` porque el cupo de `gpt-oss-120b` se agotó; repetir F3, F4, F8, F9 y F9b cuando se libere | Media |
-| Publicar la versión 1.0 | Fusionar `semana5` a `main`, `git push` (despliega en producción), publicar las reglas, verificar con `/api/health` y etiquetar `v1.0.0`; requiere la aprobación del equipo (`docs/RELEASE_v1.0.md`) | Alta |
+| Terminar la publicación de la 1.0 | El código está en producción y etiquetado (19 oct). Falta publicar `firestore.rules` y crear la versión en la página de *Releases* de GitHub (`docs/RELEASE_v1.0.md`, sección 4) | Alta |
 | Piloto | Realizar las sesiones, llenar la bitácora y el formulario, y completar los marcadores **[completar]** de `docs/DEFENSA.md` | Alta |
 | Lector de pantalla y celulares reales | No se han probado; las pruebas de accesibilidad son automáticas y con el celular emulado a 375 px | Media |
 | Video de la demostración | Grabarlo con la versión 1.0 desplegada | Media |

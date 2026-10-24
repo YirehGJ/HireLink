@@ -184,7 +184,7 @@ escribir en producción sin `--allow-production`. Cómo separar desarrollo, stag
 ### Documentación
 
 - [CHANGELOG.md](CHANGELOG.md) y [docs/RELEASE_v1.0.md](docs/RELEASE_v1.0.md) — cambios de la versión 1.0
-  (preparada, sin publicar).
+  (publicada el 19 de octubre de 2026).
 - [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md), [docs/GUIA_DEVS.md](docs/GUIA_DEVS.md) y
   [docs/GUIA_USO.md](docs/GUIA_USO.md) — cómo está hecho, cómo trabajar en el código y cómo usar la plataforma.
 - [docs/CHECKLIST_SEGURIDAD_PRIVACIDAD.md](docs/CHECKLIST_SEGURIDAD_PRIVACIDAD.md) y
