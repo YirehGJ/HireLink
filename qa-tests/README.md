@@ -133,6 +133,33 @@ Lighthouse simula la red y la CPU de un celular de gama media y varía de una co
 repite tres veces y se compara la **mediana**. Antes de cada medición se vacía la caché HTTP. Los resultados quedan en
 `qa-tests/resultados/medicion/` (ignorado por Git).
 
+## Capturas del manual de usuario (`capturas-manual.mjs`)
+
+Toma las imágenes del manual de usuario de HireLink: recorre la aplicación como lo haría cada tipo de persona y guarda una
+imagen por paso, con **recuadros rojos numerados** sobre lo que se debe pulsar o llenar (el número es el que cita el texto
+del manual). Usa personas ficticias: una candidata y un reclutador que crea y elimina por sí mismo
+(`daniela.ruiz.manual@example.com` y `andres.mejia.manual@example.com`) y las cuentas de demostración del administrador.
+
+```bash
+python qa-tests/manual/crear-cv-ejemplo.py                 # CV de la candidata ficticia (qa-tests/resultados/cv-daniela-ruiz.pdf)
+$env:TZ = 'UTC'; $env:GROQ_MODEL_ID = 'openai/gpt-oss-20b'; npm run start:staging   # modelo de respaldo, otra terminal
+node qa-tests/capturas-manual.mjs                          # todas las escenas, en orden
+node qa-tests/capturas-manual.mjs admin movil              # solo algunas escenas
+node qa-tests/capturas-manual.mjs limpiar                  # elimina las cuentas de ejemplo y lo que dejaron
+```
+
+Escenas: `publico`, `candidata1` (registro, perfil y CV con IA), `reclutador1` (empresa y vacante con IA), `candidata2`
+(explorar y postularse), `reclutador2` (postulantes, notas, entrevista, matches y cierre), `candidata3` (avisos y
+configuración), `admin` y `movil`. Dependen unas de otras (por ejemplo `reclutador2` necesita la postulación de
+`candidata2`), así que se corren en ese orden; `candidata1` empieza eliminando lo que dejó una corrida anterior.
+
+- Las imágenes quedan en `qa-tests/resultados/capturas-manual/` (o en `OUT_DIR`) con un `catalogo.json` que dice a qué
+  apunta cada número. Este último sirve para comprobar que el texto del manual describe cada marca.
+- **Usa la IA de verdad** (análisis del CV, descripción de la vacante y recomendaciones). El modelo de respaldo falla a veces
+  con «Schema validation failed»: la escena repite el paso hasta 5 veces.
+- Solo corre contra staging (`lib.mjs` se niega con producción). Las ayudas están en `manual/ayudas.mjs`
+  (`snap` dibuja los recuadros y recorta) y cada escena en su propio archivo de `manual/`.
+
 ## Resultados
 
 Todo se escribe en `qa-tests/resultados/` (ignorado por Git): un `.json` por ejecución

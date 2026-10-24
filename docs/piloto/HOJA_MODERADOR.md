@@ -17,7 +17,10 @@ teléfono.
 - [ ] Haber probado el enlace de videollamada o tener lista la sala (si es presencial).
 - [ ] Tener a mano: este documento, el [GUION_TAREAS.md](GUION_TAREAS.md), la [bitacora.csv](bitacora.csv) abierta en Excel
       y el enlace del formulario.
-- [ ] Un CV en PDF de ejemplo por si la persona no quiere usar el suyo.
+- [ ] Un CV en PDF de ejemplo por si la persona no quiere usar el suyo (`docs/demo/cv-ejemplo-mariana-torres.pdf`).
+- [ ] **No compartir el manual de usuario antes de la sesión.** La métrica «tareas completadas sin ayuda» mide si la
+      plataforma se entiende sola; quien lee el manual primero ya no la mide. El manual (con imágenes) es para el
+      equipo, para quien lo pida al terminar y para quien use la plataforma después del piloto.
 - [ ] Navegador limpio: ventana nueva, sin sesiones abiertas, sin extensiones que cambien la página.
 - [ ] Si es reclutador: comprobar que no haya sesiones anteriores abiertas en ese equipo.
 - [ ] Nadie del equipo corre pruebas con IA ese día (el cupo es compartido).
