@@ -1,0 +1,4 @@
+# El worker de pdf.js debe ser idéntico, byte a byte, al de node_modules (lo comprueba qa-tests/unitarias/pdf-worker.test.mjs).
+# Sin esto, Git en Windows (core.autocrlf=true) lo escribe con CRLF al cambiar de rama y la prueba falla aunque el archivo del
+# repositorio sea correcto. Se regenera con `npm run worker:pdf`.
+public/pdf.worker.*.min.mjs -text
