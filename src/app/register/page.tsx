@@ -19,10 +19,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth, useFirestore } from "@/firebase";
 import { userService } from "@/firebase/firestore/user-service";
 import { clearIntentionalSignOut } from "@/lib/auth-flags";
+import { emailField } from "@/lib/auth-schemas";
 
 const registerSchema = z.object({
   fullName: z.string().trim().min(2, "Mínimo 2 caracteres").max(120, "Máximo 120 caracteres"),
-  email: z.string().email("Email inválido"),
+  email: emailField(),
   password: z.string().min(8, "Mínimo 8 caracteres"),
   role: z.enum(["candidate", "recruiter"], {
     required_error: "Selecciona un tipo de cuenta",
@@ -88,12 +89,13 @@ function RegisterPageContent() {
       footerContent={<>¿Ya tienes cuenta? <Button variant="link" asChild className="h-auto px-0 py-1.5"><Link href="/login">Inicia sesión</Link></Button></>}
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onRegister)} className="space-y-4">
+        {/* method="post": si se envía antes de que cargue el JavaScript, la contraseña no viaja en la URL. */}
+        <form onSubmit={form.handleSubmit(onRegister)} method="post" noValidate className="space-y-4">
           <FormField control={form.control} name="fullName" render={({ field }) => (
             <FormItem><FormLabel>Nombre completo</FormLabel><FormControl><Input placeholder="Juan Pérez" {...field} /></FormControl><FormMessage /></FormItem>
           )} />
           <FormField control={form.control} name="email" render={({ field }) => (
-            <FormItem><FormLabel>Email</FormLabel><FormControl><Input placeholder="tu@email.com" autoComplete="email" {...field} /></FormControl><FormMessage /></FormItem>
+            <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" placeholder="tu@email.com" autoComplete="email" {...field} /></FormControl><FormMessage /></FormItem>
           )} />
           <FormField control={form.control} name="password" render={({ field }) => (
             <FormItem>

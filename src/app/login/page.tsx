@@ -28,9 +28,10 @@ import { useAuth, useFirestore } from "@/firebase";
 import { Icons } from "@/components/icons";
 import { userService } from "@/firebase/firestore/user-service";
 import { clearIntentionalSignOut, safeNextPath } from "@/lib/auth-flags";
+import { emailField } from "@/lib/auth-schemas";
 
 const loginSchema = z.object({
-  email: z.string().min(1, "El email es requerido").email("Email inválido"),
+  email: emailField("Email inválido", "El email es requerido"),
   password: z.string().min(1, "La contraseña es requerida").min(6, "Mínimo 6 caracteres"),
   rememberMe: z.boolean().default(false),
 });
@@ -114,14 +115,15 @@ function LoginPageContent() {
     >
       <div className="space-y-4">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onEmailLogin)} className="space-y-4">
+          {/* method="post": si se envía antes de que cargue el JavaScript, la contraseña no viaja en la URL. */}
+          <form onSubmit={form.handleSubmit(onEmailLogin)} method="post" noValidate className="space-y-4">
             <FormField
               control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
-                  <FormControl><Input placeholder="tu@email.com" autoComplete="username" {...field} /></FormControl>
+                  <FormControl><Input type="email" placeholder="tu@email.com" autoComplete="username" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}

@@ -14,12 +14,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/firebase";
+import { emailField } from "@/lib/auth-schemas";
 
 const formSchema = z.object({
-  email: z
-    .string()
-    .min(1, { message: "El email es requerido." })
-    .email({ message: "Formato de email inválido." }),
+  email: emailField("Formato de email inválido.", "El email es requerido."),
 });
 
 export default function ForgotPasswordPage() {
@@ -91,7 +89,7 @@ export default function ForgotPasswordPage() {
         </div>
       ) : (
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} noValidate className="space-y-4">
             <FormField
               control={form.control}
               name="email"
@@ -99,7 +97,7 @@ export default function ForgotPasswordPage() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="tu@email.com" autoComplete="email" {...field} />
+                    <Input type="email" placeholder="tu@email.com" autoComplete="email" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
