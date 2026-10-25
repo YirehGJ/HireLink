@@ -74,6 +74,13 @@ Anote: hora de inicio, código, rol, equipo y navegador.
 | R6, entrevista | «Abre los detalles de una persona que se postuló.» |
 | R7, candidatos | «Busca la sección de candidatos en el menú lateral.» |
 
+### Aprobar a la reclutadora (solo con reclutadoras)
+
+Una cuenta de reclutadora nueva ve un aviso amarillo («Tu cuenta espera aprobación») y no puede publicar ni ver candidatas.
+Cuando termine la tarea R1, el soporte entra como administrador, abre **Gestión Usuarios**, busca su correo (o activa
+«Solo pendientes de aprobación») y elige **Aprobar reclutadora** en su menú. La persona recarga la página y sigue con la R2.
+No cuenta como ayuda: es un paso del piloto. Anote la hora.
+
 ## 4. Si algo se rompe durante la sesión
 
 | Qué ocurre | Qué hacer |

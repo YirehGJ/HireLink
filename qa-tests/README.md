@@ -4,7 +4,7 @@ Cinco tipos de prueba, de la más rápida a la más completa:
 
 | Tipo | Qué hace | Necesita |
 |---|---|---|
-| **Unitarias** (`unitarias/`) | Comprueban el motor de recomendaciones, el manejo del cupo de la IA y la versión del worker de pdf.js con una base de datos y un modelo simulados | Solo Node 22 o superior |
+| **Unitarias** (`unitarias/`) | Comprueban el motor de recomendaciones, el manejo del cupo de la IA (con el modelo de respaldo), los formularios de acceso y la versión del worker de pdf.js con una base de datos y un modelo simulados | Solo Node 22 o superior |
 | **Funcionales** (`funcional-1.mjs`, `funcional-2.mjs`) | Recorren la aplicación como una persona, con un navegador real | Staging, navegador y `puppeteer-core` |
 | **Sondas de defectos** (`defectos.mjs`) | Cada sonda comprueba un defecto concreto y dice si todavía existe | Staging, navegador y `puppeteer-core` |
 | **Accesibilidad y celular** (`accesibilidad.mjs`) | Teclado, menú del celular, foco en diálogos, HTML estático y guía de primeros pasos; no usa la IA | Staging, navegador y `puppeteer-core` |
@@ -26,8 +26,11 @@ habilidades (`overlapScore`), el caché por huella de `evaluateMatch` (sin cambi
 perfil o la vacante se vuelve a evaluar sin pisar la decisión del reclutador; no se guardan recomendaciones de una
 vacante eliminada), la política de reintentos de la IA (`runAi` espera lo que pide el proveedor en el límite por
 minuto, reintenta hasta dos veces una salida malformada, sea JSON roto o JSON que no cumple el esquema (`Schema validation failed`),
-y responde un 502 claro si sigue mal; si el cupo diario se agotó, responde de inmediato con un 503
-claro) y las funciones de formato (`fixEscapedNewlines`, etiquetas, años, direcciones http y búsqueda sin acentos).
+y responde un 502 claro si sigue mal; si el cupo diario del modelo principal se agotó, pasa al modelo de respaldo y solo si
+también se agotó responde de inmediato con un 503 claro; reintenta tiempos de espera y errores de conexión, responde «la IA está
+ocupada» si un límite por minuto no cede y respeta el tope de tiempo de 50 s), el campo de correo de los formularios de
+acceso (`emailField`: recorta espacios antes de validar) y las funciones de formato (`fixEscapedNewlines`, etiquetas, años,
+direcciones http y búsqueda sin acentos) y la ruta a la que se vuelve tras iniciar sesión (`safeNextPath`). Son 44 pruebas.
 Cargan directamente los archivos de `src/` con un cargador propio (`unitarias/cargador.mjs`) que sustituye lo que
 hablaría con servicios externos.
 

@@ -78,6 +78,10 @@ lo compara con las vacantes y calcula un **porcentaje de compatibilidad con las 
 En **Perfil** captura el nombre de la empresa, su sitio web y una descripción. Sin este paso no se pueden publicar
 vacantes. Las personas de otra empresa nunca ven tus vacantes en borrador ni a tus postulantes.
 
+Tu cuenta también debe estar **aprobada** por un administrador. Mientras espera ves un aviso amarillo arriba: puedes
+completar el perfil de tu empresa, pero todavía no publicar vacantes ni ver candidatas. Cuando la aprueban, el aviso
+desaparece.
+
 ### Publica una vacante
 
 1. En **Vacantes** pulsa **Crear Vacante** (*Crear Nueva Vacante*).
@@ -114,13 +118,14 @@ filtrar por seniority objetivo, nivel mínimo de habilidad y «solo disponibles�
 | Opción del menú | Qué puedes hacer |
 |---|---|
 | Panel Principal | Ver métricas reales: usuarios, organizaciones, vacantes abiertas y cerradas, postulaciones |
-| Gestión Usuarios | Cambiar el rol, **suspender** o reactivar una cuenta y abrir su ficha. **Ver como** muestra la plataforma tal como la ve esa persona reclutadora, en **solo lectura** |
+| Gestión Usuarios | **Aprobar** (o revocar) a una reclutadora: el aviso de arriba cuenta cuántas esperan y el interruptor «Solo pendientes de aprobación» las filtra. Cambiar el rol o la organización, **suspender** o reactivar una cuenta, **eliminar** una cuenta con sus datos y abrir su ficha. **Ver como** muestra la plataforma tal como la ve esa persona reclutadora, en **solo lectura** |
 | Organizaciones | Crear y editar empresas y asignarles reclutadores |
 | Gestión Vacantes | Ver y moderar todas las vacantes |
 | Auditoría | Registro de acciones de la plataforma y la pestaña *Embudo y KPIs* (cuántas postulaciones hay hoy en cada estado) |
 
-Una cuenta suspendida ve el aviso «Tu cuenta está suspendida» en lugar de la plataforma y no puede escribir datos hasta
-que se reactive.
+Una cuenta suspendida no puede iniciar sesión (se deshabilita en Authentication y se cierran sus sesiones) ni leer ni
+escribir datos hasta que se reactive. Nunca queda la plataforma sin una administradora activa: no se puede suspender,
+cambiar de rol ni eliminar a la última.
 
 ## 6. Privacidad en pocas palabras
 
@@ -128,10 +133,10 @@ que se reactive.
 |---|---|
 | ¿Qué datos se guardan? | Tu cuenta (nombre, correo, rol), tu perfil, el texto de tu CV, tus postulaciones y los avisos |
 | ¿Se guarda mi PDF? | No. Se lee en tu navegador y no se sube |
-| ¿Quién ve mi perfil? | Las personas reclutadoras registradas. Tu correo y el texto de tu CV son visibles para ellas |
+| ¿Quién ve mi perfil? | Las reclutadoras que un administrador aprobó y los administradores. Tu correo y el texto de tu CV son visibles para ellos |
 | ¿La IA ve mis datos? | El texto del CV y los datos del perfil y de la vacante se envían al proveedor de IA (Groq) solo para calcular el análisis |
-| ¿Puedo corregir o borrar mis datos? | Puedes editar tu perfil cuando quieras. Para borrar tu cuenta por completo, pídelo a un administrador |
-| ¿Quién ve las notas del reclutador sobre mí? | La empresa y los administradores. La plataforma no te las muestra |
+| ¿Puedo corregir o borrar mis datos? | Puedes editar tu perfil cuando quieras y borrar tu cuenta por completo con «Eliminar mi cuenta» (Configuración): se borran tu perfil, postulaciones, avisos y todo lo que depende de ella |
+| ¿Quién ve las notas del reclutador sobre mí? | Solo la empresa y los administradores. Tú no las ves |
 
 Por favor no subas datos sensibles que no sean necesarios para una postulación (por ejemplo, números de documentos oficiales).
 

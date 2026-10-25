@@ -54,7 +54,7 @@ src/
   lib/                     types.ts, format.ts, markdown.tsx, pdf-text.ts, api-client.ts, auth-flags.ts
   lib/server/              guard.ts, matching.ts, ai-runner.ts, notify.ts, datetime.ts, email/
 firestore.rules            Reglas de seguridad
-scripts/                   seed, dev-staging y limpiar-huerfanos
+scripts/                   seed, dev-staging, limpiar-huerfanos, publicar-reglas, aprobar-reclutadoras, migrar-notas y respaldar-datos
 public/                    Estáticos; incluye el worker de pdf.js con la versión en el nombre
 qa-tests/                  unitarias, regresión con navegador, sondas, accesibilidad y mediciones (medicion/)
 security-tests/            reglas, API y carga, flujos
@@ -103,7 +103,13 @@ ahí; la pantalla no se dibuja hasta conocer el rol de la persona.
 - Los flujos de Genkit están en `src/ai/flows/`. Se llaman **solo desde el servidor** y siempre dentro de `runAi(...)`
   (`src/lib/server/ai-runner.ts`): limita la concurrencia, reintenta y traduce el cupo agotado a un 503 con mensaje claro.
 - Si el resultado del modelo se muestra o se guarda, normalízalo (como hace `sanitizeCvData` en `extract-cv`).
-- El modelo se define en `src/ai/model.ts` y se puede cambiar con `GROQ_MODEL_ID`.
+- El modelo se define en `src/ai/model.ts` y se puede cambiar con `GROQ_MODEL_ID`. Los flujos piden `activeModel()` en
+  cada llamada: cuando `runAi` ve que se agotó el cupo diario del principal, pasa al de respaldo (`GROQ_FALLBACK_MODEL_ID`,
+  por defecto `openai/gpt-oss-20b`) durante el tiempo que indique el proveedor. La huella de cada recomendación incluye
+  el modelo que dio el puntaje (`engineVersion()`).
+- Los scripts de mantenimiento comparten `scripts/comun.mjs`: `publicar-reglas.mjs` compara (y con `--apply` publica)
+  `firestore.rules` en el proyecto elegido; `aprobar-reclutadoras.mjs`, `migrar-notas.mjs` y `respaldar-datos.mjs` hacen
+  lo que dice su nombre. Todos son de simulación por defecto y se niegan a escribir en producción sin `--allow-production`.
 - Para recomendaciones, la huella (`inputHash`) en `src/lib/server/matching.ts` decide si se vuelve a llamar a la IA; si
   agregas campos al prompt, deben entrar en `matchInput`.
 

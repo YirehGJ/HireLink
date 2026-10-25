@@ -4,6 +4,15 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 const { emailField } = await import('../../src/lib/auth-schemas.ts');
+const { safeNextPath } = await import('../../src/lib/auth-flags.ts');
+
+test('safeNextPath solo acepta rutas internas del dashboard (sin «..», dobles barras ni direcciones externas)', () => {
+  assert.equal(safeNextPath('/dashboard'), '/dashboard');
+  assert.equal(safeNextPath('/dashboard/jobs/abc-123'), '/dashboard/jobs/abc-123');
+  for (const malo of [null, undefined, '', '/login', 'https://x.com', '//evil.com', '/dashboard//x', '/dashboard/../login', '/dashboardx', '/dashboard/%2e%2e']) {
+    assert.equal(safeNextPath(malo), null, String(malo));
+  }
+});
 
 test('emailField acepta un correo con espacios al inicio o al final y lo devuelve recortado', () => {
   assert.equal(emailField().parse('ana@correo.com '), 'ana@correo.com');

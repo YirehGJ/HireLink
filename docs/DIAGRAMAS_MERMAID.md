@@ -207,6 +207,7 @@ erDiagram
     USERS ||--o{ AUDIT_LOGS : "ejecuta"
     JOBS ||--o{ APPLICATIONS : "recibe"
     CANDIDATES ||--o{ APPLICATIONS : "realiza"
+    JOBS ||--o{ APPLICANT_NOTES : "notas privadas de la empresa"
     JOBS ||--o{ RECOMMENDATIONS : "genera"
     CANDIDATES ||--o{ RECOMMENDATIONS : "recibe"
     JOBS ||--o{ INTERVIEWS : "programa"
@@ -248,6 +249,9 @@ erDiagram
         string jobRef FK
         string status
         string source
+    }
+    APPLICANT_NOTES {
+        string candidateRef PK
         boolean shortlisted
         string recruiterNotes
     }

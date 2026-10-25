@@ -13,11 +13,21 @@ Se ejecutan desde la raíz del proyecto.
 
 | Script | Qué prueba | Comando |
 |---|---|---|
-| `sec-test.mjs` | Reglas de Firestore: escalada de privilegios, aislamiento entre empresas, cuentas suspendidas, datos ajenos, integridad de postulaciones, validación de tamaño (61 pruebas de ataque/permiso) | `node security-tests/sec-test.mjs --env .env.staging` |
+| `sec-test.mjs` | Reglas de Firestore: escalada de privilegios, aislamiento entre empresas, cuentas suspendidas, datos ajenos, integridad de postulaciones, validación de tamaño, notas privadas, reclutadoras sin aprobar, cuentas suspendidas o con el rol cambiado y entrevistas (107 pruebas de ataque/permiso) | `node security-tests/sec-test.mjs --env .env.staging` |
 | `api-test.mjs` | Endpoints `/api/*`: autenticación, roles, aislamiento, validación de entrada, idempotencia, límites de uso, cabeceras de seguridad y carga con 100 usuarios simultáneos | `npm run build:staging && npm run start:staging` y luego `node security-tests/api-test.mjs http://localhost:3100 --env .env.staging` |
 | `flow-test.mjs` | Regresión: los flujos normales de la app (registro, empresa, vacante, postulación, estados, entrevistas) siguen funcionando con las reglas endurecidas | `node security-tests/flow-test.mjs --env .env.staging` |
 
-## Resultados (última ejecución: 16 de octubre de 2026, contra `hirelink-staging`)
+## Resultados de la 1.1 (25 de octubre de 2026, contra `hirelink-staging`, con un servidor local compilado)
+
+- **Reglas de Firestore:** 107/107 (con las reglas nuevas: aprobación de reclutadoras, notas privadas aparte, cuentas
+  suspendidas sin lectura, el rol cuenta, entrevistas validadas).
+- **API + carga:** 93/93. Se agregaron 20 comprobaciones (U01 a U20): reclutadora sin aprobar, API de administración
+  (aprobar, revocar, suspender con la cuenta de Authentication deshabilitada, reactivar, cambiar el rol, eliminar con
+  cascada, salvaguardas de quien llama), «Eliminar mi cuenta» y las restricciones de `/api/audit`.
+- **Flujos de la app:** 29/29 (incluye que una reclutadora sin aprobar no publica ni ve candidatas y que la candidata
+  no lee las notas privadas).
+
+## Resultados de la 1.0 (última ejecución: 16 de octubre de 2026, contra `hirelink-staging`)
 
 - **Reglas de Firestore:** 61/61 (antes de endurecer: 45/57, 12 vulnerabilidades). Se agregaron dos controles: el
   reclutador de una empresa lee las entrevistas de su vacante (consulta con `jobRef` y `organizationRef`) y otro

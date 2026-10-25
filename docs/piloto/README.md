@@ -40,7 +40,9 @@ antes del 2 de noviembre.
 | Sábado 7 | Cierre de la bitácora y clasificación inicial de los hallazgos |
 | Domingo 8 | Resumen de resultados y paso a la Semana 8 |
 
-Los reclutadores se programan antes que los candidatos del mismo día para que ya existan vacantes publicadas.
+Los reclutadores se programan antes que los candidatos del mismo día para que ya existan vacantes publicadas. Desde la 1.1
+una reclutadora nueva no ve candidatas ni publica hasta que un administrador la aprueba: el soporte la aprueba justo
+después de la tarea R1 (Gestión Usuarios, «Aprobar reclutadora») y antes de dar la R2.
 
 ## 4. Entorno
 
@@ -66,7 +68,7 @@ puede elegir su rol (riesgo R3 del informe extra de la Semana 4).
 | Las reglas publicadas son las del repositorio | Comparar la pestaña Rules de la consola con `firestore.rules` |
 | No hay datos huérfanos | `node scripts/limpiar-huerfanos.mjs --env .env.local --allow-production` (simulación) |
 | Sentry recibe eventos | Provocar un error de prueba y confirmar que llega al panel |
-| Cuenta de soporte | Una cuenta de administrador para ver a cualquier reclutadora con «Ver como» (no existe para candidatas) y revisar la auditoría |
+| Cuenta de soporte | Una cuenta de administrador para aprobar a cada reclutadora (Gestión Usuarios, «Aprobar reclutadora»), verla con «Ver como» (no existe para candidatas) y revisar la auditoría |
 
 ## 6. Cupo de la IA durante el piloto
 
@@ -85,10 +87,10 @@ tokens. Por eso:
 
 - Se reparten las sesiones en varios días (máximo 3 candidatos y 1 reclutador por día, unos 70 000 tokens diarios).
 - Se reutilizan los puntajes que no cambiaron (ya implementado): volver a guardar un perfil sin cambios no gasta IA.
-- Si el cupo se agota, la aplicación lo explica en pantalla al analizar un CV, al generar una descripción y al buscar
-  candidatos; al guardar el perfil todavía no (la pantalla de recomendaciones solo dice que no hay; backlog punto 26).
-  Se puede definir `GROQ_MODEL_ID=openai/gpt-oss-20b` (cupo propio) y volver a desplegar, o esperar a que se libere
-  (ventana de 24 horas).
+- Desde la 1.1, si el cupo del modelo principal se agota la aplicación pasa sola al modelo de respaldo
+  (`openai/gpt-oss-20b`, con cupo propio) y vuelve al principal cuando se libera. Solo si los dos se agotan lo explica
+  en pantalla (al analizar un CV, al generar una descripción, al buscar candidatos y al guardar el perfil); entonces
+  hay que esperar a que se libere (ventana de 24 horas).
 - Lo ideal es usar una clave de Groq distinta a la de staging y que nadie corra pruebas con IA en esos días.
 
 ## 7. Roles del equipo durante una sesión
@@ -118,7 +120,7 @@ Las metas son propuestas para decidir si el piloto fue satisfactorio; el equipo 
 |---|---|
 | No se consigue el número de participantes | Invitar desde la semana 4; apoyarse en docentes y compañeros como reclutadores |
 | Se agota el cupo de IA | Sección 6 |
-| Una persona ve datos de otra | Las reglas separan empresas (cualquier reclutadora registrada sí ve los perfiles de las candidatas, riesgo R1); el soporte revisa con «Ver como» (solo reclutadoras) y la auditoría |
+| Una persona ve datos de otra | Las reglas separan empresas (las reclutadoras aprobadas por un administrador sí ven los perfiles de las candidatas, riesgo R1); el soporte revisa con «Ver como» (solo reclutadoras) y la auditoría |
 | Error en producción durante una sesión | Flujo de corrección rápida de [TRIAGE_Y_CORRECCION.md](TRIAGE_Y_CORRECCION.md) y revisión de Sentry |
 | Participantes escriben datos personales sensibles en un CV | El aviso lo advierte; se pide usar un CV de ejemplo si lo prefieren |
 

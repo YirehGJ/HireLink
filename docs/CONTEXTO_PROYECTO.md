@@ -52,7 +52,7 @@ Artificial para Conectar, Comprender y Vincular Talento con Oportunidades Labora
 |---|---|
 | Frontend | Next.js 15.5 (App Router, carpeta `src/`), React 18.3, TypeScript, Tailwind CSS, shadcn/ui; Node 22 |
 | Datos y autenticación | Firebase Authentication y Firestore (tiempo real); Firebase Admin en los Route Handlers |
-| IA | Genkit con el conector OpenAI-compatible hacia Groq, modelo `openai/gpt-oss-120b` por defecto (`src/ai/model.ts`, `src/ai/genkit.ts`); se puede cambiar con `GROQ_MODEL_ID` |
+| IA | Genkit con el conector OpenAI-compatible hacia Groq, modelo `openai/gpt-oss-120b` por defecto (`src/ai/model.ts`, `src/ai/genkit.ts`); se puede cambiar con `GROQ_MODEL_ID`. Al agotarse su cupo diario pasa sola al modelo de respaldo `openai/gpt-oss-20b` (`GROQ_FALLBACK_MODEL_ID`) |
 | Despliegue | Vercel, CI/CD automático desde `main` |
 | Errores | Sentry (`@sentry/nextjs`), activo en producción |
 | Correo | Resend, **apagado** por defecto (`docs/EMAIL_SETUP.md`) |
@@ -73,10 +73,10 @@ src/
     api/                  ai/extract-cv, ai/generate-description, recommendations/generate,
                           recommendations/generate-for-job, matches/respond, jobs/delete,
                           interviews/cancel, applications/notify-new, applications/notify-status,
-                          audit, health
+                          admin/users, account/delete, audit, health
     not-found.tsx         404 en español (también en dashboard/not-found.tsx y dashboard/error.tsx)
     global-error.tsx      Pantalla de error + reporte a Sentry
-  ai/model.ts             Modelo de Groq (GROQ_MODEL_ID) y etiqueta del motor (ENGINE_VERSION)
+  ai/model.ts             Modelo de Groq (GROQ_MODEL_ID), modelo de respaldo y etiqueta del motor (engineVersion())
   ai/genkit.ts            Cliente Genkit/Groq (la clave se limpia con .trim())
   ai/flows/               extract-cv-data, match-candidate-job, generate-job-description
   firebase/               Config cliente, admin.ts (Admin SDK), servicios de Firestore por entidad

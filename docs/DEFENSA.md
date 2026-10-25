@@ -73,8 +73,9 @@ generar una descripción, 1 200; guardar un perfil por primera vez o publicar un
 ### Sobre privacidad y datos
 
 **¿Qué hacen con los CV?** El PDF no se sube: el navegador extrae el texto. Ese texto se guarda en el perfil y se envía a Groq
-para analizarlo. Cualquier reclutador registrado puede ver el perfil y el texto del CV; es una limitación conocida (riesgo
-R1) con solución planeada: que la persona controle la visibilidad.
+para analizarlo. Solo las reclutadoras que un administrador aprobó pueden ver el perfil y el texto del CV (sin aprobar no
+ven candidatas ni publican); que la persona controle la visibilidad es una limitación conocida (riesgo R1) con solución
+planeada. Las notas privadas de la reclutadora viven aparte de la postulación y la candidata no las lee.
 
 **¿Cumplen con la ley de datos personales?** La plataforma tiene un aviso de privacidad para el piloto, pero falta uno
 permanente en el registro y un botón para eliminar la cuenta. Ambos están en el backlog con prioridad alta. No se debe decir que

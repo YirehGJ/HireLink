@@ -117,8 +117,13 @@ Qué hacer cuando se agote:
 
 - La aplicación responde con «La IA alcanzó su límite de uso gratuito por hoy» (HTTP 503) en lugar de
   «Error interno», y no lo reporta a Sentry como un error.
-- Cada modelo tiene su propio cupo. Se puede definir `GROQ_MODEL_ID=openai/gpt-oss-20b` en las variables de
-  Vercel y volver a desplegar, o esperar a que se libere.
+- Cada modelo tiene su propio cupo. Desde la 1.1, cuando se agota el del modelo principal la aplicación pasa sola
+  al de respaldo (`openai/gpt-oss-20b`, o el que indique `GROQ_FALLBACK_MODEL_ID`) y vuelve al principal cuando el
+  proveedor lo libera; solo si los dos se agotan responde «La IA alcanzó su límite de uso gratuito por hoy». También
+  se puede forzar otro modelo principal con `GROQ_MODEL_ID` en las variables de Vercel (hay que volver a desplegar).
+- El botón «Google» del inicio de sesión está apagado salvo que se defina `NEXT_PUBLIC_GOOGLE_LOGIN=true` (siempre
+  crea cuentas de candidata y no se probó en celulares con Safari). La variable se lee al compilar: hay que volver a
+  desplegar al cambiarla.
 - Las pruebas largas en staging deben correr con el modelo de respaldo para no gastar el cupo de producción
   (en PowerShell: `$env:GROQ_MODEL_ID = 'openai/gpt-oss-20b'` antes de `npm run start:staging`).
 

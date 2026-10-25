@@ -4,7 +4,66 @@ Todos los cambios importantes de HireLink, de lo más reciente a lo más antiguo
 `v1.0.0` (commit `302e211`, 19 de octubre de 2026) es la última publicada; antes, `v0.9-rc` (commit `94c6762`,
 24 de septiembre de 2026). Cómo se publicó y cómo se revierte: [docs/RELEASE_v1.0.md](docs/RELEASE_v1.0.md).
 
-## [1.0.1] sin publicar
+## [1.1.0] sin publicar
+
+Incluye lo que iba a ser la 1.0.1 (el arreglo del JSON incompleto de la IA) y las correcciones de la revisión por áreas
+del 24 de octubre. Orden de publicación y cómo se revierte: [docs/RELEASE_v1.1.md](docs/RELEASE_v1.1.md).
+
+### Seguridad y privacidad
+- **Las reclutadoras necesitan la aprobación de un administrador** para ver candidatas y publicar vacantes
+  (`users/{uid}.recruiterApproved`, que solo escribe el servidor). Sin aprobar pueden completar su empresa y ven un
+  aviso. La administradora aprueba, revoca y filtra las pendientes desde Gestión Usuarios.
+- **Las notas privadas y la shortlist de la reclutadora ya no las puede leer la candidata**: se guardaban en el documento
+  de la postulación, que ella lee; ahora viven en `jobs/{id}/applicantNotes/{uid}`. `scripts/migrar-notas.mjs` mueve lo
+  anterior.
+- **Suspender corta de verdad**: las lecturas exigen cuenta activa, se deshabilita la cuenta de Authentication y se
+  revocan las sesiones. Antes solo se bloqueaban las escrituras.
+- **El rol cuenta**: quien deja de ser reclutadora ya no lee los postulantes de su antigua empresa.
+- **Entrevistas** solo para quien se postuló a una vacante de la propia empresa; el aviso de cancelación usa el título que
+  está en el servidor.
+- **`/api/admin/users`** (aprobar, revocar, suspender, reactivar, rol, organización, eliminar) y **`/api/account/delete`**
+  («Eliminar mi cuenta» en Configuración): borrado en cascada, auditoría en el servidor y nunca se deja a la plataforma sin
+  una administradora activa. El navegador ya no escribe rol, estado ni aprobación, y `/api/audit` ya no acepta acciones sobre
+  cuentas.
+- Las rutas que actúan por una empresa exigen una reclutadora aprobada de ella (`canManageOrg`).
+- Las contraseñas de las cuentas de demostración salen del README y de los guiones (solo quedan en `docs/CUENTAS_DEMO.md`,
+  marcadas como de staging).
+- Los formularios de acceso envían por POST: si se envían antes de que cargue el JavaScript, la contraseña ya no viaja en la URL.
+
+### IA
+- **Modelo de respaldo automático**: al agotarse el cupo diario del modelo principal se pasa a `openai/gpt-oss-20b`
+  (`GROQ_FALLBACK_MODEL_ID`) y se vuelve al principal cuando el proveedor lo libera.
+- Mejor clasificación de los fallos: tiempos de espera, errores de conexión y el estado de Genkit en texto se reintentan;
+  un límite por minuto nunca se toma por el cupo diario; si no cede, la respuesta es «la IA está muy ocupada» (503) y no
+  «Error interno». Tope de 50 s por operación (antes Vercel cortaba con «Error 504»).
+- Las pantallas explican por qué no hay recomendaciones (cupo, respuestas incompletas) y «Buscar candidatos» dice cuántas
+  evaluaciones fallaron o quedaron pendientes.
+
+### Flujos y pantallas
+- El correo con un espacio al final ya no se rechaza (importa en el celular) y el campo es de tipo correo.
+- El registro deshace la cuenta si no se puede guardar el perfil, y el panel ofrece cerrar sesión si el perfil nunca carga.
+- «Retirado» ya no se ofrece a la reclutadora ni se puede reactivar una postulación retirada; rechazar pide confirmación;
+  agendar una entrevista y cambiar el estado es una sola operación y no pisa «Oferta» ni «Contratado».
+- El calendario de entrevistas se abre en la próxima entrevista y cancelar pide confirmación.
+- «Sin preferencia» de seniority se guarda; aplicar las sugerencias del CV no borra campos con datos vacíos.
+- Configuración respeta «Ver como» (solo lectura). El botón «Google» queda apagado salvo `NEXT_PUBLIC_GOOGLE_LOGIN=true`.
+- La página de una vacante carga el calendario y los matches al abrir su pestaña (369 kB a 347 kB de JavaScript inicial).
+
+### Herramientas
+- Scripts: `publicar-reglas` (compara y publica `firestore.rules` con el SDK de administración), `aprobar-reclutadoras`,
+  `migrar-notas` y `respaldar-datos`; `seed` y `limpiar-huerfanos` conocen lo nuevo.
+- Verificación automática en GitHub (`.github/workflows/verificacion.yml`): tipos y pruebas unitarias en cada cambio a `main`.
+- `/api/health` guarda 30 s en memoria la lectura de Firestore (es pública y leía en cada visita).
+
+### Cambios que obligan a un paso manual
+Publicar `firestore.rules`, aprobar a las reclutadoras que ya existen y mover las notas anteriores (ver
+[docs/RELEASE_v1.1.md](docs/RELEASE_v1.1.md)). Variables nuevas, ambas opcionales: `GROQ_FALLBACK_MODEL_ID` y
+`NEXT_PUBLIC_GOOGLE_LOGIN`.
+
+### Pruebas
+- Unitarias: 44 (eran 26 en la 1.0.0: reintento con `Schema validation failed`, 502 claro, modelo de respaldo, tiempos
+  de espera, tope de tiempo, formularios de acceso y `safeNextPath`). Reglas de Firestore: 107/107. API y carga: 93/93.
+  Flujos: 29/29 (todas contra `hirelink-staging`). `npm run build:staging` y `npx tsc --noEmit` sin errores.
 
 ### Corregido
 - **La IA devolvía un JSON incompleto y la persona veía «Error interno».** Cuando el modelo contestaba un JSON válido al que le faltaba una
@@ -15,10 +74,6 @@ Todos los cambios importantes de HireLink, de lo más reciente a lo más antiguo
   descripción de la vacante y recomendaciones).
 - La prueba del worker de pdf.js fallaba en Windows al cambiar de rama porque Git lo escribía con CRLF (`core.autocrlf`): `.gitattributes` lo
   deja sin conversión.
-
-### Pruebas
-- Unitarias de 26 a 32: reintento con `Schema validation failed`, 502 claro tras reintentar, un `INVALID_ARGUMENT` que no es de esquema no se
-  reintenta, y el mensaje llega a la pantalla.
 
 ## [1.0.0] 19 de octubre de 2026
 
