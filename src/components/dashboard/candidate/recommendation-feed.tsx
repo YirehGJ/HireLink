@@ -45,7 +45,10 @@ export function RecommendationFeed() {
     return (
       <div className="text-center py-16 border-2 border-dashed rounded-lg">
         <h2 className="text-xl font-semibold">No hay recomendaciones por ahora</h2>
-        <p className="text-muted-foreground mt-2">Asegúrate de que tu perfil y CV estén completos y actualizados, o explora todas las vacantes.</p>
+        <p className="text-muted-foreground mt-2">
+          Se calculan al guardar tu perfil (con tus habilidades y tu CV) y cuando se publican vacantes nuevas. Si acabas de
+          guardarlo y no aparece nada, puede que la IA haya alcanzado su límite del día: inténtalo más tarde o explora todas las vacantes.
+        </p>
       </div>
     );
   }

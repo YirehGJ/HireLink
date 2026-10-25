@@ -58,6 +58,8 @@ export async function POST(request: Request) {
     const cached = stillValid.length;
     let processed = cached;
     let skipped = 0;
+    // Evaluaciones que fallaron por otra causa (p. ej. la IA devolvió una respuesta incompleta): se cuentan para decirlo.
+    let failed = 0;
     let quotaError: HttpError | undefined;
     const started = Date.now();
 
@@ -74,7 +76,10 @@ export async function POST(request: Request) {
         processed++;
       } catch (err) {
         if (err instanceof HttpError && err.status === 503) quotaError = err;
-        else console.error(`Error calculando match de ${c.id} para ${jobId}:`, err);
+        else {
+          failed++;
+          console.error(`Error calculando match de ${c.id} para ${jobId}:`, err);
+        }
       }
     });
 
@@ -85,7 +90,7 @@ export async function POST(request: Request) {
     // puntajes vigentes se responde con ellos y `aiLimit` indica que la IA no alcanzó a evaluar a los demás.
     if (quotaError && processed === 0) throw quotaError;
 
-    return NextResponse.json({ processed, cached, skipped, aiLimit: !!quotaError });
+    return NextResponse.json({ processed, cached, skipped, failed, aiLimit: !!quotaError });
   } catch (e) {
     return errorResponse(e);
   }

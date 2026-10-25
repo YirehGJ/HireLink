@@ -63,6 +63,8 @@ export async function POST(request: Request) {
 
     const started = Date.now();
     let skipped = 0;
+    // Evaluaciones que fallaron por otra causa (p. ej. la IA devolvió una respuesta incompleta): se cuentan para decirlo.
+    let failed = 0;
     let quotaError: HttpError | undefined;
     const work = mapWithConcurrency(jobDocs, 2, async (jobDoc) => {
       // Sin cupo de IA no tiene caso seguir intentando con las demás vacantes.
@@ -76,7 +78,10 @@ export async function POST(request: Request) {
         results.push({ jobId: jobDoc.id, score: match.score });
       } catch (err) {
         if (err instanceof HttpError && err.status === 503) quotaError = err;
-        else console.error(`Error calculando match para job ${jobDoc.id}:`, err);
+        else {
+          failed++;
+          console.error(`Error calculando match para job ${jobDoc.id}:`, err);
+        }
       }
     });
     // Límite duro: se responde con lo ya calculado antes de que Vercel corte la función.
@@ -85,7 +90,7 @@ export async function POST(request: Request) {
     // Si no se pudo evaluar nada porque la IA se quedó sin cupo, se avisa con un mensaje claro.
     if (quotaError && results.length === 0) throw quotaError;
 
-    return NextResponse.json({ processed: results.length, cached, skipped, aiLimit: !!quotaError, results });
+    return NextResponse.json({ processed: results.length, cached, skipped, failed, aiLimit: !!quotaError, results });
   } catch (e) {
     return errorResponse(e);
   }

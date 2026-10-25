@@ -1,4 +1,4 @@
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { deleteField, doc, setDoc, serverTimestamp } from "firebase/firestore";
 import type { Firestore } from "firebase/firestore";
 import type { Candidate } from "@/lib/types";
 
@@ -28,7 +28,9 @@ export const candidateService = {
         ...(email ? { email } : {}),
         ...(cvSummary ? { cvSummary } : {}),
         ...(cvText ? { cvText } : {}),
-        ...(targetSeniority ? { targetSeniority } : {}),
+        // «Sin preferencia» llega como `undefined` y debe borrar el valor guardado (antes se conservaba el anterior y
+        // las reclutadoras seguían filtrando por él). Si la clave no viene, no se toca.
+        ...("targetSeniority" in data ? { targetSeniority: targetSeniority ?? deleteField() } : {}),
         // Firestore no acepta `undefined`; una lista vacía es válida y borra lo anterior.
         experience: experience ?? [],
         education: education ?? [],

@@ -1,0 +1,32 @@
+name: Verificación
+
+# Revisa tipos y pruebas unitarias en cada cambio a main y en cada pull request (gratis en repositorios públicos).
+# No toca Firebase ni la IA: las baterías de seguridad y las pruebas con navegador se ejecutan a mano contra staging.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tipos-y-pruebas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: npm
+
+      - run: npm ci
+
+      # next-env.d.ts no se versiona (lo crea Next al compilar): se genera aquí para que TypeScript conozca los tipos de Next.
+      - name: Crear next-env.d.ts
+        run: |
+          printf '/// <reference types="next" />\n/// <reference types="next/image-types/global" />\n' > next-env.d.ts
+
+      - name: Tipos (tsc)
+        run: npx tsc --noEmit
+
+      - name: Pruebas unitarias
+        run: npm run test:unit

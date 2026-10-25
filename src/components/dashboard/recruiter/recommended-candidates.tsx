@@ -136,7 +136,17 @@ export function RecommendedCandidates({ jobId }: { jobId: string }) {
       const res = await callAuthedApi(auth, "/api/recommendations/generate-for-job", { jobId });
       const reused = res.cached ? ` (${res.cached} sin cambios desde la última vez)` : "";
       const limit = res.aiLimit ? " La IA alcanzó su límite de uso por hoy y no pudo evaluar a los demás." : "";
-      toast({ title: "Recomendaciones actualizadas", description: `${res.processed} candidatos revisados${reused}.${limit}` });
+      const failed = res.failed ? ` ${res.failed} no se pudieron evaluar (la IA devolvió respuestas incompletas); vuelve a intentarlo.` : "";
+      const late = res.skipped ? ` ${res.skipped} quedaron para la próxima búsqueda porque la IA tardó demasiado.` : "";
+      if (res.processed === 0 && !res.failed && !res.aiLimit) {
+        toast({ title: "Aún no hay a quién evaluar", description: "Las candidatas necesitan habilidades o un titular en su perfil para que la IA las compare con esta vacante." });
+      } else {
+        toast({
+          title: res.processed === 0 ? "No se pudo evaluar a nadie" : "Recomendaciones actualizadas",
+          description: `${res.processed} candidatos revisados${reused}.${limit}${failed}${late}`,
+          variant: res.processed === 0 ? "destructive" : undefined,
+        });
+      }
     } catch (e) {
       console.error(e);
       toast({ title: "No se pudo recalcular", description: aiUnavailableMessage(e), variant: "destructive" });

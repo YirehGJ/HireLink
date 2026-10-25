@@ -11,6 +11,8 @@ export const dynamic = "force-dynamic";
 
 // Resultado de la prueba de Groq en memoria, para que el endpoint público no pueda usarse para martillar al proveedor.
 let groqCache: { at: number; value: Record<string, unknown> } | null = null;
+// Lo mismo para la prueba de Firebase Admin: una lectura de Firestore como máximo cada 30 s por instancia.
+let adminCache: { at: number; value: { ok: boolean; reason?: string } } | null = null;
 
 async function probeGroq(): Promise<Record<string, unknown>> {
   const key = process.env.GROQ_API_KEY ?? "";
@@ -51,13 +53,20 @@ export async function GET(request: Request) {
     hasQuotesAround: /^["']|["']$/.test(pk.trim()),
   };
 
+  // La prueba de Firestore se guarda 30 s en memoria: el endpoint es público y cada visita hacía una lectura
+  // (con el plan gratuito, un bucle de visitas podía agotar las 50 000 lecturas del día).
   let adminInit: { ok: boolean; reason?: string } = { ok: false };
-  try {
-    adminAuth();
-    await adminDb().collection("users").limit(1).get();
-    adminInit = { ok: true };
-  } catch (e: any) {
-    adminInit = { ok: false, reason: String(e?.message ?? e).slice(0, 160) };
+  if (adminCache && Date.now() - adminCache.at < 30_000) {
+    adminInit = adminCache.value;
+  } else {
+    try {
+      adminAuth();
+      await adminDb().collection("users").limit(1).get();
+      adminInit = { ok: true };
+    } catch (e: any) {
+      adminInit = { ok: false, reason: String(e?.message ?? e).slice(0, 160) };
+    }
+    adminCache = { at: Date.now(), value: adminInit };
   }
 
   const groqKey = process.env.GROQ_API_KEY ?? "";

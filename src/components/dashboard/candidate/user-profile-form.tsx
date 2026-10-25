@@ -21,7 +21,7 @@ import type { Candidate } from "@/lib/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuth, useFirestore } from "@/firebase";
 import { candidateService } from "@/firebase/firestore/candidate-service";
-import { callAuthedApi } from "@/lib/api-client";
+import { aiUnavailableMessage, callAuthedApi } from "@/lib/api-client";
 import { useApp } from "@/components/providers/app-provider";
 import { SENIORITY_OPTIONS } from "@/lib/format";
 import { extractPdfText } from "@/lib/pdf-text";
@@ -153,10 +153,24 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
         description: "Tu información ha sido guardada exitosamente.",
       });
 
-      // Dispara el recálculo de recomendaciones en segundo plano (no bloquea la UI).
-      callAuthedApi(auth, "/api/recommendations/generate").catch((err) =>
-        console.error("No se pudieron recalcular las recomendaciones:", err)
-      );
+      // Dispara el recálculo de recomendaciones en segundo plano (no bloquea la UI) y, si la IA no pudo, lo explica
+      // (antes la pantalla solo decía «No hay recomendaciones por ahora» y la persona creía que su perfil estaba mal).
+      callAuthedApi(auth, "/api/recommendations/generate")
+        .then((res) => {
+          if (res?.aiLimit) {
+            toast({ title: "Recomendaciones incompletas", description: "La IA alcanzó su límite de uso por hoy. Las que faltan se calcularán la próxima vez que guardes tu perfil." });
+          } else if (res?.failed) {
+            toast({ title: "Algunas recomendaciones no se calcularon", description: "La IA devolvió respuestas incompletas. Guarda de nuevo tu perfil en unos minutos para completarlas." });
+          }
+        })
+        .catch((err) => {
+          console.error("No se pudieron recalcular las recomendaciones:", err);
+          toast({
+            title: "Tu perfil se guardó, pero no se calcularon tus recomendaciones",
+            description: aiUnavailableMessage(err) ?? "Inténtalo de nuevo en unos minutos.",
+            variant: "destructive",
+          });
+        });
 
       router.refresh();
     } catch (error) {
@@ -232,12 +246,13 @@ export function UserProfileForm({ profile }: { profile: Candidate | null }) {
 
   function applySuggestions() {
     if (!suggestions) return;
-    form.setValue('headline', suggestions.headline, { shouldValidate: true });
-    form.setValue('location', suggestions.location, { shouldValidate: true });
-    form.setValue('yearsOfExperience', suggestions.yearsOfExperience, { shouldValidate: true });
-    replace(suggestions.skills ?? []);
-    expArray.replace(suggestions.experience ?? []);
-    eduArray.replace(suggestions.education ?? []);
+    // Solo se aplica lo que la IA sí encontró: un campo vacío no debe borrar lo que la persona ya tenía escrito.
+    if (suggestions.headline) form.setValue('headline', suggestions.headline, { shouldValidate: true });
+    if (suggestions.location) form.setValue('location', suggestions.location, { shouldValidate: true });
+    if (suggestions.yearsOfExperience > 0) form.setValue('yearsOfExperience', suggestions.yearsOfExperience, { shouldValidate: true });
+    if (suggestions.skills?.length) replace(suggestions.skills);
+    if (suggestions.experience?.length) expArray.replace(suggestions.experience);
+    if (suggestions.education?.length) eduArray.replace(suggestions.education);
 
     // El texto y el resumen del CV se guardan con el perfil para que la IA
     // los use al calcular la compatibilidad con cada vacante.

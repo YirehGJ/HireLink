@@ -4,7 +4,17 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/com
 import { Calendar } from "@/components/ui/calendar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { X } from "lucide-react"
@@ -36,10 +46,14 @@ interface InterviewsCalendarProps {
 
 export function InterviewsCalendar({ jobId, organizationRef, candidateUid }: InterviewsCalendarProps) {
     const [date, setDate] = useState<Date | undefined>(new Date())
+    // Mientras la persona no elija un día, el calendario se abre en la próxima entrevista (antes abría siempre en hoy
+    // y decía «no hay entrevistas» aunque hubiera para otro día).
+    const [pickedByUser, setPickedByUser] = useState(false);
     const auth = useAuth();
     const { readOnly } = useApp();
     const { toast } = useToast();
     const [cancelling, setCancelling] = useState<string | null>(null);
+    const [toCancel, setToCancel] = useState<string | null>(null);
 
     const where: WhereClause | WhereClause[] | undefined = jobId
         ? (organizationRef
@@ -62,6 +76,14 @@ export function InterviewsCalendar({ jobId, organizationRef, candidateUid }: Int
                 .sort((a, b) => a.start.getTime() - b.start.getTime()),
         [data]
     );
+
+    useEffect(() => {
+        if (pickedByUser || interviews.length === 0) return;
+        // La próxima que no haya terminado; si todas son pasadas, la más reciente.
+        const horizon = Date.now() - 3600_000;
+        const next = interviews.find(i => i.start.getTime() >= horizon) ?? interviews[interviews.length - 1];
+        setDate(next.start);
+    }, [interviews, pickedByUser]);
 
     const selectedDayInterviews = date
         ? interviews.filter(i => format(i.start, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd'))
@@ -92,7 +114,7 @@ export function InterviewsCalendar({ jobId, organizationRef, candidateUid }: Int
                    <Calendar
                         mode="single"
                         selected={date}
-                        onSelect={setDate}
+                        onSelect={(d) => { setPickedByUser(true); setDate(d); }}
                         locale={es}
                         className="p-0"
                         modifiers={{
@@ -131,12 +153,12 @@ export function InterviewsCalendar({ jobId, organizationRef, candidateUid }: Int
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className="h-6 w-6"
-                                                onClick={() => cancel(interview.id)}
+                                                className="h-9 w-9"
+                                                onClick={() => setToCancel(interview.id)}
                                                 disabled={cancelling === interview.id}
                                                 aria-label="Cancelar entrevista"
                                             >
-                                                <X className="h-3 w-3" />
+                                                <X className="h-4 w-4" />
                                             </Button>
                                         )}
                                     </div>
@@ -155,6 +177,22 @@ export function InterviewsCalendar({ jobId, organizationRef, candidateUid }: Int
                     )}
                 </CardContent>
             </Card>
+            <AlertDialog open={!!toCancel} onOpenChange={(open) => { if (!open) setToCancel(null); }}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Cancelar esta entrevista?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Se elimina del calendario y la persona recibe un aviso de cancelación. El estado de su postulación no cambia.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Volver</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => { const id = toCancel; setToCancel(null); if (id) cancel(id); }}>
+                            Cancelar entrevista
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }
