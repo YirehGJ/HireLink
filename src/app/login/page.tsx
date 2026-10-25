@@ -38,6 +38,10 @@ const loginSchema = z.object({
 
 type LoginValues = z.infer<typeof loginSchema>;
 
+// El inicio con Google crea siempre una cuenta de candidata y nunca se probó en celulares con Safari: queda
+// apagado salvo que se active con NEXT_PUBLIC_GOOGLE_LOGIN=true (ver docs/ENTORNOS.md).
+const GOOGLE_LOGIN_ENABLED = process.env.NEXT_PUBLIC_GOOGLE_LOGIN === "true";
+
 function LoginPageContent() {
   const router = useRouter();
   const { toast } = useToast();
@@ -57,9 +61,18 @@ function LoginPageContent() {
 
   const handleAuthError = (error: any) => {
     console.error("Auth Error:", error);
+    const code: string | undefined = error?.code;
+    // Cerrar la ventana de Google a propósito no es un error.
+    if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") return;
+    const messages: Record<string, string> = {
+      "auth/user-disabled": "Tu cuenta está suspendida. Si crees que es un error, contacta al equipo de HireLink.",
+      "auth/too-many-requests": "Demasiados intentos. Espera unos minutos o restablece tu contraseña.",
+      "auth/network-request-failed": "No hay conexión. Revisa tu internet e inténtalo de nuevo.",
+      "auth/popup-blocked": "El navegador bloqueó la ventana de Google. Permítela e inténtalo de nuevo, o entra con tu correo.",
+    };
     toast({
       title: "Error de acceso",
-      description: "Credenciales inválidas o problema de conexión.",
+      description: (code && messages[code]) || "Credenciales inválidas o problema de conexión.",
       variant: "destructive"
     });
   };
@@ -172,11 +185,15 @@ function LoginPageContent() {
             </Button>
           </form>
         </Form>
-        <div className="relative"><div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div><div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">O continúa con</span></div></div>
-        <Button variant="outline" className="w-full" onClick={onGoogleLogin} disabled={!!loadingType}>
-          {loadingType === 'google' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Icons.google className="mr-2 h-4 w-4" />}
-          Google
-        </Button>
+        {GOOGLE_LOGIN_ENABLED && (
+          <>
+            <div className="relative"><div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div><div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">O continúa con</span></div></div>
+            <Button variant="outline" className="w-full" onClick={onGoogleLogin} disabled={!!loadingType}>
+              {loadingType === 'google' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Icons.google className="mr-2 h-4 w-4" />}
+              Google
+            </Button>
+          </>
+        )}
 
       </div>
     </FormCard>

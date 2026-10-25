@@ -23,33 +23,57 @@ service cloud.firestore {
       return me().role == role;
     }
 
-    // Las cuentas suspendidas por un admin no pueden escribir nada.
+    // Las cuentas suspendidas por un admin no pueden leer ni escribir nada, salvo su propio documento de usuario
+    // (la pantalla lo necesita para avisarles que están suspendidas).
     function isActive() {
       return me().get('status', 'active') != 'suspended';
     }
 
-    function isRecruiterForOrg(orgId) {
-      return me().get('organizationRef', '') == orgId;
+    // Administradora activa: una cuenta de admin suspendida pierde sus poderes.
+    function isAdmin() {
+      return isRole('admin') && isActive();
     }
 
-    // Reclutador activo de la organización dada.
+    // Una reclutadora solo ve candidatas y publica vacantes cuando un administrador la aprobó
+    // (`recruiterApproved`, que solo escribe el servidor).
+    function isApproved() {
+      return me().get('recruiterApproved', false) == true;
+    }
+
+    // Reclutadora activa de la organización dada. Cuenta el rol y no solo la empresa: quien cambió de rol deja
+    // de contar aunque conserve su organizationRef.
+    function isRecruiterForOrg(orgId) {
+      return isRole('recruiter') && isActive() && orgId != '' && me().get('organizationRef', '') == orgId;
+    }
+
+    // Reclutadora activa Y aprobada de la organización dada: puede publicar y gestionar.
     function isActiveRecruiterOf(orgId) {
-      return isRole('recruiter') && isActive() && isRecruiterForOrg(orgId);
+      return isRecruiterForOrg(orgId) && isApproved();
+    }
+
+    // Reclutadora activa y aprobada, de cualquier empresa: es la única que ve los perfiles de las candidatas.
+    function isApprovedRecruiter() {
+      return isRole('recruiter') && isActive() && isApproved();
+    }
+
+    // Campos que cambia la escritura en curso (solo para `update`).
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
     }
 
     // ---------------------------------------------------------------
     // Validaciones de tamaño/forma (evitan documentos gigantes y campos inventados)
     // ---------------------------------------------------------------
     function validCandidate(d, candidateId) {
-      return d.get('headline', '').size() <= 200
-        && d.get('location', '').size() <= 200
-        && d.get('fullName', '').size() <= 120
-        && d.get('email', '').size() <= 200
-        && d.get('skills', []).size() <= 60
-        && d.get('experience', []).size() <= 20
-        && d.get('education', []).size() <= 15
-        && d.get('cvSummary', '').size() <= 2500
-        && d.get('cvText', '').size() <= 9000
+      return d.get('headline', '') is string && d.get('headline', '').size() <= 200
+        && d.get('location', '') is string && d.get('location', '').size() <= 200
+        && d.get('fullName', '') is string && d.get('fullName', '').size() <= 120
+        && d.get('email', '') is string && d.get('email', '').size() <= 200
+        && d.get('skills', []) is list && d.get('skills', []).size() <= 60
+        && d.get('experience', []) is list && d.get('experience', []).size() <= 20
+        && d.get('education', []) is list && d.get('education', []).size() <= 15
+        && d.get('cvSummary', '') is string && d.get('cvSummary', '').size() <= 2500
+        && d.get('cvText', '') is string && d.get('cvText', '').size() <= 9000
         && d.get('targetSeniority', '') in ['', 'intern', 'junior', 'mid', 'senior', 'lead']
         && d.get('userRef', candidateId) == candidateId;
     }
@@ -58,7 +82,7 @@ service cloud.firestore {
       return d.title is string && d.title.size() <= 200
         && d.descriptionMd is string && d.descriptionMd.size() <= 10000
         && d.get('location', '').size() <= 200
-        && d.get('searchTags', []).size() <= 40
+        && d.get('searchTags', []) is list && d.get('searchTags', []).size() <= 40
         && d.status in ['published', 'draft', 'closed'];
     }
 
@@ -73,46 +97,47 @@ service cloud.firestore {
     // USERS
     // ---------------------------------------------------------------
     match /users/{userId} {
-      // Alta propia: nunca como admin, sin organización preasignada y siempre activo.
+      // Alta propia: nunca como admin, sin organización preasignada, sin aprobación y siempre activo.
       allow create: if isSignedIn() && isOwner(userId)
         && request.resource.data.role in ['candidate', 'recruiter']
         && request.resource.data.status == 'active'
         && request.resource.data.keys().hasOnly(['id', 'email', 'fullName', 'role', 'status', 'phone'])
+        && request.resource.data.fullName is string
         && request.resource.data.fullName.size() <= 120;
 
-      allow get: if isSignedIn() && (isOwner(userId) || isRole('admin'));
+      // La persona ve su propio documento aunque esté suspendida; las admins ven todos.
+      allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
 
-      // El dueño solo puede cambiar nombre y teléfono; puede enlazar UNA organización
-      // únicamente si es reclutador, aún no tiene una y él mismo la creó (ownerUid).
-      // Nunca puede tocar rol, estado, correo ni id. Los admins pueden actualizar todo.
-      allow update: if isSignedIn() && (
-        (
-          isOwner(userId) && isActive()
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['fullName', 'phone', 'organizationRef'])
-          && (
-            !('organizationRef' in request.resource.data.diff(resource.data).affectedKeys())
+      // El dueño solo puede cambiar nombre y teléfono; puede enlazar UNA organización únicamente si es
+      // reclutador, aún no tiene una y él mismo la creó (ownerUid). Rol, estado, aprobación, correo e id
+      // solo los cambia el servidor (/api/admin/users) con el SDK de administración, que además deja
+      // constancia en la auditoría: ningún cliente puede escribirlos.
+      allow update: if isSignedIn() && isOwner(userId) && isActive()
+        && changedKeys().hasOnly(['fullName', 'phone', 'organizationRef'])
+        && (!('fullName' in changedKeys())
+            || (request.resource.data.fullName is string && request.resource.data.fullName.size() <= 120))
+        && (!('phone' in changedKeys())
+            || (request.resource.data.phone is string && request.resource.data.phone.size() <= 40))
+        && (!('organizationRef' in changedKeys())
             || (
               resource.data.role == 'recruiter'
               && !('organizationRef' in resource.data)
               && get(/databases/$(database)/documents/organizations/$(request.resource.data.organizationRef)).data.get('ownerUid', '') == request.auth.uid
-            )
-          )
-        )
-        || isRole('admin')
-      );
+            ));
 
-      allow delete: if isSignedIn() && isRole('admin');
-      allow list: if isSignedIn() && isRole('admin');
+      // Eliminar cuentas (con todo lo que depende de ellas) lo hace el servidor.
+      allow delete: if false;
+      allow list: if isSignedIn() && isAdmin();
 
       // Preferencias del usuario
       match /settings/{settingId} {
-        allow read: if isSignedIn() && isOwner(userId);
+        allow read: if isSignedIn() && isOwner(userId) && isActive();
         allow write: if isSignedIn() && isOwner(userId) && isActive();
       }
 
       // Notificaciones: las crea solo el servidor; el dueño solo marca `read`.
       match /notifications/{notifId} {
-        allow get, list: if isSignedIn() && isOwner(userId);
+        allow get, list: if isSignedIn() && isOwner(userId) && isActive();
         allow update: if isSignedIn() && isOwner(userId) && isActive() &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
         allow create, delete: if false;
@@ -121,7 +146,7 @@ service cloud.firestore {
       // Copia por candidato de sus postulaciones (lectura en tiempo real sin índices).
       // Se crea al postular (siempre "applied"); los cambios de estado los hace el servidor.
       match /applications/{jobId} {
-        allow get, list: if isSignedIn() && (isOwner(userId) || isRole('admin'));
+        allow get, list: if isSignedIn() && ((isOwner(userId) && isActive()) || isAdmin());
         allow create: if isSignedIn() && isOwner(userId) && isActive()
           && request.resource.data.candidateRef == userId
           && request.resource.data.jobRef == jobId
@@ -137,15 +162,16 @@ service cloud.firestore {
     match /candidates/{candidateId} {
         allow create: if isSignedIn() && isOwner(candidateId) && isActive()
           && validCandidate(request.resource.data, candidateId);
-        // Reclutadores y admins ven perfiles; el candidato ve el suyo.
-        allow get: if isSignedIn() && (isRole('recruiter') || isRole('admin') || isOwner(candidateId));
+        // Solo reclutadoras aprobadas y admins ven perfiles; la candidata ve el suyo.
+        allow get: if isSignedIn() && ((isOwner(candidateId) && isActive()) || isAdmin() || isApprovedRecruiter());
         allow update: if isSignedIn() && isOwner(candidateId) && isActive()
           && validCandidate(request.resource.data, candidateId);
-        allow delete: if isSignedIn() && isRole('admin');
-        allow list: if isSignedIn() && (isRole('recruiter') || isRole('admin'));
+        // Borrar un perfil lo hace el servidor junto con el resto de la cuenta.
+        allow delete: if false;
+        allow list: if isSignedIn() && (isAdmin() || isApprovedRecruiter());
 
         match /skills/{skillId} {
-            allow read: if isSignedIn() && isOwner(candidateId);
+            allow read: if isSignedIn() && isOwner(candidateId) && isActive();
             allow write: if isSignedIn() && isOwner(candidateId) && isActive();
         }
     }
@@ -154,46 +180,46 @@ service cloud.firestore {
     // ORGANIZATIONS
     // ---------------------------------------------------------------
     match /organizations/{orgId} {
-      allow get, list: if isSignedIn();
-      // Un reclutador sin organización puede crear la suya (queda como ownerUid);
-      // los admins pueden crear cualquiera.
+      allow get, list: if isSignedIn() && isActive();
+      // Una reclutadora sin organización puede crear la suya (queda como ownerUid), aunque aún no esté
+      // aprobada: así completa su empresa mientras espera. Los admins pueden crear cualquiera.
       allow create: if isSignedIn() && validOrg(request.resource.data) && (
-        isRole('admin') ||
+        isAdmin() ||
         (isRole('recruiter') && isActive()
           && !('organizationRef' in me())
           && request.resource.data.get('ownerUid', '') == request.auth.uid)
       );
       allow update: if isSignedIn() && validOrg(request.resource.data) && (
-        isRole('admin') ||
-        (isActiveRecruiterOf(orgId)
+        isAdmin() ||
+        (isRecruiterForOrg(orgId)
           && request.resource.data.get('ownerUid', '') == resource.data.get('ownerUid', ''))
       );
-      allow delete: if isSignedIn() && isRole('admin');
+      allow delete: if isSignedIn() && isAdmin();
     }
 
     // ---------------------------------------------------------------
     // JOBS
     // ---------------------------------------------------------------
     match /jobs/{jobId} {
-      // Los candidatos solo ven vacantes publicadas o cerradas; los borradores son
+      // Las candidatas solo ven vacantes publicadas o cerradas; los borradores son
       // solo de su organización y de los admins.
-      allow get, list: if isSignedIn() && (
+      allow get, list: if isSignedIn() && isActive() && (
         resource.data.status in ['published', 'closed'] ||
-        isRole('admin') ||
+        isAdmin() ||
         isRecruiterForOrg(resource.data.organizationRef)
       );
       allow create: if isSignedIn() && isActiveRecruiterOf(request.resource.data.organizationRef)
         && validJob(request.resource.data);
       allow update: if isSignedIn() && validJob(request.resource.data) && (
-        isRole('admin') ||
+        isAdmin() ||
         (isActiveRecruiterOf(resource.data.organizationRef)
           && request.resource.data.organizationRef == resource.data.organizationRef)
       );
-      allow delete: if isSignedIn() && (isRole('admin') || isActiveRecruiterOf(resource.data.organizationRef));
+      allow delete: if isSignedIn() && (isAdmin() || isActiveRecruiterOf(resource.data.organizationRef));
 
         // Postulaciones
         match /applications/{appId} {
-            // El candidato solo puede postularse él mismo, una vez, a una vacante
+            // La candidata solo puede postularse ella misma, una vez, a una vacante
             // publicada y siempre en estado "applied".
             allow create: if isSignedIn() && isActive()
               && request.auth.uid == request.resource.data.candidateRef
@@ -202,27 +228,45 @@ service cloud.firestore {
               && request.resource.data.status == 'applied'
               && get(/databases/$(database)/documents/jobs/$(jobId)).data.status == 'published'
               && request.resource.data.keys().hasOnly(['candidateRef', 'jobRef', 'status', 'source', 'cvRef', 'appliedAt', 'updatedAt']);
-            allow get, list: if isSignedIn() && (
+            // La candidata ve la suya; la empresa de la vacante y los admins ven todas. Las notas privadas de la
+            // reclutadora NO viven aquí (ver `applicantNotes`): este documento lo lee la propia candidata.
+            allow get, list: if isSignedIn() && isActive() && (
                 isOwner(resource.data.candidateRef) ||
-                isRole('admin') ||
+                isAdmin() ||
                 isRecruiterForOrg(get(/databases/$(database)/documents/jobs/$(jobId)).data.organizationRef)
             );
-            // Reclutadores/admins cambian estado, shortlist y notas (nada más).
-            allow update: if isSignedIn() && (
-                isRole('admin') ||
-                isActiveRecruiterOf(get(/databases/$(database)/documents/jobs/$(jobId)).data.organizationRef)
-              )
-              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'shortlisted', 'recruiterNotes', 'updatedAt'])
-              && request.resource.data.get('recruiterNotes', '').size() <= 5000;
-            // El candidato puede retirar su postulación.
+            // Las reclutadoras aprobadas de la empresa solo cambian el estado, y nunca a «retirado» ni sobre una
+            // postulación que la candidata ya retiró.
+            allow update: if isSignedIn()
+              && isActiveRecruiterOf(get(/databases/$(database)/documents/jobs/$(jobId)).data.organizationRef)
+              && changedKeys().hasOnly(['status', 'updatedAt'])
+              && request.resource.data.status in ['applied', 'screening', 'assessment', 'interview', 'offer', 'hired', 'rejected']
+              && resource.data.status != 'withdrawn';
+            // La candidata puede retirar su postulación.
             allow delete: if isSignedIn() && isActive() && isOwner(resource.data.candidateRef);
+        }
+
+        // Notas privadas y shortlist de la reclutadora sobre cada postulante (mismo id que la postulación).
+        // Solo las lee y escribe la empresa de la vacante (y las admins leen): la candidata no tiene acceso.
+        match /applicantNotes/{noteId} {
+            allow get, list: if isSignedIn() && (
+                isAdmin() ||
+                isActiveRecruiterOf(get(/databases/$(database)/documents/jobs/$(jobId)).data.organizationRef)
+            );
+            allow create, update: if isSignedIn()
+              && isActiveRecruiterOf(get(/databases/$(database)/documents/jobs/$(jobId)).data.organizationRef)
+              && request.resource.data.keys().hasOnly(['shortlisted', 'recruiterNotes', 'updatedAt'])
+              && request.resource.data.get('shortlisted', false) is bool
+              && request.resource.data.get('recruiterNotes', '') is string
+              && request.resource.data.get('recruiterNotes', '').size() <= 5000;
+            allow delete: if false;
         }
     }
 
-    // Postulaciones (collection group): métricas globales del admin y consultas del reclutador.
+    // Postulaciones (collection group): métricas globales del admin y consultas de la reclutadora.
     match /{path=**}/applications/{appId} {
-      allow get, list: if isSignedIn() && (
-        isRole('admin') ||
+      allow get, list: if isSignedIn() && isActive() && (
+        isAdmin() ||
         (resource.data.keys().hasAny(['jobRef']) &&
           isRecruiterForOrg(get(/databases/$(database)/documents/jobs/$(resource.data.jobRef)).data.organizationRef))
       );
@@ -232,33 +276,46 @@ service cloud.firestore {
     // INTERVIEWS
     // ---------------------------------------------------------------
     match /interviews/{interviewId} {
-      allow get, list: if isSignedIn() && (
+      allow get, list: if isSignedIn() && isActive() && (
         isOwner(resource.data.candidateRef) ||
-        isRole('admin') ||
+        isAdmin() ||
         isRecruiterForOrg(resource.data.organizationRef)
       );
+      // Solo para una persona que se postuló a una vacante de la propia empresa (antes se podía agendar con
+      // cualquier cuenta y el aviso llegaba a quien fuera).
       allow create: if isSignedIn() && isActiveRecruiterOf(request.resource.data.organizationRef)
+        && request.resource.data.get('location', '').size() <= 500
+        && request.resource.data.interviewerRef == request.auth.uid
+        && request.resource.data.type in ['phone', 'video', 'onsite']
+        && request.resource.data.scheduledStart is timestamp
+        && request.resource.data.jobRef is string
+        && request.resource.data.candidateRef is string
+        && get(/databases/$(database)/documents/jobs/$(request.resource.data.jobRef)).data.organizationRef == request.resource.data.organizationRef
+        && exists(/databases/$(database)/documents/jobs/$(request.resource.data.jobRef)/applications/$(request.resource.data.candidateRef));
+      // No se puede cambiar a quién ni de qué vacante es una entrevista.
+      allow update: if isSignedIn() && isActiveRecruiterOf(resource.data.organizationRef)
+        && changedKeys().hasOnly(['scheduledStart', 'location', 'notes', 'type'])
         && request.resource.data.get('location', '').size() <= 500;
-      allow update, delete: if isSignedIn() && isActiveRecruiterOf(resource.data.organizationRef);
+      allow delete: if isSignedIn() && isActiveRecruiterOf(resource.data.organizationRef);
     }
 
     // ---------------------------------------------------------------
-    // RECOMMENDATIONS (matches de la IA) — solo el servidor escribe
+    // RECOMMENDATIONS (matches de la IA): solo el servidor escribe
     // ---------------------------------------------------------------
     match /recommendations/{recId} {
-      allow get, list: if isSignedIn() && (
+      allow get, list: if isSignedIn() && isActive() && (
         request.auth.uid == resource.data.candidateRef ||
-        isRole('admin') ||
+        isAdmin() ||
         isRecruiterForOrg(get(/databases/$(database)/documents/jobs/$(resource.data.jobRef)).data.organizationRef)
       );
       allow create, update, delete: if false;
     }
 
     // ---------------------------------------------------------------
-    // AUDIT LOGS — escritos solo por el servidor; lectura solo admin
+    // AUDIT LOGS: escritos solo por el servidor; lectura solo admin
     // ---------------------------------------------------------------
     match /auditLogs/{logId} {
-      allow get, list: if isSignedIn() && isRole('admin');
+      allow get, list: if isSignedIn() && isAdmin();
       allow create, update, delete: if false;
     }
 

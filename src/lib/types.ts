@@ -18,6 +18,8 @@ export interface User {
   status: UserStatus;
   lastSignIn?: Timestamp | Date;
   organizationRef?: string; // For recruiters
+  /** Solo para reclutadoras: un administrador las aprobó (ven candidatas y publican vacantes). Lo escribe el servidor. */
+  recruiterApproved?: boolean;
 }
 
 export interface Candidate {
@@ -102,8 +104,17 @@ export interface Application {
   cvRef: string;
   appliedAt: Timestamp | Date;
   updatedAt: Timestamp | Date;
+  /** Solo en datos anteriores a la 1.1: ahora viven en `ApplicantNote` (este documento lo lee la candidata). */
   shortlisted?: boolean;
   recruiterNotes?: string;
+}
+
+/** Notas privadas y shortlist de la reclutadora: /jobs/{jobId}/applicantNotes/{candidateUid}. La candidata no las lee. */
+export interface ApplicantNote {
+  id: string;
+  shortlisted?: boolean;
+  recruiterNotes?: string;
+  updatedAt?: Timestamp | Date;
 }
 
 export interface Interview {

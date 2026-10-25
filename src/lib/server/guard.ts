@@ -52,6 +52,21 @@ export async function requireUser(request: Request, roles?: UserRole[]): Promise
 }
 
 /**
+ * ¿Puede esta cuenta gestionar la organización dada? Las administradoras sí; las reclutadoras solo si un
+ * administrador las aprobó y son de esa organización (lo mismo que exigen las reglas de Firestore).
+ */
+export function canManageOrg(caller: AuthedUser, organizationRef: unknown): boolean {
+  if (caller.role === "admin") return true;
+  return (
+    caller.role === "recruiter" &&
+    caller.data.recruiterApproved === true &&
+    typeof organizationRef === "string" &&
+    organizationRef !== "" &&
+    caller.organizationRef === organizationRef
+  );
+}
+
+/**
  * Límite de llamadas por usuario y acción en una ventana de tiempo, guardado en
  * Firestore (`rateLimits`, cerrado a los clientes) para que funcione entre
  * instancias serverless. Lanza 429 al excederlo.

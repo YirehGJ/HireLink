@@ -1,4 +1,4 @@
-import { doc, updateDoc, writeBatch, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, updateDoc, writeBatch, serverTimestamp } from "firebase/firestore";
 import type { Firestore } from "firebase/firestore";
 import type { ApplicationStatus } from "@/lib/types";
 
@@ -34,13 +34,17 @@ export const applicationService = {
     await updateDoc(ref, { status, updatedAt: serverTimestamp() });
   },
 
+  /**
+   * Notas privadas y shortlist de la reclutadora. Viven en `/jobs/{jobId}/applicantNotes/{appId}` y no en la
+   * postulación, porque ese documento lo lee la propia candidata.
+   */
   async updateRecruiterFields(
     firestore: Firestore,
     jobId: string,
     appId: string,
     data: { shortlisted?: boolean; recruiterNotes?: string }
   ) {
-    const ref = doc(firestore, "jobs", jobId, "applications", appId);
-    await updateDoc(ref, { ...data, updatedAt: serverTimestamp() });
+    const ref = doc(firestore, "jobs", jobId, "applicantNotes", appId);
+    await setDoc(ref, { ...data, updatedAt: serverTimestamp() }, { merge: true });
   },
 };

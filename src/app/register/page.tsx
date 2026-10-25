@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import React from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile, type User as AuthUser } from "firebase/auth";
 
 import { Button } from "@/components/ui/button";
 import { FormCard } from "@/components/auth/form-card";
@@ -62,8 +62,10 @@ function RegisterPageContent() {
     if (!auth || !firestore) return;
     setLoading(true);
 
+    let created: AuthUser | null = null;
     try {
       const { user } = await createUserWithEmailAndPassword(auth, values.email.trim(), values.password);
+      created = user;
       await updateProfile(user, { displayName: values.fullName.trim() });
       await userService.ensureProfileExists(firestore, user.uid, values.email.trim(), values.fullName.trim(), values.role);
       clearIntentionalSignOut();
@@ -72,9 +74,15 @@ function RegisterPageContent() {
       router.push("/dashboard");
     } catch (error: any) {
       console.error("Register Error:", error);
+      // Si la cuenta de acceso ya se creó pero faltó guardar el perfil, se deshace: de lo contrario la persona
+      // quedaba con sesión y sin perfil (pantalla de carga sin fin) y no podía volver a registrarse con ese correo.
+      if (created) await created.delete().catch(() => {});
       toast({
         title: "Error de registro",
-        description: error.code === 'auth/email-already-in-use' ? "Email ya registrado." : "Inténtalo de nuevo.",
+        description:
+          error.code === 'auth/email-already-in-use' ? "Email ya registrado."
+          : error.code === 'auth/network-request-failed' ? "No hay conexión. Revisa tu internet e inténtalo de nuevo."
+          : "Inténtalo de nuevo.",
         variant: "destructive"
       });
     } finally {

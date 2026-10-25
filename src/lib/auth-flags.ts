@@ -16,5 +16,6 @@ export const wasIntentionalSignOut = () => intentionalSignOut;
 /** Solo se aceptan rutas internas del dashboard como destino posterior al inicio de sesión. */
 export function safeNextPath(value: string | null | undefined): string | null {
   if (!value) return null;
-  return /^\/dashboard(\/[A-Za-z0-9_\-./]*)?$/.test(value) && !value.includes("//") ? value : null;
+  const ok = /^\/dashboard(\/[A-Za-z0-9_\-./]*)?$/.test(value) && !value.includes("//") && !value.split("/").includes("..");
+  return ok ? value : null;
 }

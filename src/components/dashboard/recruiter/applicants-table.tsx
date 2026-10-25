@@ -6,10 +6,20 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import type { Application, ApplicationStatus, Candidate, Recommendation } from "@/lib/types";
+import type { ApplicantNote, Application, ApplicationStatus, Candidate, Recommendation } from "@/lib/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileText, Loader2, Star, Zap } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { UserAvatar } from "@/components/user-avatar";
 import { useAuth, useFirestore, useDoc, useCollection } from "@/firebase";
 import { applicationService } from "@/firebase/firestore/application-service";
@@ -48,14 +58,19 @@ export const applicationStatusText: Record<Application['status'], string> = {
     withdrawn: 'Retirado'
 };
 
+/** Estados que la reclutadora puede elegir: «Retirado» solo lo decide la candidata (las reglas no lo permiten). */
+const RECRUITER_STATUSES = (Object.keys(applicationStatusText) as ApplicationStatus[]).filter((s) => s !== "withdrawn");
+
 function ApplicantRow({
   app,
   job,
   recommendation,
+  note,
 }: {
   app: Application;
   job: { id: string; title: string; organizationRef: string };
   recommendation?: Recommendation;
+  note?: ApplicantNote;
 }) {
   const auth = useAuth();
   const firestore = useFirestore();
@@ -64,6 +79,16 @@ function ApplicantRow({
   const { data: candidate, loading: candidateLoading } = useDoc<Candidate>(`candidates/${app.candidateRef}`);
   const [isUpdating, setIsUpdating] = React.useState(false);
   const [detailsOpen, setDetailsOpen] = React.useState(false);
+  const [confirmReject, setConfirmReject] = React.useState(false);
+  // Una postulación que la candidata retiró no se puede reactivar desde aquí.
+  const locked = app.status === "withdrawn";
+  const shortlisted = note?.shortlisted ?? app.shortlisted ?? false;
+
+  /** Rechazar avisa a la candidata y es difícil de deshacer: se pide confirmación. */
+  function requestStatusChange(status: ApplicationStatus) {
+    if (status === "rejected" && app.status !== "rejected") setConfirmReject(true);
+    else handleStatusChange(status);
+  }
 
   async function handleStatusChange(status: ApplicationStatus) {
     if (!firestore || !auth) return;
@@ -103,7 +128,7 @@ function ApplicantRow({
     if (!firestore) return;
     try {
       await applicationService.updateRecruiterFields(firestore, job.id, app.id, {
-        shortlisted: !app.shortlisted,
+        shortlisted: !shortlisted,
       });
     } catch (e) {
       console.error(e);
@@ -140,17 +165,17 @@ function ApplicantRow({
         </TableCell>
         <TableCell className="block px-3 py-1.5 md:table-cell md:p-4 md:text-right">
             <div className="flex flex-wrap items-center gap-2 md:justify-end">
-                <Button variant="ghost" size="icon" onClick={toggleShortlist} disabled={readOnly} aria-label={app.shortlisted ? "Quitar de shortlist" : "Agregar a shortlist"} title="Shortlist">
-                    <Star className={`h-4 w-4 ${app.shortlisted ? 'fill-yellow-400 text-yellow-500' : ''}`} />
+                <Button variant="ghost" size="icon" onClick={toggleShortlist} disabled={readOnly} aria-label={shortlisted ? "Quitar de shortlist" : "Agregar a shortlist"} title="Shortlist">
+                    <Star className={`h-4 w-4 ${shortlisted ? 'fill-yellow-400 text-yellow-500' : ''}`} />
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => setDetailsOpen(true)}>Detalles</Button>
-                <Select value={app.status} onValueChange={(v) => handleStatusChange(v as ApplicationStatus)} disabled={isUpdating || readOnly}>
+                <Select value={app.status} onValueChange={(v) => requestStatusChange(v as ApplicationStatus)} disabled={isUpdating || readOnly || locked}>
                     <SelectTrigger className="w-[150px]" aria-label={`Cambiar estado de ${name}`}>
                         {isUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : <SelectValue />}
                     </SelectTrigger>
                     <SelectContent>
-                        {Object.entries(applicationStatusText).map(([value, label]) => (
-                            <SelectItem key={value} value={value}>{label}</SelectItem>
+                        {(locked ? [...RECRUITER_STATUSES, "withdrawn" as ApplicationStatus] : RECRUITER_STATUSES).map((value) => (
+                            <SelectItem key={value} value={value}>{applicationStatusText[value]}</SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
@@ -163,8 +188,23 @@ function ApplicantRow({
       app={app}
       candidate={candidate}
       recommendation={recommendation}
+      note={note}
       job={job}
     />
+    <AlertDialog open={confirmReject} onOpenChange={setConfirmReject}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>¿Rechazar a {name}?</AlertDialogTitle>
+          <AlertDialogDescription>
+            La postulación pasará a «Rechazado» y la persona recibirá un aviso. Puedes volver a cambiar el estado después, pero el aviso ya no se retira.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction onClick={() => handleStatusChange("rejected")}>Rechazar</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
     </>
   );
 }
@@ -176,22 +216,31 @@ export function ApplicantsTable({ applicants, jobId, jobTitle, organizationRef }
     where: ["jobRef", "==", jobId],
   });
 
+  // Notas privadas y shortlist: viven aparte de la postulación (esa la lee la candidata).
+  const { data: notes } = useCollection<ApplicantNote>(`jobs/${jobId}/applicantNotes`);
+
   const scoreByCandidate = React.useMemo(() => {
     const map = new Map<string, Recommendation>();
     (recs ?? []).forEach((r) => map.set(r.candidateRef, r));
     return map;
   }, [recs]);
 
+  const noteById = React.useMemo(() => {
+    const map = new Map<string, ApplicantNote>();
+    (notes ?? []).forEach((n) => map.set(n.id, n));
+    return map;
+  }, [notes]);
+
   const visible = React.useMemo(() => {
     return applicants
-      .filter((a) => (onlyShortlist ? a.shortlisted : true))
+      .filter((a) => (onlyShortlist ? (noteById.get(a.id)?.shortlisted ?? a.shortlisted) : true))
       .filter((a) => (statusFilter === "all" ? true : a.status === statusFilter))
       .sort(
         (a, b) =>
           (scoreByCandidate.get(b.candidateRef)?.score ?? -1) -
           (scoreByCandidate.get(a.candidateRef)?.score ?? -1)
       );
-  }, [applicants, onlyShortlist, statusFilter, scoreByCandidate]);
+  }, [applicants, onlyShortlist, statusFilter, scoreByCandidate, noteById]);
 
   if (applicants.length === 0) {
     return (
@@ -247,7 +296,7 @@ export function ApplicantsTable({ applicants, jobId, jobTitle, organizationRef }
                       </TableRow>
                     ) : (
                       visible.map(app => (
-                        <ApplicantRow key={app.id} app={app} job={job} recommendation={scoreByCandidate.get(app.candidateRef)} />
+                        <ApplicantRow key={app.id} app={app} job={job} recommendation={scoreByCandidate.get(app.candidateRef)} note={noteById.get(app.id)} />
                       ))
                     )}
                 </TableBody>

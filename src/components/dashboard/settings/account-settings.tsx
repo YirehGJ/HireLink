@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DeleteAccountSection } from "./delete-account";
 
 const accountFormSchema = z
   .object({
@@ -60,7 +61,7 @@ const accountFormSchema = z
 type AccountFormValues = z.infer<typeof accountFormSchema>;
 
 export function AccountSettings() {
-  const { user, setUser, isMounted } = useApp();
+  const { user, setUser, isMounted, readOnly } = useApp();
   const auth = useAuth();
   const firestore = useFirestore();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -92,6 +93,8 @@ export function AccountSettings() {
 
 
   async function onSubmit(data: AccountFormValues) {
+    // En «Ver como» (solo lectura) la administradora no puede cambiar la cuenta que está observando.
+    if (readOnly) return;
     setIsSubmitting(true);
 
     if (!auth?.currentUser || !firestore || !user) {
@@ -116,6 +119,10 @@ export function AccountSettings() {
       if (data.fullName !== user.fullName) {
         updates.push(updateProfile(auth.currentUser, { displayName: data.fullName }));
         updates.push(updateDoc(doc(firestore, "users", user.id), { fullName: data.fullName }));
+        // El nombre que ven las reclutadoras vive en el perfil de la candidata: se mantiene al día (si aún no hay perfil, no pasa nada).
+        if (user.role === "candidate") {
+          updates.push(updateDoc(doc(firestore, "candidates", user.id), { fullName: data.fullName }).catch(() => {}));
+        }
         updatedUserData.fullName = data.fullName;
       }
 
@@ -169,6 +176,7 @@ export function AccountSettings() {
   }
 
   return (
+    <>
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <h3 className="text-md font-medium text-foreground">Perfil</h3>
@@ -179,7 +187,7 @@ export function AccountSettings() {
             <FormItem>
               <FormLabel>Nombre Completo</FormLabel>
               <FormControl>
-                <Input placeholder="Tu nombre y apellido" {...field} />
+                <Input placeholder="Tu nombre y apellido" {...field} disabled={readOnly} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -249,11 +257,13 @@ export function AccountSettings() {
             Iniciaste sesión con tu cuenta de Google, por lo que la contraseña se administra desde Google y no desde HireLink.
           </p>
         )}
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="submit" disabled={isSubmitting || readOnly}>
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Guardar Cambios
         </Button>
       </form>
     </Form>
+    <DeleteAccountSection />
+    </>
   );
 }

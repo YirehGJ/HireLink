@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { adminDb } from "@/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
 import { writeAuditLog } from "@/firebase/admin-audit";
-import { enforceRateLimit, errorResponse, HttpError, requireUser } from "@/lib/server/guard";
+import { canManageOrg, enforceRateLimit, errorResponse, HttpError, requireUser } from "@/lib/server/guard";
 import { notifyUser } from "@/lib/server/notify";
 import { formatDateTimeEs, safeTimeZone } from "@/lib/server/datetime";
 
@@ -50,10 +50,7 @@ export async function POST(request: Request) {
     const job = jobSnap.data();
     if (!job) throw new HttpError(404, "Vacante no encontrada");
 
-    const isAuthorized =
-      caller.role === "admin" ||
-      (caller.role === "recruiter" && caller.organizationRef === job.organizationRef);
-    if (!isAuthorized) throw new HttpError(403, "No autorizado");
+    if (!canManageOrg(caller, job.organizationRef)) throw new HttpError(403, "No autorizado");
 
     const appRef = db.collection("jobs").doc(jobId).collection("applications").doc(candidateUid);
     const appSnap = await appRef.get();

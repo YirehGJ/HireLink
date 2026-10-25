@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { adminDb } from "@/firebase/admin";
 import { evaluateMatch, isUpToDate, matchHash, overlapScore } from "@/lib/server/matching";
 import { mapWithConcurrency } from "@/lib/server/concurrency";
-import { enforceRateLimit, errorResponse, HttpError, requireUser } from "@/lib/server/guard";
+import { canManageOrg, enforceRateLimit, errorResponse, HttpError, requireUser } from "@/lib/server/guard";
 
 // Máximo permitido en el plan gratuito de Vercel; evita que la función se corte a la mitad.
 export const maxDuration = 60;
@@ -35,10 +35,7 @@ export async function POST(request: Request) {
     const job = (await db.collection("jobs").doc(jobId).get()).data();
     if (!job) throw new HttpError(404, "Vacante no encontrada");
 
-    const authorized =
-      caller.role === "admin" ||
-      (caller.role === "recruiter" && caller.organizationRef === job.organizationRef);
-    if (!authorized) throw new HttpError(403, "No autorizado");
+    if (!canManageOrg(caller, job.organizationRef)) throw new HttpError(403, "No autorizado");
     if (job.status !== "published") throw new HttpError(409, "Solo se buscan candidatos para vacantes publicadas");
 
     // Se leen más candidatos de los que se alcanzan a evaluar para poder elegir a los mejores: primero los que

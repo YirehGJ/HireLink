@@ -12,13 +12,16 @@ const RECRUITER_ACTIONS = [
   "organization_created",
   "organization_updated",
 ];
-const ADMIN_ONLY_ACTIONS = ["user_role_changed", "user_status_changed", "user_organization_changed"];
 
-/** Qué acciones puede registrar cada rol (un candidato no puede fabricar eventos de admin). */
+/**
+ * Qué acciones puede registrar cada rol desde el navegador (un candidato no puede fabricar eventos). Las acciones
+ * sobre cuentas (aprobar, suspender, cambiar rol u organización, eliminar) ya no pasan por aquí: las registra
+ * `/api/admin/users` en el servidor, junto con la operación.
+ */
 const ALLOWED: Record<UserRole, Set<string>> = {
   candidate: new Set<string>(),
   recruiter: new Set(RECRUITER_ACTIONS),
-  admin: new Set([...RECRUITER_ACTIONS, ...ADMIN_ONLY_ACTIONS]),
+  admin: new Set(RECRUITER_ACTIONS),
 };
 
 /**
@@ -27,7 +30,8 @@ const ALLOWED: Record<UserRole, Set<string>> = {
  */
 export async function POST(request: Request) {
   try {
-    const { uid, role } = await requireUser(request);
+    const caller = await requireUser(request);
+    const { uid, role } = caller;
     const db = adminDb();
     await enforceRateLimit(db, uid, "audit", 120, 3600);
 
@@ -36,8 +40,14 @@ export async function POST(request: Request) {
     if (typeof action !== "string" || !ALLOWED[role].has(action)) {
       throw new HttpError(403, "Acción no permitida para tu rol");
     }
-    if (typeof targetType !== "string" || typeof targetId !== "string" || !targetType || !targetId) {
+    if (typeof targetType !== "string" || typeof targetId !== "string" || !targetType || !targetId || targetId.includes("/")) {
       throw new HttpError(400, "Parámetros inválidos");
+    }
+    // Una reclutadora no puede registrar eventos sobre vacantes de otra empresa (si la vacante ya no existe, sí:
+    // el evento de eliminación se registra después de borrarla).
+    if (role === "recruiter" && targetType === "job") {
+      const job = (await db.collection("jobs").doc(targetId).get()).data();
+      if (job && job.organizationRef !== caller.organizationRef) throw new HttpError(403, "Acción no permitida para tu rol");
     }
 
     await writeAuditLog(db, uid, {

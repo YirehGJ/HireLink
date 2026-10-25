@@ -13,9 +13,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState, useMemo } from "react";
 import { SENIORITY_OPTIONS, matchesText, normalizeText } from "@/lib/format";
+import { usePendingRecruiter } from "@/components/dashboard/recruiter/pending-approval-banner";
 
 export default function CandidatesPage() {
-    const { data: candidates, loading } = useCollection<Candidate>("candidates");
+    const pending = usePendingRecruiter();
+    // Una reclutadora sin aprobar no lee candidatas: no se consulta y se explica por qué.
+    const { data: candidates, loading, error } = useCollection<Candidate>(pending ? null : "candidates");
     const [search, setSearch] = useState("");
     const [minLevel, setMinLevel] = useState("0");
     const [onlyAvailable, setOnlyAvailable] = useState(false);
@@ -80,14 +83,24 @@ export default function CandidatesPage() {
                         <Label htmlFor="available">Solo disponibles</Label>
                     </div>
                 </div>
-                {!loading && (
+                {!loading && !pending && !error && (
                     <p className="text-sm text-muted-foreground" aria-live="polite">
                         {filtered.length} {filtered.length === 1 ? "candidato" : "candidatos"}
                     </p>
                 )}
-                {loading ? (
+                {pending ? (
+                    <div className="text-center py-16 border-2 border-dashed rounded-lg" role="status">
+                        <h2 className="text-xl font-semibold">Verás a las candidatas cuando tu cuenta sea aprobada</h2>
+                        <p className="mt-2 text-muted-foreground">Un administrador revisa las cuentas de reclutadoras antes de darles acceso a los perfiles.</p>
+                    </div>
+                ) : loading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                         {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-72 w-full" />)}
+                    </div>
+                ) : error ? (
+                    <div className="text-center py-16 border-2 border-dashed rounded-lg" role="alert">
+                        <h2 className="text-xl font-semibold">No se pudieron cargar los candidatos</h2>
+                        <p className="mt-2 text-muted-foreground">Revisa tu conexión y recarga la página. Si sigue igual, avisa al equipo.</p>
                     </div>
                 ) : filtered.length === 0 ? (
                     <div className="text-center py-16 border-2 border-dashed rounded-lg">

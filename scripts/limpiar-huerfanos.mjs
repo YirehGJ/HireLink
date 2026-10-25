@@ -67,6 +67,8 @@ for (const d of (await db.collectionGroup("applications").get()).docs) {
 }
 const orphanRecs = (await db.collection("recommendations").get()).docs.filter((d) => !jobIds.has(d.data().jobRef));
 const orphanInterviews = (await db.collection("interviews").get()).docs.filter((d) => !jobIds.has(d.data().jobRef));
+// Notas privadas y shortlist de las reclutadoras (/jobs/{jobId}/applicantNotes/*) de vacantes que ya no existen
+const orphanNotes = (await db.collectionGroup("applicantNotes").get()).docs.filter((d) => !jobIds.has(d.ref.parent.parent.id));
 
 console.log("\nResultado de la revisión:");
 console.log(`  vacantes existentes ............................ ${jobIds.size}`);
@@ -74,10 +76,11 @@ console.log(`  postulaciones de vacantes eliminadas ........... ${orphanApps.len
 console.log(`  copias de candidato de vacantes eliminadas ..... ${orphanMirrors.length}`);
 console.log(`  recomendaciones de vacantes eliminadas ......... ${orphanRecs.length}`);
 console.log(`  entrevistas de vacantes eliminadas ............. ${orphanInterviews.length}`);
+console.log(`  notas privadas de vacantes eliminadas .......... ${orphanNotes.length}`);
 console.log(`  postulaciones vigentes sin copia del candidato . ${missingMirrors.length}`);
 for (const m of missingMirrors) console.log(`    - jobs/${m.jobId}/applications/${m.uid} (${m.data.status})`);
 
-const toDelete = [...orphanApps, ...orphanMirrors, ...orphanRecs, ...orphanInterviews];
+const toDelete = [...orphanApps, ...orphanMirrors, ...orphanRecs, ...orphanInterviews, ...orphanNotes];
 if (!APPLY) {
   console.log(`\nSimulación terminada: se borrarían ${toDelete.length} documentos y se reconstruirían ${missingMirrors.length} copias. Agrega --apply para ejecutarlo.`);
   process.exit(0);

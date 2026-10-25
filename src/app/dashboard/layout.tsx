@@ -3,6 +3,7 @@ import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { MobileTopBar } from "@/components/dashboard/mobile-topbar";
 import { ReadOnlyBanner } from "@/components/dashboard/read-only-banner";
 import { AccountGuard } from "@/components/dashboard/account-guard";
+import { PendingApprovalBanner } from "@/components/dashboard/recruiter/pending-approval-banner";
 
 export default function DashboardLayout({
   children,
@@ -16,6 +17,7 @@ export default function DashboardLayout({
         <MobileTopBar />
         <main id="contenido" tabIndex={-1} className="flex-1 bg-muted/50 dark:bg-background/90 focus:outline-none">
           <ReadOnlyBanner />
+          <PendingApprovalBanner />
           <AccountGuard>{children}</AccountGuard>
         </main>
       </div>

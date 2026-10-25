@@ -79,6 +79,25 @@ export function AccountGuard({ children }: { children: React.ReactNode }) {
     router.replace(`/login?next=${encodeURIComponent(pathname)}`);
   }, [authLoading, authUser, pathname, router]);
 
+  // Si hay sesión pero el perfil no llega (falló el registro a la mitad, se cortó la conexión o la cuenta está
+  // incompleta), en vez de un esqueleto sin fin se ofrece cerrar sesión.
+  const [profileTimedOut, setProfileTimedOut] = React.useState(false);
+  React.useEffect(() => {
+    if (!authUser || user) {
+      setProfileTimedOut(false);
+      return;
+    }
+    const timer = setTimeout(() => setProfileTimedOut(true), 10_000);
+    return () => clearTimeout(timer);
+  }, [authUser, user]);
+
+  const leave = async () => {
+    markIntentionalSignOut();
+    if (auth) await signOut(auth);
+    setUser(null);
+    router.push("/");
+  };
+
   React.useEffect(() => {
     if (!user?.role) return;
     try {
@@ -87,6 +106,19 @@ export function AccountGuard({ children }: { children: React.ReactNode }) {
       /* sin almacenamiento */
     }
   }, [user?.role]);
+
+  if (authUser && isMounted && !user && profileTimedOut) {
+    return (
+      <div role="alert" className="flex min-h-[60vh] flex-col items-center justify-center gap-4 p-8 text-center">
+        <ShieldAlert className="h-12 w-12 text-muted-foreground" />
+        <h2 className="text-2xl font-bold">No pudimos cargar tu perfil</h2>
+        <p className="max-w-md text-muted-foreground">
+          Puede ser un problema de conexión o que tu cuenta haya quedado incompleta. Cierra sesión e inténtalo de nuevo.
+        </p>
+        <Button onClick={leave}>Cerrar sesión</Button>
+      </div>
+    );
+  }
 
   if (authLoading || !authUser || !isMounted || !user) return <GuardSkeleton pathname={pathname} />;
 
@@ -98,16 +130,7 @@ export function AccountGuard({ children }: { children: React.ReactNode }) {
         <p className="max-w-md text-muted-foreground">
           Un administrador desactivó el acceso a esta cuenta. Si crees que es un error, contacta al equipo de HireLink.
         </p>
-        <Button
-          onClick={async () => {
-            markIntentionalSignOut();
-            if (auth) await signOut(auth);
-            setUser(null);
-            router.push("/");
-          }}
-        >
-          Cerrar sesión
-        </Button>
+        <Button onClick={leave}>Cerrar sesión</Button>
       </div>
     );
   }

@@ -43,7 +43,7 @@ const defaultValues: Partial<NotificationsFormValues> = {
 export function NotificationSettings() {
   const auth = useAuth();
   const firestore = useFirestore();
-  const { user } = useApp();
+  const { user, readOnly } = useApp();
   const { data: savedPrefs } = useDoc<NotificationsFormValues>(
     user ? `users/${user.id}/settings/notifications` : null
   );
@@ -59,7 +59,8 @@ export function NotificationSettings() {
   }, [savedPrefs]);
 
   async function onSubmit(data: NotificationsFormValues) {
-    if (!firestore || !auth || !auth.currentUser) return;
+    // En «Ver como» (solo lectura) no se guarda nada: el formulario muestra las preferencias de la persona observada.
+    if (readOnly || !firestore || !auth || !auth.currentUser) return;
     setIsSubmitting(true);
     try {
       await setDoc(doc(firestore, "users", auth.currentUser.uid, "settings", "notifications"), data);
@@ -81,7 +82,8 @@ export function NotificationSettings() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+       <fieldset disabled={readOnly} className="m-0 min-w-0 space-y-8 border-0 p-0">
         <div>
           <h3 className="mb-4 text-lg font-medium">Notificaciones por Email</h3>
           <div className="space-y-4">
@@ -169,10 +171,11 @@ export function NotificationSettings() {
             />
           </div>
         </div>
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="submit" disabled={isSubmitting || readOnly}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Guardar cambios
         </Button>
+       </fieldset>
       </form>
     </Form>
   );

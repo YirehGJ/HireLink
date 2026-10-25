@@ -23,7 +23,7 @@ import { callAuthedApi } from "@/lib/api-client";
 import { useApp } from "@/components/providers/app-provider";
 import { useToast } from "@/hooks/use-toast";
 import { yearsLabel } from "@/lib/format";
-import type { Application, Candidate, InterviewType, Recommendation } from "@/lib/types";
+import type { ApplicantNote, Application, Candidate, InterviewType, Recommendation } from "@/lib/types";
 
 interface Props {
   open: boolean;
@@ -31,6 +31,8 @@ interface Props {
   app: Application;
   candidate: Candidate | null | undefined;
   recommendation?: Recommendation;
+  /** Notas privadas de la reclutadora (viven aparte de la postulación, que lee la candidata). */
+  note?: ApplicantNote;
   job: { id: string; title: string; organizationRef: string };
 }
 
@@ -38,13 +40,15 @@ interface Props {
  * Detalle del postulante para el reclutador: perfil, razones de la IA, notas
  * privadas, contacto y agenda de entrevista (S08 + S10).
  */
-export function ApplicantDetailsDialog({ open, onOpenChange, app, candidate, recommendation, job }: Props) {
+export function ApplicantDetailsDialog({ open, onOpenChange, app, candidate, recommendation, note, job }: Props) {
   const auth = useAuth();
   const firestore = useFirestore();
   const { toast } = useToast();
   const { readOnly } = useApp();
 
-  const [notes, setNotes] = React.useState(app.recruiterNotes ?? "");
+  // `app.recruiterNotes` solo existe en datos anteriores a la 1.1 que aún no se migraron.
+  const savedNotes = note?.recruiterNotes ?? app.recruiterNotes ?? "";
+  const [notes, setNotes] = React.useState(savedNotes);
   const [savingNotes, setSavingNotes] = React.useState(false);
 
   const [date, setDate] = React.useState("");
@@ -54,8 +58,8 @@ export function ApplicantDetailsDialog({ open, onOpenChange, app, candidate, rec
   const [scheduling, setScheduling] = React.useState(false);
 
   React.useEffect(() => {
-    setNotes(app.recruiterNotes ?? "");
-  }, [app.recruiterNotes]);
+    setNotes(savedNotes);
+  }, [savedNotes]);
 
   const name = candidate?.fullName || candidate?.headline || "Candidato";
 
@@ -92,20 +96,34 @@ export function ApplicantDetailsDialog({ open, onOpenChange, app, candidate, rec
       toast({ title: "El lugar o enlace no puede pasar de 500 caracteres", variant: "destructive" });
       return;
     }
+    if (["withdrawn", "rejected", "hired"].includes(app.status)) {
+      toast({
+        title: "No se puede agendar con este estado",
+        description: "La postulación está retirada, rechazada o ya contratada. Cambia el estado antes de agendar.",
+        variant: "destructive",
+      });
+      return;
+    }
+    // Solo avanza el estado si la persona aún no estaba más adelante: no pisa «Entrevista» ni «Oferta».
+    const advance = ["applied", "screening", "assessment"].includes(app.status);
     setScheduling(true);
     try {
-      await interviewService.schedule(firestore, {
-        jobRef: job.id,
-        jobTitle: job.title,
-        organizationRef: job.organizationRef,
-        candidateRef: app.candidateRef,
-        candidateName: name,
-        interviewerRef: auth.currentUser.uid,
-        type,
-        scheduledStart: start,
-        location: place.trim(),
-      });
-      await applicationService.updateStatus(firestore, job.id, app.id, "interview");
+      // Entrevista y cambio de estado en una sola operación: o se guardan las dos cosas o ninguna.
+      await interviewService.schedule(
+        firestore,
+        {
+          jobRef: job.id,
+          jobTitle: job.title,
+          organizationRef: job.organizationRef,
+          candidateRef: app.candidateRef,
+          candidateName: name,
+          interviewerRef: auth.currentUser.uid,
+          type,
+          scheduledStart: start,
+          location: place.trim(),
+        },
+        advance ? { jobId: job.id, appId: app.id, status: "interview" } : undefined
+      );
     } catch (e) {
       console.error(e);
       toast({ title: "No se pudo agendar la entrevista", variant: "destructive" });
@@ -117,7 +135,7 @@ export function ApplicantDetailsDialog({ open, onOpenChange, app, candidate, rec
       await callAuthedApi(auth, "/api/applications/notify-status", {
         jobId: job.id,
         candidateUid: app.candidateRef,
-        newStatus: "interview",
+        newStatus: advance ? "interview" : app.status,
         interviewAt: start.toISOString(),
         interviewType: type,
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,

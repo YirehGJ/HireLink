@@ -10,9 +10,11 @@ import { useApp } from '@/components/providers/app-provider';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getGreeting } from '@/lib/utils';
+import { usePendingRecruiter } from '@/components/dashboard/recruiter/pending-approval-banner';
 
 export default function JobsDashboardPage() {
     const { user, isMounted } = useApp();
+    const pending = usePendingRecruiter();
     const [greeting, setGreeting] = useState('');
 
     useEffect(() => {
@@ -21,7 +23,13 @@ export default function JobsDashboardPage() {
         }
     }, [isMounted]);
 
-    const recruiterActions = (
+    // Una reclutadora aún sin aprobar puede completar su empresa, pero no publicar (lo exigen las reglas).
+    const recruiterActions = pending ? (
+        <Button disabled title="Disponible cuando un administrador apruebe tu cuenta">
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Crear Vacante
+        </Button>
+    ) : (
         <Button asChild>
           <Link href="/dashboard/jobs/new">
             <PlusCircle className="mr-2 h-4 w-4" />

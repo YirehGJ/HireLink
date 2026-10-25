@@ -20,6 +20,8 @@ const ACTION_TEXT: Record<string, string> = {
   user_role_changed: "Cambió rol de usuario",
   user_status_changed: "Cambió estado de usuario",
   user_organization_changed: "Asignó organización",
+  user_recruiter_approved: "Aprobó o revocó a una reclutadora",
+  user_deleted: "Eliminó una cuenta",
   organization_created: "Creó organización",
   organization_updated: "Editó organización",
   application_created: "Postulación creada",

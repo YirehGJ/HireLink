@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/firebase/admin";
 import { writeAuditLog } from "@/firebase/admin-audit";
-import { enforceRateLimit, errorResponse, HttpError, requireUser } from "@/lib/server/guard";
+import { canManageOrg, enforceRateLimit, errorResponse, HttpError, requireUser } from "@/lib/server/guard";
 import { notifyUser } from "@/lib/server/notify";
 import { FieldValue } from "firebase-admin/firestore";
 
@@ -47,9 +47,7 @@ async function handle(request: Request) {
 
   const candidateUid: string = rec.candidateRef;
   const isCandidate = uid === candidateUid;
-  const isCompany =
-    caller.role === "admin" ||
-    (caller.role === "recruiter" && caller.organizationRef === job.organizationRef);
+  const isCompany = canManageOrg(authed, job.organizationRef);
 
   if (!isCandidate && !isCompany) {
     return NextResponse.json({ error: "No autorizado" }, { status: 403 });

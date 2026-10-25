@@ -150,7 +150,10 @@ function buildPlan() {
     if (existed[p.key]) continue;
     const base = { id: uidOf[p.key], email: p.email, fullName: p.fullName, role: p.role, status: "active", seed: true };
     if (p.phone) base.phone = p.phone;
-    if (p.role === "recruiter") base.organizationRef = orgOf[p.org].id;
+    if (p.role === "recruiter") {
+      base.organizationRef = orgOf[p.org].id;
+      base.recruiterApproved = true; // sin aprobación una reclutadora no ve candidatas ni publica vacantes
+    }
     add(`users/${uidOf[p.key]}`, base);
   }
 
@@ -189,11 +192,15 @@ function buildPlan() {
       candidateRef: uidOf[a.cand], jobRef: jobId(a.job), status: a.status, source: a.source, cvRef: "",
       appliedAt: when, updatedAt: when, notifiedAt: when, seed: true,
     };
-    const full = { ...base };
-    if (a.shortlisted) full.shortlisted = true;
-    if (a.notes) full.recruiterNotes = a.notes;
-    add(`jobs/${jobId(a.job)}/applications/${uidOf[a.cand]}`, full);
+    add(`jobs/${jobId(a.job)}/applications/${uidOf[a.cand]}`, base);
     add(`users/${uidOf[a.cand]}/applications/${jobId(a.job)}`, base);
+    // Shortlist y notas privadas viven aparte: el documento de la postulación lo lee la propia candidata.
+    if (a.shortlisted || a.notes) {
+      const note = { updatedAt: when, seed: true };
+      if (a.shortlisted) note.shortlisted = true;
+      if (a.notes) note.recruiterNotes = a.notes;
+      add(`jobs/${jobId(a.job)}/applicantNotes/${uidOf[a.cand]}`, note);
+    }
   }
 
   // Recomendaciones de la IA (valores fijos; engineVersion = "seed")
@@ -273,6 +280,8 @@ function validate() {
       need(d.name.length <= 200 && (d.description || "").length <= 3000, `${p}: organización inválida`);
     } else if (p.includes("/applications/")) {
       need(APP_STATUS.includes(d.status), `${p}: estado de postulación inválido`);
+      need(d.recruiterNotes === undefined && d.shortlisted === undefined, `${p}: las notas y la shortlist van en applicantNotes`);
+    } else if (p.includes("/applicantNotes/")) {
       need((d.recruiterNotes || "").length <= 5000, `${p}: recruiterNotes > 5000`);
     } else if (root === "recommendations") {
       need(d.score >= 0 && d.score <= 1, `${p}: score fuera de 0 a 1`);
