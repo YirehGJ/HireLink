@@ -14,7 +14,7 @@ const adb = getFirestore();
 const aauth = getAuth();
 const KEY = get('NEXT_PUBLIC_FB_API_KEY');
 const PASS = 'TestPass1234';
-const EMAILS = ['sec.reca', 'sec.recb', 'sec.cand1', 'sec.cand2', 'sec.susp'].map((s) => `${s}@example.com`);
+const EMAILS = ['sec.reca', 'sec.recb', 'sec.recc', 'sec.cand1', 'sec.cand2', 'sec.susp', 'sec.admin', 'sec.tgt', 'sec.del', 'sec.selfdel'].map((s) => `${s}@example.com`);
 
 async function token(email) {
   const r = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${KEY}`, {
@@ -42,6 +42,8 @@ async function mkUser(email, role, extra = {}) {
 }
 async function cleanup() {
   for (const p of created) { try { await adb.doc(p).delete(); } catch {} }
+  // Registros de auditoría que dejan las acciones de administración de la prueba (actores sec.*).
+  try { for (const d of (await adb.collection('auditLogs').where('actorEmail', '>=', 'sec.').where('actorEmail', '<', 'sec/').get()).docs) await d.ref.delete(); } catch {}
   for (const e of EMAILS) { try { const u = await aauth.getUserByEmail(e); await aauth.deleteUser(u.uid); await adb.doc(`users/${u.uid}`).delete(); await adb.doc(`candidates/${u.uid}`).delete(); } catch {} }
 }
 
@@ -52,8 +54,9 @@ try {
   await cleanup();
   const orgA = await adb.collection('organizations').add({ name: 'SEC Org A' }); created.push(orgA.path);
   const orgB = await adb.collection('organizations').add({ name: 'SEC Org B' }); created.push(orgB.path);
-  uids.reca = await mkUser('sec.reca@example.com', 'recruiter', { organizationRef: orgA.id });
-  uids.recb = await mkUser('sec.recb@example.com', 'recruiter', { organizationRef: orgB.id });
+  // Desde la 1.1 las rutas que actúan por una empresa exigen una reclutadora aprobada (recruiterApproved).
+  uids.reca = await mkUser('sec.reca@example.com', 'recruiter', { organizationRef: orgA.id, recruiterApproved: true });
+  uids.recb = await mkUser('sec.recb@example.com', 'recruiter', { organizationRef: orgB.id, recruiterApproved: true });
   uids.cand1 = await mkUser('sec.cand1@example.com', 'candidate');
   uids.cand2 = await mkUser('sec.cand2@example.com', 'candidate');
   uids.susp = await mkUser('sec.susp@example.com', 'candidate', { status: 'suspended' });
@@ -66,7 +69,7 @@ try {
   for (const [k, e] of [['reca', 'sec.reca'], ['recb', 'sec.recb'], ['cand1', 'sec.cand1'], ['cand2', 'sec.cand2'], ['susp', 'sec.susp']]) T[k] = await token(`${e}@example.com`);
 
   // ---------- 1) sin autenticación ----------
-  for (const p of ['/api/audit', '/api/ai/extract-cv', '/api/ai/generate-description', '/api/applications/notify-new', '/api/applications/notify-status', '/api/recommendations/generate', '/api/recommendations/generate-for-job', '/api/matches/respond', '/api/jobs/delete', '/api/interviews/cancel']) {
+  for (const p of ['/api/audit', '/api/ai/extract-cv', '/api/ai/generate-description', '/api/applications/notify-new', '/api/applications/notify-status', '/api/recommendations/generate', '/api/recommendations/generate-for-job', '/api/matches/respond', '/api/jobs/delete', '/api/interviews/cancel', '/api/admin/users', '/api/account/delete']) {
     expect(`A01 sin token -> ${p}`, (await api(p, null, {})).status, 401);
     expect(`A02 token falso -> ${p}`, (await api(p, 'eyJhbGciOiJSUzI1NiJ9.e30.x', {})).status, 401);
   }
@@ -113,6 +116,81 @@ try {
   const delRes = await api('/api/jobs/delete', T.reca, { jobId: jobDel.id });
   const left = [(await adb.doc(`jobs/${jobDel.id}`).get()).exists, (await adb.collection(`jobs/${jobDel.id}/applications`).get()).size, (await adb.doc(`users/${uids.cand1}/applications/${jobDel.id}`).get()).exists, (await adb.doc(`recommendations/${uids.cand1}_${jobDel.id}`).get()).exists];
   results.push({ name: 'N09 reclutador A elimina su vacante en cascada (postulaciones, copia del candidato y recomendación)', ok: delRes.status === 200 && left.every((x) => !x), note: `HTTP ${delRes.status}; restos ${JSON.stringify(left)}` });  // ---------- 5) suspendidos ----------
+  // ---------- 4c) 1.1: reclutadoras sin aprobar y API de administración ----------
+  const orgC = await adb.collection('organizations').add({ name: 'SEC Org C' }); created.push(orgC.path);
+  uids.recc = await mkUser('sec.recc@example.com', 'recruiter', { organizationRef: orgC.id }); // sin recruiterApproved
+  uids.admin = await mkUser('sec.admin@example.com', 'admin');
+  uids.tgt = await mkUser('sec.tgt@example.com', 'candidate');
+  const jobPlain = { descriptionMd: 'x'.repeat(60), searchTags: ['a'], seniority: 'junior', location: 'x', remoteAllowed: false, status: 'published' };
+  const jobC1 = await adb.collection('jobs').add({ ...jobPlain, organizationRef: orgC.id, title: 'SEC Job C1' }); created.push(jobC1.path);
+  const jobC2 = await adb.collection('jobs').add({ ...jobPlain, organizationRef: orgC.id, title: 'SEC Job C2' }); created.push(jobC2.path);
+  T.recc = await token('sec.recc@example.com');
+  T.admin = await token('sec.admin@example.com');
+  expect('U01 reclutadora sin aprobar elimina su vacante', (await api('/api/jobs/delete', T.recc, { jobId: jobC1.id })).status, 403);
+  expect('U02 reclutadora sin aprobar busca candidatos de su vacante', (await api('/api/recommendations/generate-for-job', T.recc, { jobId: jobC1.id })).status, 403);
+  expect('U03 candidato usa la API de administración', (await api('/api/admin/users', T.cand1, { uid: uids.tgt, action: 'suspend' })).status, 403);
+  expect('U04 reclutadora usa la API de administración', (await api('/api/admin/users', T.reca, { uid: uids.tgt, action: 'suspend' })).status, 403);
+  expect('U05 admin registra un evento de cuentas por /api/audit (ya no se acepta desde el navegador)', (await api('/api/audit', T.admin, { action: 'user_role_changed', targetType: 'user', targetId: 'x' })).status, 403);
+  expect('U05b reclutadora registra un evento sobre una vacante de otra empresa', (await api('/api/audit', T.reca, { action: 'job_updated', targetType: 'job', targetId: jobC1.id })).status, 403);
+  expect('U06 admin: acción inválida', (await api('/api/admin/users', T.admin, { uid: uids.tgt, action: 'hackear' })).status, 400);
+  expect('U07 admin: usuario inexistente', (await api('/api/admin/users', T.admin, { uid: 'no-existe-sec', action: 'suspend' })).status, 404);
+  expect('U07b admin: solo se aprueba a reclutadoras', (await api('/api/admin/users', T.admin, { uid: uids.tgt, action: 'approve_recruiter' })).status, 400);
+
+  const ap = await api('/api/admin/users', T.admin, { uid: uids.recc, action: 'approve_recruiter' });
+  const apOk = (await adb.doc(`users/${uids.recc}`).get()).data()?.recruiterApproved === true;
+  const apAudit = (await adb.collection('auditLogs').where('targetId', '==', uids.recc).get()).docs.some((d) => d.data().action === 'user_recruiter_approved');
+  results.push({ name: 'U08 admin aprueba a la reclutadora: queda recruiterApproved y queda en la auditoría', ok: ap.status === 200 && apOk && apAudit, note: `HTTP ${ap.status}; aprobada ${apOk}; auditoría ${apAudit}` });
+  expect('U09 reclutadora ya aprobada elimina su vacante (cascada)', (await api('/api/jobs/delete', T.recc, { jobId: jobC1.id })).status, 200);
+  expect('U10 admin revoca la aprobación', (await api('/api/admin/users', T.admin, { uid: uids.recc, action: 'revoke_recruiter' })).status, 200);
+  expect('U11 reclutadora con la aprobación revocada ya no elimina su vacante', (await api('/api/jobs/delete', T.recc, { jobId: jobC2.id })).status, 403);
+
+  const sp = await api('/api/admin/users', T.admin, { uid: uids.tgt, action: 'suspend' });
+  const spAuth = (await aauth.getUser(uids.tgt)).disabled === true;
+  const spDoc = (await adb.doc(`users/${uids.tgt}`).get()).data()?.status === 'suspended';
+  let loginBlocked = false; try { await token('sec.tgt@example.com'); } catch { loginBlocked = true; }
+  results.push({ name: 'U12 suspender deshabilita la cuenta de Authentication y bloquea el inicio de sesión', ok: sp.status === 200 && spAuth && spDoc && loginBlocked, note: `HTTP ${sp.status}; Auth deshabilitada ${spAuth}; estado ${spDoc}; inicio bloqueado ${loginBlocked}` });
+  const re = await api('/api/admin/users', T.admin, { uid: uids.tgt, action: 'reactivate' });
+  const reOk = (await aauth.getUser(uids.tgt)).disabled === false && (await adb.doc(`users/${uids.tgt}`).get()).data()?.status === 'active';
+  results.push({ name: 'U13 reactivar vuelve a habilitar la cuenta', ok: re.status === 200 && reOk, note: `HTTP ${re.status}; habilitada ${reOk}` });
+  expect('U14 admin no puede suspenderse a sí mismo', (await api('/api/admin/users', T.admin, { uid: uids.admin, action: 'suspend' })).status, 409);
+  expect('U15 admin no puede cambiar su propio rol', (await api('/api/admin/users', T.admin, { uid: uids.admin, action: 'set_role', role: 'candidate' })).status, 409);
+  expect('U16 admin no se elimina por la API de administración', (await api('/api/admin/users', T.admin, { uid: uids.admin, action: 'delete' })).status, 409);
+
+  const toRec = await api('/api/admin/users', T.admin, { uid: uids.tgt, action: 'set_role', role: 'recruiter' });
+  const asRec = (await adb.doc(`users/${uids.tgt}`).get()).data();
+  await adb.doc(`users/${uids.tgt}`).update({ organizationRef: orgA.id });
+  const toCand = await api('/api/admin/users', T.admin, { uid: uids.tgt, action: 'set_role', role: 'candidate' });
+  const asCand = (await adb.doc(`users/${uids.tgt}`).get()).data();
+  results.push({ name: 'U17 cambiar el rol: la reclutadora nombrada queda aprobada; al volver a candidata pierde empresa y aprobación', ok: toRec.status === 200 && asRec.role === 'recruiter' && asRec.recruiterApproved === true && toCand.status === 200 && asCand.role === 'candidate' && asCand.organizationRef === undefined && asCand.recruiterApproved === undefined, note: `HTTP ${toRec.status}/${toCand.status}` });
+
+  // Eliminar una cuenta con todo lo que depende de ella
+  uids.del = await mkUser('sec.del@example.com', 'candidate');
+  await adb.doc(`candidates/${uids.del}`).set({ userRef: uids.del, headline: 'Borrar', skills: [] });
+  await adb.doc(`jobs/${job.id}/applications/${uids.del}`).set({ candidateRef: uids.del, jobRef: job.id, status: 'applied' }); created.push(`jobs/${job.id}/applications/${uids.del}`);
+  await adb.doc(`users/${uids.del}/applications/${job.id}`).set({ candidateRef: uids.del, jobRef: job.id, status: 'applied' });
+  await adb.doc(`jobs/${job.id}/applicantNotes/${uids.del}`).set({ shortlisted: true, recruiterNotes: 'x' }); created.push(`jobs/${job.id}/applicantNotes/${uids.del}`);
+  await adb.doc(`recommendations/${uids.del}_${job.id}`).set({ candidateRef: uids.del, jobRef: job.id, score: 0.9, status: 'pending', reasons: [] }); created.push(`recommendations/${uids.del}_${job.id}`);
+  const ivDel = await adb.collection('interviews').add({ jobRef: job.id, organizationRef: orgA.id, candidateRef: uids.del, interviewerRef: uids.reca, type: 'video', scheduledStart: Timestamp.fromDate(new Date(Date.now() + 864e5)), location: 'x' }); created.push(ivDel.path);
+  await adb.doc(`users/${uids.del}/notifications/n1`).set({ title: 't', read: false });
+  const del = await api('/api/admin/users', T.admin, { uid: uids.del, action: 'delete' });
+  const delLeft = [
+    (await adb.doc(`users/${uids.del}`).get()).exists, (await adb.doc(`candidates/${uids.del}`).get()).exists,
+    (await adb.doc(`jobs/${job.id}/applications/${uids.del}`).get()).exists, (await adb.doc(`users/${uids.del}/applications/${job.id}`).get()).exists,
+    (await adb.doc(`jobs/${job.id}/applicantNotes/${uids.del}`).get()).exists, (await adb.doc(`recommendations/${uids.del}_${job.id}`).get()).exists,
+    (await adb.doc(`interviews/${ivDel.id}`).get()).exists, (await adb.collection(`users/${uids.del}/notifications`).get()).size > 0,
+    await aauth.getUser(uids.del).then(() => true, () => false),
+  ];
+  results.push({ name: 'U18 admin elimina una cuenta con todo lo que depende de ella (perfil, postulación y copia, notas, recomendación, entrevista, avisos y Authentication)', ok: del.status === 200 && delLeft.every((x) => !x), note: `HTTP ${del.status}; restos ${JSON.stringify(delLeft)}` });
+
+  // «Eliminar mi cuenta»
+  uids.selfdel = await mkUser('sec.selfdel@example.com', 'candidate');
+  await adb.doc(`candidates/${uids.selfdel}`).set({ userRef: uids.selfdel, headline: 'Borrar yo', skills: [] });
+  T.selfdel = await token('sec.selfdel@example.com');
+  expect('U19 «Eliminar mi cuenta» sin escribir la confirmación', (await api('/api/account/delete', T.selfdel, {})).status, 400);
+  const sd = await api('/api/account/delete', T.selfdel, { confirm: 'ELIMINAR' });
+  const sdLeft = [(await adb.doc(`users/${uids.selfdel}`).get()).exists, (await adb.doc(`candidates/${uids.selfdel}`).get()).exists, await aauth.getUser(uids.selfdel).then(() => true, () => false)];
+  results.push({ name: 'U20 «Eliminar mi cuenta» borra el perfil, el documento de usuario y la cuenta de Authentication', ok: sd.status === 200 && sdLeft.every((x) => !x), note: `HTTP ${sd.status}; restos ${JSON.stringify(sdLeft)}` });
+
   for (const p of ['/api/audit', '/api/ai/extract-cv', '/api/recommendations/generate', '/api/applications/notify-new']) {
     expect(`A24 cuenta suspendida -> ${p}`, (await api(p, T.susp, { cvText: 'x'.repeat(100), jobId: job.id })).status, 403);
   }

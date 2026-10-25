@@ -13,14 +13,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { JobForm } from "@/components/dashboard/recruiter/job-form";
 import { ApplicantsTable } from "@/components/dashboard/recruiter/applicants-table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { InterviewsCalendar } from "@/components/dashboard/recruiter/interviews-calendar";
-import { RecommendedCandidates } from "@/components/dashboard/recruiter/recommended-candidates";
+import dynamic from "next/dynamic";
 import { JobStatusActions } from "@/components/dashboard/recruiter/job-status-actions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { ApplyButton } from "@/components/dashboard/candidate/apply-button";
 import { MarkdownLite } from "@/lib/markdown";
 import { seniorityLabel } from "@/lib/format";
+
+// El calendario (react-day-picker) y los matches de la IA solo se usan al abrir su pestaña: se descargan entonces y no
+// con la página de la vacante.
+const InterviewsCalendar = dynamic(
+  () => import("@/components/dashboard/recruiter/interviews-calendar").then((m) => m.InterviewsCalendar),
+  { loading: () => <Skeleton className="h-72 w-full" /> }
+);
+const RecommendedCandidates = dynamic(
+  () => import("@/components/dashboard/recruiter/recommended-candidates").then((m) => m.RecommendedCandidates),
+  { loading: () => <Skeleton className="h-72 w-full" /> }
+);
 
 const JobViewForCandidate = ({ job }: { job: Job }) => {
     const { data: org } = useDoc<Organization>(`organizations/${job.organizationRef}`);

@@ -25,8 +25,11 @@ Las tres baterías de seguridad se ejecutaron contra `hirelink-staging` y se nie
 |---|---|---|
 | Reglas de Firestore con rol, propiedad y aislamiento entre empresas | ✅ | `firestore.rules`, `sec-test.mjs` (61 pruebas de ataque y permiso) |
 | Nadie puede darse el rol de administrador al registrarse | ✅ | Regla de `users/create`; pruebas S01 y S04 |
-| Una cuenta suspendida no puede escribir ni reactivarse sola | ✅ | `isActive()` en las reglas; pruebas S06b, S07, S08 y S33b. Excepción: una cuenta de administrador sí puede actualizar su propio estado (backlog punto 23) |
-| Una cuenta suspendida, o con el rol cambiado, no puede leer datos | ❌ | Las reglas de lectura no usan `isActive()` y `isRecruiterForOrg` no mira el rol: suspender o degradar a una reclutadora no corta lo que ya podía leer; la pantalla sí muestra «Tu cuenta está suspendida» (backlog punto 23) |
+| Una cuenta suspendida no puede escribir ni reactivarse sola | ✅ | `isActive()` en las reglas; pruebas S06b, S07, S08 y S33b. Desde la 1.1 el estado, el rol y la aprobación solo los cambia el servidor (`/api/admin/users`): ni siquiera una administradora lo escribe desde el navegador (S40 a S40d) |
+| Una cuenta suspendida, o con el rol cambiado, no puede leer datos | ✅ | Desde la 1.1 todas las lecturas exigen cuenta activa (salvo el propio documento de usuario, que la pantalla necesita para avisar) y `isRecruiterForOrg` exige el rol de reclutadora; suspender también deshabilita la cuenta de Authentication y revoca las sesiones. Pruebas S50 a S52 |
+| Una reclutadora solo ve candidatas y publica vacantes si un administrador la aprobó | ✅ | `recruiterApproved` (solo lo escribe el servidor) en las reglas y en `canManageOrg` de cada ruta; sin aprobar puede completar su empresa. Pruebas S46 a S49, U01 a U11 |
+| Las notas privadas y la shortlist de la reclutadora no las lee la candidata | ✅ | Viven en `/jobs/{id}/applicantNotes/{uid}` y no en la postulación; pruebas S41 a S45 |
+| Una entrevista solo se agenda para quien se postuló a una vacante de la propia empresa | ✅ | Regla de `interviews` (existe la postulación, la vacante es de la empresa, `interviewerRef` es quien llama); pruebas S53 a S54b |
 | El reclutador solo ve y gestiona su empresa | ✅ | `isRecruiterForOrg`, pruebas de empresa ajena |
 | Los candidatos no leen borradores de vacantes | ✅ | Regla de `jobs`; pruebas S25 y S26 |
 | Tamaños máximos de perfiles, vacantes y empresas | ✅ | `validCandidate`, `validJob`, `validOrg`; pruebas S38 y S39 (documentos de 500 KB) |
@@ -43,7 +46,7 @@ Las tres baterías de seguridad se ejecutaron contra `hirelink-staging` y se nie
 | Las funciones de IA no son Server Actions públicas | ✅ | Prueba A27 |
 | Las respuestas de la API no se guardan en caché | ✅ | Cabecera `Cache-Control: no-store` (prueba H05) |
 | La clave de IA nunca llega al navegador | ✅ | Los flujos de Genkit solo se llaman desde el servidor |
-| El detalle de `/api/health` es público | 🟡 | Muestra si cada variable existe (nunca su valor), la forma de las claves (si la privada empieza y termina como corresponde; si la de Groq empieza con `gsk_` o trae espacios) y el motivo del error si Firebase Admin falla. Cada visita hace una lectura en Firestore y no tiene límite. Protegerlo está en el backlog (punto 6) |
+| El detalle de `/api/health` es público | 🟡 | Muestra si cada variable existe (nunca su valor), la forma de las claves (si la privada empieza y termina como corresponde; si la de Groq empieza con `gsk_` o trae espacios) y el motivo del error si Firebase Admin falla. La lectura de Firestore se guarda 30 s en memoria (desde la 1.1; antes cada visita leía) pero sigue sin haber límite por persona. Protegerlo está en el backlog (punto 6) |
 
 ### 2.3 Navegador y cabeceras
 
@@ -91,7 +94,7 @@ backlog. El aviso restante de `next` es moderado y viene de `postcss`, que se us
 |---|---|---|
 | Errores del cliente y del servidor a Sentry (solo errores, sin trazas de rendimiento) | ✅ | `sentry.*.config.ts`; activo en producción desde el 8 de octubre |
 | Registro de auditoría de acciones sensibles, visible solo para administradores | ✅ | Colección `auditLogs`, pantalla *Auditoría* |
-| El registro de auditoría no se puede escribir desde el navegador | 🟡 | Reglas en `false`; escribe el servidor, y el actor y las acciones permitidas salen del token y del rol (prueba del lote de reglas). Pero el navegador lo dispara después de la operación (puede omitirse) y quien llama declara el objetivo y el detalle (backlog punto 27) |
+| El registro de auditoría no se puede escribir desde el navegador | 🟡 | Reglas en `false`; escribe el servidor, y el actor y las acciones permitidas salen del token y del rol (prueba del lote de reglas). Desde la 1.1 las acciones sobre cuentas (aprobar, suspender, rol, organización, eliminar) las registra el servidor junto con la operación y ya no se aceptan por `/api/audit`; los eventos de vacantes y empresas siguen disparándose desde el navegador (pueden omitirse), aunque una reclutadora ya no puede registrarlos sobre vacantes de otra empresa |
 
 ## 3. Privacidad
 
@@ -100,11 +103,11 @@ backlog. El aviso restante de `next` es moderado y viene de `postcss`, que se us
 | Dato | Dónde | Quién lo ve |
 |---|---|---|
 | Nombre, correo, rol y estado de la cuenta | Firebase Authentication y `users` | La persona y los administradores |
-| Perfil profesional (titular, ubicación, habilidades, experiencia, educación) | `candidates` | La persona, **cualquier reclutador registrado** y los administradores |
+| Perfil profesional (titular, ubicación, habilidades, experiencia, educación) | `candidates` | La persona, **las reclutadoras que un administrador aprobó** y los administradores |
 | Texto del CV (hasta 9 000 caracteres) y su resumen | `candidates` | Igual que el perfil |
 | El archivo PDF del CV | **No se guarda** | Se lee en el navegador |
 | Postulaciones y su estado | `jobs/.../applications` y copia en `users/.../applications` | La persona, la empresa de la vacante y los administradores |
-| Notas privadas del reclutador sobre un candidato | Postulación | La empresa y los administradores. La pantalla de la candidata no las muestra, pero las reglas todavía le permiten leer su propia postulación, donde se guardan (backlog punto 22) |
+| Notas privadas y shortlist del reclutador sobre un candidato | `jobs/.../applicantNotes` (desde la 1.1; antes iban en la postulación, que lee la candidata) | Solo la empresa de la vacante y los administradores |
 | Recomendaciones de la IA (puntaje y razones) | `recommendations` | La persona, la empresa de la vacante y los administradores |
 | Avisos y preferencias de notificación | `users/.../notifications` y `settings` | Solo la persona |
 | Acciones de auditoría | `auditLogs` | Solo los administradores |
@@ -129,9 +132,9 @@ backlog. El aviso restante de `next` es moderado y viene de `postcss`, que se us
 | Transparencia sobre la IA | ✅ | Cada porcentaje trae razones y la IA no decide: el match queda en espera hasta que la empresa y el candidato actúan |
 | Aviso de privacidad y consentimiento | 🟡 | Existe para el piloto ([AVISO_PRIVACIDAD_PILOTO.md](piloto/AVISO_PRIVACIDAD_PILOTO.md)). Falta uno permanente en el registro (backlog punto 1) |
 | Acceso y rectificación | ✅ | La persona edita su perfil y su cuenta cuando quiere |
-| Cancelación (borrar la cuenta) | 🟡 | Hoy se pide a un administrador. Falta el botón con borrado en cascada (backlog punto 2) |
-| Control de quién ve el perfil | ❌ | Hoy cualquier reclutador registrado lo ve (riesgo R1; backlog punto 3) |
-| Verificación de empresas | ❌ | Cualquiera puede registrarse como reclutador (backlog punto 4) |
+| Cancelación (borrar la cuenta) | ✅ | Desde la 1.1: «Eliminar mi cuenta» en Configuración y eliminación por un administrador, con borrado en cascada (perfil, postulaciones y notas, recomendaciones, entrevistas, avisos y cuenta de Authentication). La auditoría conserva el registro de que la cuenta existió |
+| Control de quién ve el perfil | 🟡 | Solo lo ven las reclutadoras que un administrador aprobó; la candidata todavía no decide quién ve el suyo (riesgo R1; backlog punto 3) |
+| Verificación de empresas | 🟡 | Cualquiera puede registrarse como reclutadora, pero no ve candidatas ni publica hasta que un administrador la aprueba; no se verifica que la empresa exista (backlog punto 4) |
 | Política de conservación de datos | ❌ | No hay borrado automático; se definirá con el aviso de privacidad |
 | Datos de pruebas y demostración | ✅ | Todo es ficticio (`@example.com`) y las pruebas se niegan a tocar producción |
 | Personas menores de edad | 🟡 | El piloto es solo para mayores de edad; la plataforma no lo verifica |
@@ -140,7 +143,7 @@ backlog. El aviso restante de `next` es moderado y viene de `postcss`, que se us
 
 | Riesgo | Por qué se acepta | Mitigación |
 |---|---|---|
-| R1: los reclutadores ven el correo y el texto del CV de todas las personas candidatas | Es el comportamiento del producto en la versión 1.0 | Aviso en el piloto; control de visibilidad en el backlog |
+| R1: las reclutadoras aprobadas ven el correo y el texto del CV de todas las personas candidatas | Es el comportamiento del producto; desde la 1.1 solo con la aprobación de un administrador | Aviso en el piloto; control de visibilidad en el backlog |
 | R3: quien entra con Google no elige su rol | Se evita pidiendo registrarse con correo | El administrador puede cambiar el rol |
 | R6: sin Content-Security-Policy | Una política mal puesta rompe la aplicación | Primero en modo solo reporte (backlog) |
 | R8: la clave de Groq se comparte entre entornos | Costo cero | No correr pruebas con IA los días de piloto o de defensa; el modelo de respaldo tiene cupo propio |

@@ -9,9 +9,9 @@ M: de 1 a 3 días, L: más de 3 días) y lo que habría que decidir antes de emp
 | # | Qué | Origen | Esfuerzo | Por qué importa | Decisión previa |
 |---|---|---|---|---|---|
 | 1 | Aviso de privacidad y consentimiento en el registro | R2 | S | La plataforma guarda CV, correo y experiencia sin consentimiento explícito | Texto legal revisado por alguien que sepa |
-| 2 | «Eliminar mi cuenta» con borrado en cascada (perfil, postulaciones, recomendaciones, entrevistas, avisos) | R2 | M | Derecho de cancelación; ya existe el patrón de borrado en cascada de `/api/jobs/delete` | Qué se conserva en auditoría |
+| 2 | ~~«Eliminar mi cuenta» con borrado en cascada (perfil, postulaciones, recomendaciones, entrevistas, avisos)~~ **Hecho en la 1.1** (Configuración y eliminación por un administrador) | R2 | M | Derecho de cancelación; ya existe el patrón de borrado en cascada de `/api/jobs/delete` | Qué se conserva en auditoría |
 | 3 | Visibilidad del perfil controlada por la persona candidata | R1 | M | Hoy cualquier reclutador ve correo y texto del CV de todos | Qué ve una empresa antes de una postulación o match |
-| 4 | Verificación de reclutadores y empresas | R1 | M | Cualquiera puede registrarse como reclutador | Proceso de aprobación por un administrador |
+| 4 | Verificación de reclutadores y empresas. **Parcial en la 1.1**: un administrador aprueba a cada reclutadora; falta comprobar que la empresa exista | R1 | M | Cualquiera puede registrarse como reclutador (sin aprobar no ve candidatas ni publica) | Cómo se verifica una empresa |
 | 5 | Elegir el rol al entrar por primera vez con Google | R3 | S | Hoy queda como candidato y solo un administrador puede cambiarlo | Ninguna |
 | 6 | Content-Security-Policy y proteger el detalle de `/api/health` | R6 | M | Reduce el daño de un XSS y la información que se expone | Primero en modo solo reporte |
 
@@ -53,16 +53,16 @@ por confirmar. Ninguno estaba en los puntos anteriores.
 
 | # | Qué | Esfuerzo | Estado |
 |---|---|---|---|
-| 22 | Pasar las notas privadas y el shortlist de la reclutadora a un documento que solo lean la empresa y los administradores | M | Verificado |
-| 23 | Que suspender una cuenta o cambiar su rol corte también las lecturas: usar `isActive()` y el rol en las reglas de lectura, borrar `organizationRef` al degradar e inhabilitar la cuenta en Authentication | S | Verificado |
-| 24 | Entrevistas: exigir una postulación existente al crearlas y redactar el aviso en el servidor | S | Por confirmar |
-| 25 | Tope diario global de la IA y menos evaluaciones por cada guardado de vacante o de perfil | M | Por confirmar |
-| 26 | Clasificar mejor los fallos de la IA (hoy algunos salen como «Error interno» o «Error 504») y mostrar el motivo cuando las recomendaciones fallan al guardar el perfil | S | Por confirmar |
-| 27 | Registro de auditoría: hoy lo dispara el navegador después de la operación y quien llama declara el objetivo; registrarlo en el servidor junto con la operación | M | Verificado |
-| 28 | Registro en tres pasos sin deshacer: si falla el último queda una sesión sin perfil | S | Por confirmar |
-| 29 | Estados de postulación: quitar «Retirado» de las opciones de la reclutadora, pedir confirmación al rechazar y agendar la entrevista y cambiar el estado en una sola operación | S | Por confirmar |
-| 30 | Panel del administrador: el embudo muestra el estado actual y no la conversión, los errores de lectura salen como ceros, «Ver como» no queda en la auditoría y Configuración sigue editable en ese modo | M | Por confirmar (Configuración verificado) |
-| 31 | Pruebas de reglas que faltan: lectura de perfiles ajenos o de notas por una candidata, entrevistas ajenas, cuentas suspendidas, reclutadora sin empresa y `/api/health` | M | Por confirmar |
+| 22 | Pasar las notas privadas y el shortlist de la reclutadora a un documento que solo lean la empresa y los administradores | M | **Hecho en la 1.1** (`applicantNotes`; `scripts/migrar-notas.mjs` mueve lo anterior) |
+| 23 | Que suspender una cuenta o cambiar su rol corte también las lecturas: usar `isActive()` y el rol en las reglas de lectura, borrar `organizationRef` al degradar e inhabilitar la cuenta en Authentication | S | **Hecho en la 1.1** |
+| 24 | Entrevistas: exigir una postulación existente al crearlas y redactar el aviso en el servidor | S | **Hecho en la 1.1** |
+| 25 | Tope diario global de la IA y menos evaluaciones por cada guardado de vacante o de perfil | M | **Parcial en la 1.1**: al agotarse el cupo del modelo principal se pasa solo al de respaldo; falta un tope diario global |
+| 26 | Clasificar mejor los fallos de la IA (hoy algunos salen como «Error interno» o «Error 504») y mostrar el motivo cuando las recomendaciones fallan al guardar el perfil | S | **Hecho en la 1.1** |
+| 27 | Registro de auditoría: hoy lo dispara el navegador después de la operación y quien llama declara el objetivo; registrarlo en el servidor junto con la operación | M | **Parcial en la 1.1**: las acciones sobre cuentas ya las registra el servidor; faltan las de vacantes y empresas |
+| 28 | Registro en tres pasos sin deshacer: si falla el último queda una sesión sin perfil | S | **Hecho en la 1.1** (se deshace la cuenta; la pantalla ofrece cerrar sesión) |
+| 29 | Estados de postulación: quitar «Retirado» de las opciones de la reclutadora, pedir confirmación al rechazar y agendar la entrevista y cambiar el estado en una sola operación | S | **Hecho en la 1.1** |
+| 30 | Panel del administrador: el embudo muestra el estado actual y no la conversión, los errores de lectura salen como ceros, «Ver como» no queda en la auditoría y Configuración sigue editable en ese modo | M | **Parcial en la 1.1**: Configuración ya respeta «Ver como»; faltan el embudo, los errores de lectura y la auditoría de «Ver como» |
+| 31 | Pruebas de reglas que faltan: lectura de perfiles ajenos o de notas por una candidata, entrevistas ajenas, cuentas suspendidas, reclutadora sin empresa y `/api/health` | M | **Parcial en la 1.1**: hay pruebas de reglas y de la API para todo lo nuevo; faltan reclutadora sin empresa y `/api/health` |
 
 ## Ideas para después
 
