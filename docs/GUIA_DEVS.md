@@ -40,7 +40,7 @@ npm install
    npm run dev:staging                           # http://localhost:3100
    ```
 
-4. Entra con una cuenta de demostración (contraseña `TestPass1234`, lista completa en [CUENTAS_DEMO.md](CUENTAS_DEMO.md)):
+4. Entra con una cuenta de demostración (contraseña y lista completa en [CUENTAS_DEMO.md](CUENTAS_DEMO.md)):
    `candidato@example.com`, `reclutar@example.com` o `admin@example.com`.
 
 ## 3. Mapa del código

@@ -139,15 +139,10 @@ La app queda en `http://localhost:3000`.
 
 ## Cuentas de prueba
 
-| Rol | Correo | Contraseña |
-|---|---|---|
-| Candidato | `candidato@example.com` | `TestPass1234` |
-| Reclutador | `reclutar@example.com` | `TestPass1234` |
-| Administrador | `admin@example.com` | `TestPass1234` |
-
-La lista completa de cuentas y datos de ejemplo está en
-[docs/CUENTAS_DEMO.md](docs/CUENTAS_DEMO.md). Guion de demostración en
-[docs/GUION_DEMO_SEMANA_2.md](docs/GUION_DEMO_SEMANA_2.md).
+Las cuentas de demostración (candidato, reclutador y administrador, todas `@example.com`) las crea `scripts/seed.mjs`
+en el proyecto de **pruebas** (staging). Su contraseña y los datos de ejemplo están en
+[docs/CUENTAS_DEMO.md](docs/CUENTAS_DEMO.md); este repositorio es público, así que no se publican credenciales de
+producción. Guion de demostración en [docs/GUION_DEMO_FINAL.md](docs/GUION_DEMO_FINAL.md).
 
 ### Datos de ejemplo y entornos
 

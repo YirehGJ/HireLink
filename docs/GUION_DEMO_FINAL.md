@@ -24,8 +24,9 @@ las veces que haga falta; lo que sí depende está marcado con 🤖 y gasta cupo
 1. Dos ventanas de navegador (una normal y una de incógnito) con zoom al 110 %, y la ventana de cada rol con sesión iniciada.
 2. Una tercera ventana con el teléfono emulado (herramientas de desarrollo, 375 px) en el inicio del candidato.
 3. Cerrar notificaciones del sistema y poner el equipo en modo «no molestar».
-4. Cuentas (contraseña de todas: `TestPass1234`): candidato `candidato@example.com`, reclutador `reclutar@example.com` y
-   administrador `admin@example.com`. La lista completa está en [CUENTAS_DEMO.md](CUENTAS_DEMO.md).
+4. Cuentas: candidato `candidato@example.com`, reclutador `reclutar@example.com` y administrador `admin@example.com`.
+   Las contraseñas no se publican en el repositorio: en producción, las propias de cada cuenta (guárdelas fuera de Git);
+   en el plan B (staging local), las de [CUENTAS_DEMO.md](CUENTAS_DEMO.md). La lista completa está en ese mismo documento.
 5. Si producción no tiene datos de ejemplo o la IA no responde, usar el **plan B**: `npm run build:staging` y
    `npm run start:staging` en el portátil (los mismos datos y el mismo código en `http://localhost:3100`).
 

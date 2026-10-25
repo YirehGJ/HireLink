@@ -1,8 +1,9 @@
 # Cuentas de demostración
 
-Todas son ficticias (dominio `example.com`) y las crea `scripts/seed.mjs`. La contraseña
-común es **`TestPass1234`**. Están pensadas para staging y para demostraciones; no son cuentas
-reales y no deben usarse con datos personales verdaderos.
+Todas son ficticias (dominio `example.com`) y las crea `scripts/seed.mjs` en **staging**. La contraseña
+común es **`TestPass1234`** y, como este repositorio es público, cualquiera la conoce: **nunca debe usarse en
+producción**. Si estas cuentas existen o se crean en producción, hay que inhabilitarlas o fijarles una contraseña
+propia que no se publique. No son cuentas reales y no deben usarse con datos personales verdaderos.
 
 ## Cuentas principales (las que se usan en la demostración)
 
@@ -83,5 +84,5 @@ node scripts/seed.mjs --env .env.staging --apply            # crear
 node scripts/seed.mjs --env .env.staging --reset --apply    # eliminar lo creado por el script
 ```
 
-Si una cuenta ya existía (por ejemplo, las tres principales en producción), el script la reutiliza
-sin modificarla. Más detalle en [ENTORNOS.md](ENTORNOS.md).
+Si una cuenta ya existía en el proyecto elegido, el script la reutiliza sin modificarla (conserva la
+contraseña que tuviera). Más detalle en [ENTORNOS.md](ENTORNOS.md).

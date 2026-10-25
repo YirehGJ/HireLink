@@ -221,7 +221,9 @@ publicadas, 2 borradores y 2 cerradas), 34 postulaciones en los 8 estados, 36 re
 niega a correr contra `hirelink-fd1fe` salvo `--allow-production` (código 2), valida contra las
 reglas (código 3), marca todo con `seed: true`, no modifica cuentas existentes y es repetible sin
 duplicar. Las cuentas son `@example.com` y están en `docs/CUENTAS_DEMO.md`. Existen en staging;
-el script no se ha aplicado a producción.
+el script no se ha aplicado a producción, pero las demostraciones de la Semana 2 se hicieron en producción con
+`candidato@example.com` y `reclutar@example.com`: revisar en la consola de Firebase de `hirelink-fd1fe` si existen
+(con la contraseña pública del repositorio) y, si existen, inhabilitarlas o fijarles una contraseña propia.
 
 Las pruebas funcionales de `qa-tests/` añaden en staging 15 cuentas más (correos
 `@example.com` de personas ficticias), con sus empresas, vacantes, perfiles con CV,

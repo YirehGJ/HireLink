@@ -15,7 +15,7 @@ S19 (CV y Storage), S20 (Asistente de CV con IA) y S24 (Notificaciones).
 2. Ten abierto el PDF de ejemplo: [`docs/demo/cv-ejemplo-mariana-torres.pdf`](demo/cv-ejemplo-mariana-torres.pdf).
    Usa **este** PDF (o un CV real): la IA falla con documentos que no son currículums.
 3. Ten dos ventanas de navegador (una normal y una de incógnito) para mostrar candidato y reclutador a la vez.
-4. Cuentas (contraseña de todas: `TestPass1234`):
+4. Cuentas (la contraseña no se publica en el repositorio; la de staging está en [CUENTAS_DEMO.md](CUENTAS_DEMO.md)):
    - Candidato: `candidato@example.com`
    - Reclutador: `reclutar@example.com`
 5. Haz una prueba completa una vez antes. Groq tiene un límite de tokens por minuto: **no repitas el análisis de CV
