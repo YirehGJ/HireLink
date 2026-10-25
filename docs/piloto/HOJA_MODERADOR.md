@@ -40,7 +40,7 @@ teléfono.
 >
 > Antes de empezar, ¿leíste el aviso de privacidad y estás de acuerdo en participar? [esperar respuesta y anotar «sí»]
 >
-> Para crear tu cuenta, usa correo y contraseña (no el botón de Google). Puedes usar un correo cualquiera.
+> Para crear tu cuenta, usa correo y contraseña (no el botón de Google). Puedes usar cualquier correo que sea tuyo.
 
 Anote: hora de inicio, código, rol, equipo y navegador.
 
@@ -70,7 +70,9 @@ Anote: hora de inicio, código, rol, equipo y navegador.
 | C6, recomendadas | «Mira en la pantalla de inicio.» |
 | R2, vacante nueva | «Empieza en el menú de vacantes.» |
 | R3, recomendados | «Abre la vacante y mira sus pestañas.» |
-| R5 y R7, candidatos | «Busca la sección de candidatos en el menú lateral.» |
+| R5, estado y notas | «Abre la vacante y mira sus pestañas.» |
+| R6, entrevista | «Abre los detalles de una persona que se postuló.» |
+| R7, candidatos | «Busca la sección de candidatos en el menú lateral.» |
 
 ## 4. Si algo se rompe durante la sesión
 
@@ -79,8 +81,8 @@ Anote: hora de inicio, código, rol, equipo y navegador.
 | Mensaje de error rojo o botón sin respuesta | Pida que **no lo cierre**, capture la pantalla y anótelo en la bitácora con la tarea |
 | Pantalla en blanco | Recargue una vez; si sigue, anótelo como hallazgo y pase a la siguiente tarea |
 | Aviso de «cupo de IA agotado» | Es un límite esperado: anótelo, pase a la siguiente tarea y avise al soporte |
-| La persona ve datos que no son suyos | Pare la sesión, capture la pantalla y avise al equipo de inmediato (gravedad crítica) |
-| Cuenta bloqueada o no entra | El soporte revisa con «Ver como» y la auditoría; anótelo |
+| La persona ve datos de otra cuenta que el producto no debería mostrarle | Pare la sesión, capture la pantalla y avise al equipo de inmediato (gravedad crítica). No aplica a una reclutadora que ve los perfiles de las candidatas (R3 y R7): eso es parte del producto, solo anótelo |
+| Cuenta bloqueada o no entra | El soporte revisa el estado de la cuenta en Gestión Usuarios y la auditoría («Ver como» solo sirve para reclutadoras y no ayuda con problemas de acceso); anótelo |
 
 No arregle nada en caliente durante la sesión. Se corrige después, con la bitácora ordenada.
 

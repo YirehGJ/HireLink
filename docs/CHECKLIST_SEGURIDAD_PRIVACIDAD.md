@@ -25,7 +25,8 @@ Las tres baterías de seguridad se ejecutaron contra `hirelink-staging` y se nie
 |---|---|---|
 | Reglas de Firestore con rol, propiedad y aislamiento entre empresas | ✅ | `firestore.rules`, `sec-test.mjs` (61 pruebas de ataque y permiso) |
 | Nadie puede darse el rol de administrador al registrarse | ✅ | Regla de `users/create`; pruebas S01 y S04 |
-| Una cuenta suspendida no puede escribir ni reactivarse sola | ✅ | `isActive()` en las reglas; pruebas S06b, S07, S08 y S33b |
+| Una cuenta suspendida no puede escribir ni reactivarse sola | ✅ | `isActive()` en las reglas; pruebas S06b, S07, S08 y S33b. Excepción: una cuenta de administrador sí puede actualizar su propio estado (backlog punto 23) |
+| Una cuenta suspendida, o con el rol cambiado, no puede leer datos | ❌ | Las reglas de lectura no usan `isActive()` y `isRecruiterForOrg` no mira el rol: suspender o degradar a una reclutadora no corta lo que ya podía leer; la pantalla sí muestra «Tu cuenta está suspendida» (backlog punto 23) |
 | El reclutador solo ve y gestiona su empresa | ✅ | `isRecruiterForOrg`, pruebas de empresa ajena |
 | Los candidatos no leen borradores de vacantes | ✅ | Regla de `jobs`; pruebas S25 y S26 |
 | Tamaños máximos de perfiles, vacantes y empresas | ✅ | `validCandidate`, `validJob`, `validOrg`; pruebas S38 y S39 (documentos de 500 KB) |
@@ -42,7 +43,7 @@ Las tres baterías de seguridad se ejecutaron contra `hirelink-staging` y se nie
 | Las funciones de IA no son Server Actions públicas | ✅ | Prueba A27 |
 | Las respuestas de la API no se guardan en caché | ✅ | Cabecera `Cache-Control: no-store` (prueba H05) |
 | La clave de IA nunca llega al navegador | ✅ | Los flujos de Genkit solo se llaman desde el servidor |
-| El detalle de `/api/health` es público | 🟡 | Muestra solo si cada variable existe, no su valor. Protegerlo está en el backlog (punto 6) |
+| El detalle de `/api/health` es público | 🟡 | Muestra si cada variable existe (nunca su valor), la forma de las claves (si la privada empieza y termina como corresponde; si la de Groq empieza con `gsk_` o trae espacios) y el motivo del error si Firebase Admin falla. Cada visita hace una lectura en Firestore y no tiene límite. Protegerlo está en el backlog (punto 6) |
 
 ### 2.3 Navegador y cabeceras
 
@@ -64,7 +65,7 @@ Las tres baterías de seguridad se ejecutaron contra `hirelink-staging` y se nie
 | Producción y staging son proyectos distintos | ✅ | `hirelink-fd1fe` y `hirelink-staging`, [ENTORNOS.md](ENTORNOS.md) |
 | Las pruebas y los scripts se niegan a escribir en producción | ✅ | `--allow-production` obligatorio; `qa-tests/lib.mjs` aborta |
 | Clave de Groq distinta para staging y producción | ❌ | Hoy es la misma y comparten el cupo diario (backlog punto 7) |
-| Variables Preview en Vercel | ❌ | Pendiente (backlog punto 20) |
+| Variables Preview en Vercel | ✅ | Hecho el 19 de octubre de 2026: nueve variables de staging solo con ámbito Preview ([ENTORNOS.md](ENTORNOS.md)) |
 
 ### 2.5 Dependencias
 
@@ -90,7 +91,7 @@ backlog. El aviso restante de `next` es moderado y viene de `postcss`, que se us
 |---|---|---|
 | Errores del cliente y del servidor a Sentry (solo errores, sin trazas de rendimiento) | ✅ | `sentry.*.config.ts`; activo en producción desde el 8 de octubre |
 | Registro de auditoría de acciones sensibles, visible solo para administradores | ✅ | Colección `auditLogs`, pantalla *Auditoría* |
-| El registro de auditoría no se puede falsificar desde el navegador | ✅ | Reglas en `false`; escribe el servidor (prueba del lote de reglas) |
+| El registro de auditoría no se puede escribir desde el navegador | 🟡 | Reglas en `false`; escribe el servidor, y el actor y las acciones permitidas salen del token y del rol (prueba del lote de reglas). Pero el navegador lo dispara después de la operación (puede omitirse) y quien llama declara el objetivo y el detalle (backlog punto 27) |
 
 ## 3. Privacidad
 
@@ -103,7 +104,7 @@ backlog. El aviso restante de `next` es moderado y viene de `postcss`, que se us
 | Texto del CV (hasta 9 000 caracteres) y su resumen | `candidates` | Igual que el perfil |
 | El archivo PDF del CV | **No se guarda** | Se lee en el navegador |
 | Postulaciones y su estado | `jobs/.../applications` y copia en `users/.../applications` | La persona, la empresa de la vacante y los administradores |
-| Notas privadas del reclutador sobre un candidato | Postulación | Solo la empresa y los administradores |
+| Notas privadas del reclutador sobre un candidato | Postulación | La empresa y los administradores. La pantalla de la candidata no las muestra, pero las reglas todavía le permiten leer su propia postulación, donde se guardan (backlog punto 22) |
 | Recomendaciones de la IA (puntaje y razones) | `recommendations` | La persona, la empresa de la vacante y los administradores |
 | Avisos y preferencias de notificación | `users/.../notifications` y `settings` | Solo la persona |
 | Acciones de auditoría | `auditLogs` | Solo los administradores |

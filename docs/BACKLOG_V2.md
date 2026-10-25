@@ -42,8 +42,27 @@ M: de 1 a 3 días, L: más de 3 días) y lo que habría que decidir antes de emp
 | 17 | Probar las reglas con Firebase Emulator Suite | Cronograma S11 | M | Hoy se prueban contra un proyecto real |
 | 18 | Pruebas con navegador en cada despliegue (integración continua) | Semana 4 | M | Hoy se ejecutan a mano |
 | 19 | Accesibilidad: revisión con lector de pantalla y con personas usuarias | Semana 6 | M | Las pruebas automáticas cubren una parte de las barreras |
-| 20 | Variables Preview en Vercel y dominio autorizado en Authentication de staging | Semana 4 | S | Cada rama tendría su entorno de prueba |
+| 20 | ~~Variables Preview en Vercel y dominio autorizado en Authentication de staging~~ **Hecho el 19 de octubre de 2026** | Semana 4 | S | Cada rama tiene su entorno de prueba ([ENTORNOS.md](ENTORNOS.md)) |
 | 21 | Actualizar a la siguiente versión mayor de las dependencias con avisos sin corrección | Semana 5 | M | Quedan 20 avisos altos (cadena de Firebase, Genkit y herramientas de compilación). Se probó `firebase` 13.0.0: compila y pasa las pruebas unitarias, pero suma unos 68 kB por ruta y solo quita un aviso alto |
+
+## Hallazgos de la revisión por áreas (24 de octubre de 2026)
+
+Una revisión de solo lectura del código, hecha por áreas (seguridad y reglas, cuentas, candidata, reclutadora,
+administración e IA), encontró lo siguiente. Lo marcado «verificado» se comprobó leyendo el código; el resto son hallazgos
+por confirmar. Ninguno estaba en los puntos anteriores.
+
+| # | Qué | Esfuerzo | Estado |
+|---|---|---|---|
+| 22 | Pasar las notas privadas y el shortlist de la reclutadora a un documento que solo lean la empresa y los administradores | M | Verificado |
+| 23 | Que suspender una cuenta o cambiar su rol corte también las lecturas: usar `isActive()` y el rol en las reglas de lectura, borrar `organizationRef` al degradar e inhabilitar la cuenta en Authentication | S | Verificado |
+| 24 | Entrevistas: exigir una postulación existente al crearlas y redactar el aviso en el servidor | S | Por confirmar |
+| 25 | Tope diario global de la IA y menos evaluaciones por cada guardado de vacante o de perfil | M | Por confirmar |
+| 26 | Clasificar mejor los fallos de la IA (hoy algunos salen como «Error interno» o «Error 504») y mostrar el motivo cuando las recomendaciones fallan al guardar el perfil | S | Por confirmar |
+| 27 | Registro de auditoría: hoy lo dispara el navegador después de la operación y quien llama declara el objetivo; registrarlo en el servidor junto con la operación | M | Verificado |
+| 28 | Registro en tres pasos sin deshacer: si falla el último queda una sesión sin perfil | S | Por confirmar |
+| 29 | Estados de postulación: quitar «Retirado» de las opciones de la reclutadora, pedir confirmación al rechazar y agendar la entrevista y cambiar el estado en una sola operación | S | Por confirmar |
+| 30 | Panel del administrador: el embudo muestra el estado actual y no la conversión, los errores de lectura salen como ceros, «Ver como» no queda en la auditoría y Configuración sigue editable en ese modo | M | Por confirmar (Configuración verificado) |
+| 31 | Pruebas de reglas que faltan: lectura de perfiles ajenos o de notas por una candidata, entrevistas ajenas, cuentas suspendidas, reclutadora sin empresa y `/api/health` | M | Por confirmar |
 
 ## Ideas para después
 
@@ -56,7 +75,7 @@ M: de 1 a 3 días, L: más de 3 días) y lo que habría que decidir antes de emp
 
 ## Cómo se decide qué entra primero
 
-1. Lo que protege datos personales (puntos 1 a 6).
-2. Lo que evita que la IA deje de funcionar (7 a 9).
+1. Lo que protege datos personales (puntos 1 a 6, 22 y 23).
+2. Lo que evita que la IA deje de funcionar (7 a 9, 25 y 26).
 3. Lo que una persona del piloto pidió dos veces.
 4. El resto, por esfuerzo.

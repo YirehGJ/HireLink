@@ -27,7 +27,10 @@ inteligencia artificial (Groq) para sugerir tu perfil y calcular compatibilidade
 
 ## Con quién se comparte
 
-- Las personas que participan como reclutadoras pueden ver tu perfil y el texto de tu CV (así funciona la plataforma).
+- Cualquier persona con una cuenta de reclutadora en HireLink puede ver tu perfil, tu correo y el texto de tu CV. No
+  solo quienes participan en el piloto: el registro de reclutadoras está abierto y todavía no hay un proceso de
+  aprobación. Así funciona la plataforma hoy.
+- El equipo administrador de la plataforma puede ver los datos de tu cuenta, tu perfil, tus postulaciones y tus avisos.
 - La infraestructura es de terceros: Vercel (aplicación), Firebase de Google Cloud (base de datos) y Groq (IA).
 - No se venden ni se usan tus datos con fines comerciales.
 

@@ -1,5 +1,10 @@
 # Documentación de la API | HireLink
 
+> **Documento obsoleto.** Describe la primera versión (Server Actions de Genkit con Gemini). Hoy la lógica de servidor
+> está en los Route Handlers de `src/app/api/` (todos exigen sesión y rol) y la IA usa Groq con Genkit. La referencia
+> vigente está en [CONTEXTO_PROYECTO.md](CONTEXTO_PROYECTO.md) y [ARQUITECTURA.md](ARQUITECTURA.md); este archivo se
+> reescribirá.
+
 HireLink utiliza un enfoque de **Client-Side Data Access** mediante Firebase para la base de datos y **Server Actions** mediante Genkit para la lógica de Inteligencia Artificial. A continuación se detallan los "endpoints" (funciones de servidor) y la estructura de acceso a datos.
 
 ---

@@ -65,7 +65,7 @@ lo compara con las vacantes y calcula un **porcentaje de compatibilidad con las 
 | Postulado | La empresa aún no la revisa |
 | En Revisión | La empresa está leyendo tu perfil |
 | Evaluación | Estás en una etapa de evaluación |
-| Entrevista | Te invitaron a una entrevista (recibes un aviso con fecha, hora y lugar o enlace) |
+| Entrevista | Te invitaron a una entrevista (recibes un aviso con el tipo de entrevista, la fecha y la hora) |
 | Oferta | La empresa te hace una oferta |
 | Contratado | Fuiste seleccionada o seleccionado |
 | Rechazado | La empresa no continuó con tu candidatura |
@@ -86,7 +86,8 @@ vacantes. Las personas de otra empresa nunca ven tus vacantes en borrador ni a t
 4. Pulsa **Crear Vacante**: queda **publicada** de inmediato y los candidatos ya pueden verla. En cualquier momento puedes
    editarla, **cerrarla** (deja de recibir postulaciones y se puede **reabrir**) o **eliminarla** (se borran también sus
    postulaciones, recomendaciones y entrevistas).
-5. Al publicarla, la IA evalúa a los candidatos disponibles y calcula su compatibilidad.
+5. Al publicarla, la IA evalúa a las personas candidatas que ya tienen perfil (habilidades o titular), estén o no
+   marcadas como disponibles, y calcula su compatibilidad.
 
 ### Trabaja con tus postulantes
 
@@ -100,12 +101,13 @@ Abre una vacante. Tiene cuatro pestañas:
 | Entrevistas | Calendario de entrevistas de la vacante |
 
 Para **agendar una entrevista**, abre los detalles del postulante, elige fecha, hora, tipo (videollamada, presencial o
-telefónica) y el enlace o lugar. La persona candidata recibe un aviso con la hora correcta de su zona horaria.
+telefónica) y el enlace o lugar. La persona candidata recibe un aviso con el tipo, la fecha y la hora en la zona horaria
+de quien agenda (el aviso no nombra la zona).
 
 ### Busca talento
 
-**Candidatos** (*Explorar Candidatos*) lista a las personas disponibles. Se puede buscar por texto y filtrar por seniority
-objetivo.
+**Candidatos** (*Explorar Candidatos*) lista a todas las personas candidatas con perfil. Se puede buscar por texto y
+filtrar por seniority objetivo, nivel mínimo de habilidad y «solo disponibles».
 
 ## 5. Si eres administrador
 
@@ -115,9 +117,10 @@ objetivo.
 | Gestión Usuarios | Cambiar el rol, **suspender** o reactivar una cuenta y abrir su ficha. **Ver como** muestra la plataforma tal como la ve esa persona reclutadora, en **solo lectura** |
 | Organizaciones | Crear y editar empresas y asignarles reclutadores |
 | Gestión Vacantes | Ver y moderar todas las vacantes |
-| Auditoría | Registro de acciones de la plataforma y la pestaña *Embudo y KPIs* (cuántas personas pasan de una etapa a otra) |
+| Auditoría | Registro de acciones de la plataforma y la pestaña *Embudo y KPIs* (cuántas postulaciones hay hoy en cada estado) |
 
-Una cuenta suspendida no puede leer ni escribir datos hasta que se reactive.
+Una cuenta suspendida ve el aviso «Tu cuenta está suspendida» en lugar de la plataforma y no puede escribir datos hasta
+que se reactive.
 
 ## 6. Privacidad en pocas palabras
 
@@ -128,7 +131,7 @@ Una cuenta suspendida no puede leer ni escribir datos hasta que se reactive.
 | ¿Quién ve mi perfil? | Las personas reclutadoras registradas. Tu correo y el texto de tu CV son visibles para ellas |
 | ¿La IA ve mis datos? | El texto del CV y los datos del perfil y de la vacante se envían al proveedor de IA (Groq) solo para calcular el análisis |
 | ¿Puedo corregir o borrar mis datos? | Puedes editar tu perfil cuando quieras. Para borrar tu cuenta por completo, pídelo a un administrador |
-| ¿Quién ve las notas del reclutador sobre mí? | Solo la empresa. Tú no las ves |
+| ¿Quién ve las notas del reclutador sobre mí? | La empresa y los administradores. La plataforma no te las muestra |
 
 Por favor no subas datos sensibles que no sean necesarios para una postulación (por ejemplo, números de documentos oficiales).
 
