@@ -5,11 +5,16 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
+// Las pruebas del modelo de respaldo suponen los modelos por defecto (120b principal, 20b de respaldo).
+delete process.env.GROQ_MODEL_ID;
+delete process.env.GROQ_FALLBACK_MODEL_ID;
+
 globalThis.__ia = { llamadas: [], responder: async () => ({ score: 0.8, reasons: ['Experiencia sólida en React'] }) };
 globalThis.__avisos = [];
 
 const { evaluateMatch, overlapScore, matchHash, isUpToDate } = await import('../../src/lib/server/matching.ts');
-const { runAi, isQuotaExhausted, AI_QUOTA_MESSAGE, AI_INCOMPLETE_MESSAGE } = await import('../../src/lib/server/ai-runner.ts');
+const { runAi, isQuotaExhausted, AI_QUOTA_MESSAGE, AI_INCOMPLETE_MESSAGE, AI_BUSY_MESSAGE } = await import('../../src/lib/server/ai-runner.ts');
+const { activeModelId, engineVersion, resetModelState, GROQ_MODEL_ID, GROQ_FALLBACK_MODEL_ID } = await import('../../src/ai/model.ts');
 const { ApiError, aiUnavailableMessage } = await import('../../src/lib/api-client.ts');
 
 // ------------------------------------------------------------------ base de datos en memoria
@@ -189,21 +194,42 @@ test('isQuotaExhausted distingue el límite diario del límite por minuto y de o
   assert.equal(isQuotaExhausted(new Error('429 Rate limit reached. Please try again in 1h2m3.4s.')), true);
 });
 
-test('runAi con el cupo diario agotado responde de inmediato con un 503 claro y no reintenta', async () => {
+test('con el cupo diario del modelo principal agotado, runAi pasa al modelo de respaldo y se recupera', async () => {
+  resetModelState();
+  const usados = [];
+  const r = await sinAvisos(() => runAi(async () => {
+    usados.push(activeModelId());
+    if (usados.length === 1) throw errorGroqDiario();
+    return 'ok';
+  }));
+  assert.equal(r, 'ok');
+  assert.deepEqual(usados, [GROQ_MODEL_ID, GROQ_FALLBACK_MODEL_ID], 'la segunda llamada ya usa el modelo de respaldo');
+  // Las llamadas siguientes usan el de respaldo desde el principio, sin fallar antes.
+  const siguientes = [];
+  await runAi(async () => { siguientes.push(activeModelId()); return 'ok'; });
+  assert.deepEqual(siguientes, [GROQ_FALLBACK_MODEL_ID]);
+  // La huella y la versión que se guardan dicen qué modelo dio el puntaje.
+  assert.equal(engineVersion(), 'groq-gpt-oss-20b');
+  resetModelState();
+  assert.equal(engineVersion(), 'groq-gpt-oss-120b');
+});
+
+test('con el cupo diario agotado en los dos modelos, runAi responde de inmediato con un 503 claro', async () => {
+  resetModelState();
   let intentos = 0;
   const inicio = Date.now();
-  const warn = console.warn;
-  console.warn = () => {}; // runAi deja una línea en el registro del servidor; aquí no hace falta verla
-  try {
-    await assert.rejects(
-      runAi(async () => { intentos++; throw errorGroqDiario(); }),
-      (e) => e.status === 503 && e.message === AI_QUOTA_MESSAGE,
-    );
-  } finally {
-    console.warn = warn;
-  }
-  assert.equal(intentos, 1);
+  await sinAvisos(() => assert.rejects(
+    runAi(async () => { intentos++; throw errorGroqDiario(); }),
+    (e) => e.status === 503 && e.message === AI_QUOTA_MESSAGE,
+  ));
+  assert.equal(intentos, 2, 'un intento con cada modelo, sin más');
   assert.ok(Date.now() - inicio < 500, 'no debe esperar entre reintentos');
+  resetModelState();
+});
+
+test('un límite por minuto, aunque pida esperar mucho, no se toma por el cupo diario', () => {
+  const e = new Error('429 Rate limit reached on tokens per minute (TPM): Limit 8000, Used 7900, Requested 3000. Please try again in 45s.');
+  assert.equal(isQuotaExhausted(e), false);
 });
 
 test('runAi sí reintenta el límite por minuto y se recupera', async () => {
@@ -326,4 +352,60 @@ test('runAi no reintenta errores que no son transitorios', async () => {
   let intentos = 0;
   await assert.rejects(runAi(async () => { intentos++; throw new Error('esquema inválido'); }), /esquema inválido/);
   assert.equal(intentos, 1);
+});
+
+// Estos fallos antes salían como «Error interno» o «Error 504»: el estado de Genkit es texto y no número, y
+// «Request timed out» / «Connection error» no coincidían con ninguna de las palabras que se buscaban.
+test('runAi reintenta un tiempo de espera agotado y un error de conexión', async () => {
+  for (const mensaje of ['Request timed out.', 'Connection error.']) {
+    let intentos = 0;
+    const r = await runAi(async () => { intentos++; if (intentos === 1) throw new Error(mensaje); return 'ok'; });
+    assert.equal(r, 'ok');
+    assert.equal(intentos, 2, mensaje);
+  }
+});
+
+test('runAi reconoce el estado de Genkit escrito en texto (UNAVAILABLE) y reintenta', async () => {
+  let intentos = 0;
+  const r = await runAi(async () => {
+    intentos++;
+    if (intentos === 1) throw Object.assign(new Error('fallo del proveedor'), { status: 'UNAVAILABLE' });
+    return 'ok';
+  });
+  assert.equal(r, 'ok');
+  assert.equal(intentos, 2);
+});
+
+test('si un límite por minuto no cede tras los reintentos, runAi responde «la IA está ocupada» (503) y no «Error interno»', async () => {
+  let intentos = 0;
+  const pasajero = () => Object.assign(
+    new Error('429 Rate limit reached on tokens per minute (TPM): Limit 8000. Please try again in 5ms.'),
+    { status: 'RESOURCE_EXHAUSTED', code: 429, responseMetadata: { retryAfterMs: 5 } },
+  );
+  await sinAvisos(() => assert.rejects(
+    runAi(async () => { intentos++; throw pasajero(); }),
+    (e) => e.status === 503 && e.message === AI_BUSY_MESSAGE,
+  ));
+  assert.equal(intentos, 4);
+});
+
+test('runAi respeta el tope de tiempo: si la IA no contesta, responde 503 sin esperar a que Vercel corte la función', async () => {
+  const inicio = Date.now();
+  await sinAvisos(() => assert.rejects(
+    runAi(() => new Promise(() => {}), { budgetMs: 150 }),
+    (e) => e.status === 503 && e.message === AI_BUSY_MESSAGE,
+  ));
+  assert.ok(Date.now() - inicio < 1000);
+});
+
+test('runAi no espera un reintento que ya no cabe en el tope de tiempo', async () => {
+  const inicio = Date.now();
+  let intentos = 0;
+  // El proveedor pide esperar 1,2 s y solo quedan 0,8 s: se responde de una vez.
+  await sinAvisos(() => assert.rejects(
+    runAi(async () => { intentos++; throw errorGroqPorMinuto(); }, { budgetMs: 800 }),
+    (e) => e.status === 503 && e.message === AI_BUSY_MESSAGE,
+  ));
+  assert.equal(intentos, 1);
+  assert.ok(Date.now() - inicio < 600);
 });

@@ -7,7 +7,8 @@
  * - CvExtractionOutput: El tipo de salida del flujo (datos estructurados del perfil).
  */
 
-import { ai, GROQ_MODEL } from '@/ai/genkit';
+import { ai } from '@/ai/genkit';
+import { activeModel } from '@/ai/model';
 import { z } from 'zod';
 
 // Esquema de entrada: el texto extraído de un CV.
@@ -99,7 +100,7 @@ Extrae: headline (titular profesional), location, yearsOfExperience (total; calc
       const llmResponse = await ai.generate({
         prompt,
         output: { schema: CvExtractionOutputSchema, format: 'json' },
-        model: GROQ_MODEL,
+        model: activeModel(),
       });
 
       const output = llmResponse.output;

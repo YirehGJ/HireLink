@@ -6,7 +6,8 @@
  * - matchCandidateToJob: compara habilidades del candidato contra una vacante.
  */
 
-import { ai, GROQ_MODEL } from '@/ai/genkit';
+import { ai } from '@/ai/genkit';
+import { activeModel } from '@/ai/model';
 import { z } from 'zod';
 
 const SkillInputSchema = z.object({
@@ -76,7 +77,7 @@ Calcula un puntaje de compatibilidad (0.0 a 1.0) basado en qué tanto las habili
         schema: MatchOutputSchema,
         format: 'json',
       },
-      model: GROQ_MODEL,
+      model: activeModel(),
     });
 
     const output = llmResponse.output;

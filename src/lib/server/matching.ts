@@ -2,7 +2,7 @@ import { createHash } from "crypto";
 import type { Firestore } from "firebase-admin/firestore";
 import { FieldValue } from "firebase-admin/firestore";
 import { matchCandidateToJob } from "@/ai/flows/match-candidate-job-flow";
-import { ENGINE_VERSION } from "@/ai/model";
+import { engineVersion } from "@/ai/model";
 
 import { MATCH_THRESHOLD } from "@/lib/constants";
 import { runAi } from "@/lib/server/ai-runner";
@@ -41,7 +41,7 @@ export function overlapScore(job: FirebaseFirestore.DocumentData, candidate: Fir
  * para dejar la IA sin servicio durante el resto del día.
  */
 const inputHash = (input: unknown) =>
-  createHash("sha256").update(ENGINE_VERSION).update(JSON.stringify(input)).digest("hex").slice(0, 24);
+  createHash("sha256").update(engineVersion()).update(JSON.stringify(input)).digest("hex").slice(0, 24);
 
 /** Lo que ve el modelo para este par (candidato y vacante); de aquí sale la huella. */
 function matchInput(candidate: FirebaseFirestore.DocumentData, job: FirebaseFirestore.DocumentData) {
@@ -96,6 +96,10 @@ export async function evaluateMatch(
 
   const match = { ...(await runAi(() => matchCandidateToJob(input))), cached: false };
 
+  // Si durante la llamada se pasó al modelo de respaldo (se agotó el cupo diario del principal), la huella y la
+  // versión que se guardan son las del modelo que de verdad dio el puntaje.
+  const usedHash = inputHash(input);
+
   // La IA tarda decenas de segundos: si la vacante se eliminó mientras tanto, no se guarda una
   // recomendación huérfana (antes quedaban documentos de vacantes que ya no existían).
   if (!(await db.collection("jobs").doc(jobId).get()).exists) return match;
@@ -106,8 +110,8 @@ export async function evaluateMatch(
     await recRef.update({
       score: match.score,
       reasons: match.reasons,
-      inputHash: hash,
-      engineVersion: ENGINE_VERSION,
+      inputHash: usedHash,
+      engineVersion: engineVersion(),
       updatedAt: FieldValue.serverTimestamp(),
     });
   } else {
@@ -116,9 +120,9 @@ export async function evaluateMatch(
       jobRef: jobId,
       score: match.score,
       reasons: match.reasons,
-      inputHash: hash,
+      inputHash: usedHash,
       status: "pending",
-      engineVersion: ENGINE_VERSION,
+      engineVersion: engineVersion(),
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     });

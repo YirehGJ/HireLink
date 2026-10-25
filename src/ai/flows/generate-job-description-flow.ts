@@ -8,6 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { activeModel } from '@/ai/model';
 import { z } from 'zod';
 
 // Esquema de entrada
@@ -66,7 +67,8 @@ const generateJobDescriptionFlow = ai.defineFlow(
         throw new Error("El título y el seniority son requeridos.");
     }
     
-    const { output } = await jobDescriptionPrompt(input);
+    // El modelo se pide en cada llamada: si el principal se quedó sin cupo, runAi pasa al de respaldo.
+    const { output } = await jobDescriptionPrompt(input, { model: activeModel() });
 
     if (!output) {
       throw new Error("La IA no pudo generar una respuesta estructurada.");
