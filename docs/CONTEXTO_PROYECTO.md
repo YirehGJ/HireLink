@@ -25,7 +25,7 @@ Artificial para Conectar, Comprender y Vincular Talento con Oportunidades Labora
 |---|---|
 | Producción | https://hire-link-dun.vercel.app |
 | Repositorio | https://github.com/YirehGJ/HireLink (rama `main`) |
-| Equipo | Angel Yireh García Jara, Juan Evelio Culín Grajeda, Luis André Gutiérrez Zúñiga, J. Alfredo Mercado Aguirre |
+| Equipo | Angel Yireh García Jara, Juan Evelio Culín Grajeda, Luis André Gutiérrez Zúñiga |
 | Proyectos de Firebase | `hirelink-fd1fe` (producción), `hirelink-staging` (pruebas) |
 | Costo | **Cero**. Todo está en planes gratuitos y debe seguir así |
 | Plan de cierre | 21 sep a 30 nov 2026, en `docs/CRONOGRAMA_FINAL.md` |
