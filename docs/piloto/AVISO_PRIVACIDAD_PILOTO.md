@@ -3,7 +3,7 @@
 > **Borrador para revisión del equipo.** Es un texto de apoyo para el piloto; no es asesoría legal. Antes de
 > usarlo con personas reales, el equipo debe revisarlo y completar los datos de contacto.
 
-**Responsables:** Angel Yireh García Jara, Juan Evelio Culín Grajeda, y Luis André Gutiérrez Zúñiga,
+**Responsables:** Angel Yireh García Jara, Juan Evelio Culín Grajeda y Luis André Gutiérrez Zúñiga,
 estudiantes del Centro Universitario UNE (Seminario de Integración: Desarrollo).
 **Contacto:** `[correo del equipo, por completar]`
 
