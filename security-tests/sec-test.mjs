@@ -261,6 +261,12 @@ try {
   await deny('S55b usuario escribe un nombre de 500 caracteres', () => updateDoc(doc(C1.db, 'users', C1.uid), { fullName: 'x'.repeat(500) }));
   await deny('S56 candidata guarda habilidades que no son una lista', () => setDoc(doc(C1.db, 'candidates', C1.uid), { skills: 'react' }, { merge: true }));
   await deny('S56b reclutador A guarda etiquetas que no son una lista', () => updateDoc(doc(A.db, 'jobs', job.id), { searchTags: 'react' }));
+
+  // ---- correo del perfil = correo de la cuenta ----
+  await deny('S57 registro nuevo con un correo que no es el de la cuenta', () => setDoc(doc(F.db, 'users', F.uid), { id: F.uid, email: 'otra.persona@example.com', fullName: 'x', role: 'candidate', status: 'active' }));
+  await adb.doc(`users/${F.uid}`).delete();
+  await deny('S58 candidata guarda en su perfil el correo de otra persona', () => setDoc(doc(C1.db, 'candidates', C1.uid), { email: 'otra.persona@example.com' }, { merge: true }));
+  await allow('CTRL candidata guarda su correo con otras mayúsculas', () => setDoc(doc(C1.db, 'candidates', C1.uid), { email: 'SEC.CAND1@EXAMPLE.COM' }, { merge: true }));
 } catch (e) {
   console.error('ERROR DE PREPARACIÓN:', e);
 } finally {

@@ -89,6 +89,8 @@ if (run('F6')) {
     if (i === 0) await shot(s.page, 'F6_candidatos_postulados');
     // estado
     await pickSelect(s.page, { aria: `Cambiar estado de ${c.fullName}` }, STATUS_LABEL[target]);
+    // Desde la 1.1 rechazar pide confirmación (avisa a la candidata y es difícil de deshacer).
+    if (target === 'rejected') { await sleep(700); await clickText(s.page, 'Rechazar', 'button', '[role="alertdialog"]'); }
     await sleep(3500);
     const app1 = (await db.doc(`jobs/${jobId}/applications/${uid}`).get()).data();
     const mirror = (await db.doc(`users/${uid}/applications/${jobId}`).get()).data();
@@ -99,8 +101,10 @@ if (run('F6')) {
     if (i % 2 === 0) {
       await s.page.evaluate((js) => { const row = eval(js); row.querySelector('button[aria-label="Agregar a shortlist"]').click(); }, rowOf(c.fullName));
       await sleep(2000);
-      const app2 = (await db.doc(`jobs/${jobId}/applications/${uid}`).get()).data();
-      record('F6', 'Gestión de postulantes', `shortlist de ${c.fullName}`, app2?.shortlisted === true);
+      // Desde la 1.1 la shortlist y las notas viven en applicantNotes (la candidata lee el documento de la postulación).
+      const app2 = (await db.doc(`jobs/${jobId}/applicantNotes/${uid}`).get()).data();
+      const appDoc = (await db.doc(`jobs/${jobId}/applications/${uid}`).get()).data();
+      record('F6', 'Gestión de postulantes', `shortlist de ${c.fullName}`, app2?.shortlisted === true && appDoc?.shortlisted === undefined, 'en applicantNotes y no en la postulación');
     }
     // notas privadas
     await s.page.evaluate((js) => { const row = eval(js); [...row.querySelectorAll('button')].find((b) => b.textContent.trim() === 'Detalles').click(); }, rowOf(c.fullName));
@@ -110,8 +114,9 @@ if (run('F6')) {
     await setInput(s.page, '#notes', nota);
     await clickText(s.page, 'Guardar notas');
     await sleep(2000);
-    const app3 = (await db.doc(`jobs/${jobId}/applications/${uid}`).get()).data();
-    record('F6', 'Gestión de postulantes', `notas privadas de ${c.fullName}`, app3?.recruiterNotes === nota);
+    const app3 = (await db.doc(`jobs/${jobId}/applicantNotes/${uid}`).get()).data();
+    const appDoc3 = (await db.doc(`jobs/${jobId}/applications/${uid}`).get()).data();
+    record('F6', 'Gestión de postulantes', `notas privadas de ${c.fullName}`, app3?.recruiterNotes === nota && appDoc3?.recruiterNotes === undefined, 'en applicantNotes y no en la postulación');
     await clickText(s.page, 'Cerrar');
     await sleep(500);
   }
@@ -138,6 +143,11 @@ if (run('F7')) {
     const place = places[type](c.key);
     const expected = new Date(`${date}T${time}`);
     const started = Date.now();
+    // Desde la 1.1 no se agenda con una postulación retirada, rechazada o contratada, y solo avanza a «Entrevista» desde
+    // Postulado, En Revisión o Evaluación (no pisa «Oferta»): lo que se espera depende del estado que dejó la fase F6.
+    const before = (await db.doc(`jobs/${jobId}/applications/${uid}`).get()).data()?.status;
+    const blocked = ['withdrawn', 'rejected', 'hired'].includes(before);
+    const expectedStatus = ['applied', 'screening', 'assessment'].includes(before) ? 'interview' : before;
     await go(s.page, `/dashboard/jobs/${jobId}`, 'Candidatos Postulados');
     await s.page.evaluate((js) => { const row = eval(js); [...row.querySelectorAll('button')].find((b) => b.textContent.trim() === 'Detalles').click(); }, rowOf(c.fullName));
     await sleep(1200);
@@ -155,8 +165,13 @@ if (run('F7')) {
     const note = await recentNotif(uid, 'interview_scheduled', started - 2000);
     const okTime = !!iv && iv.scheduledStart.toMillis() === expected.getTime();
     const okNote = !!note && note.body.includes(expectedText);
-    record('F7', 'Entrevistas', `agendar ${type.toLowerCase()} con ${c.fullName} (${date} ${time})`, okTime && iv.type === typeCode[type] && app?.status === 'interview' && okNote,
-      `entrevista ${iv ? 'creada' : 'NO creada'}; fecha exacta ${okTime}; estado de la postulación ${app?.status}; el aviso dice «…${(note?.body || '').slice(-34)}»`);
+    if (blocked) {
+      record('F7', 'Entrevistas', `no se agenda con ${c.fullName}: su postulación está «${before}»`, !iv && app?.status === before && !note,
+        `entrevista ${iv ? 'CREADA' : 'no creada'}; estado ${app?.status}; aviso ${note ? 'SÍ' : 'no'}`);
+    } else {
+      record('F7', 'Entrevistas', `agendar ${type.toLowerCase()} con ${c.fullName} (${date} ${time})`, okTime && iv.type === typeCode[type] && app?.status === expectedStatus && okNote,
+        `entrevista ${iv ? 'creada' : 'NO creada'}; fecha exacta ${okTime}; estado de la postulación ${app?.status} (esperado ${expectedStatus}); el aviso dice «…${(note?.body || '').slice(-34)}»`);
+    }
     if (iv) made.push({ ...iv, cand: c, owner });
   }
   state.created.interviews = made.map((m) => m.id);
@@ -175,7 +190,8 @@ if (run('F7')) {
     const showed = (await bodyText(s.page)).includes(m.cand.fullName);
     if (m === made[0]) await shot(s.page, 'F7_calendario_reclutador');
     const btn = await s.page.$('button[aria-label="Cancelar entrevista"]');
-    if (btn) { await btn.click(); await sleep(3500); }
+    // Cancelar pide confirmación desde la 1.1.
+    if (btn) { await btn.click(); await sleep(700); await clickText(s.page, 'Cancelar entrevista', 'button', '[role="alertdialog"]'); await sleep(3500); }
     const gone = !(await db.doc(`interviews/${m.id}`).get()).exists;
     const note = await recentNotif(uid, 'interview_cancelled', started - 2000);
     record('F7', 'Entrevistas', `cancelar la entrevista de ${m.cand.fullName}`, showed && !!btn && gone && !!note, `visible en el calendario ${showed}; eliminada ${gone}; aviso al candidato ${note ? 'sí' : 'no'}`);
@@ -570,12 +586,17 @@ if (run('F12')) {
   await dropdownAction(s.page, 'Regina Palacios Soto', 'Suspender');
   await sleep(2500);
   record('F12', 'Usuarios', 'suspender a Regina', (await db.doc(`users/${reg}`).get()).data().status === 'suspended' && !!(await latestAudit('user_status_changed', t0 - 2000, 'regina.palacios')));
-  const sr = await session('regina.palacios@example.com', { block: BLOCK_RECS });
-  await sleep(1500);
-  const blocked = (await bodyText(sr.page)).includes('Tu cuenta está suspendida');
-  const tok = await (async () => { const r = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${ENV.NEXT_PUBLIC_FB_API_KEY}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'regina.palacios@example.com', password: PASS, returnSecureToken: true }) }); return (await r.json()).idToken; })();
-  const apiRes = await fetch(`${BASE}/api/applications/notify-new`, { method: 'POST', headers: { Authorization: `Bearer ${tok}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ jobId: 'x' }) });
-  record('F12', 'Usuarios', 'la cuenta suspendida ve el bloqueo y la API la rechaza', blocked && apiRes.status === 403, `pantalla de bloqueo ${blocked}; API ${apiRes.status}`);
+  // Desde la 1.1 suspender también deshabilita la cuenta de Authentication: ya no se puede ni iniciar sesión.
+  const sr = await session(null);
+  await sr.page.goto(BASE + '/login', { waitUntil: 'networkidle2' });
+  await sr.page.type('input[placeholder="tu@email.com"]', 'regina.palacios@example.com');
+  await sr.page.type('input[type="password"]', PASS);
+  await clickText(sr.page, 'Entrar');
+  await sleep(3000);
+  const blocked = (await bodyText(sr.page)).includes('Tu cuenta está suspendida') && (await sr.page.evaluate(() => location.pathname)) === '/login';
+  const rest = await (await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${ENV.NEXT_PUBLIC_FB_API_KEY}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'regina.palacios@example.com', password: PASS, returnSecureToken: true }) })).json();
+  const disabled = (await auth.getUser(reg)).disabled === true;
+  record('F12', 'Usuarios', 'la cuenta suspendida no puede iniciar sesión (aviso en pantalla, Authentication deshabilitada)', blocked && disabled && !rest.idToken, `aviso ${blocked}; Authentication deshabilitada ${disabled}; token ${rest.idToken ? 'SÍ' : 'no'} (${rest.error?.message ?? ''})`);
   await shot(sr.page, 'F12_cuenta_suspendida');
   await sr.ctx.close();
   await dropdownAction(s.page, 'Regina Palacios Soto', 'Reactivar');

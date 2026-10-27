@@ -102,6 +102,12 @@ if (run('F1')) {
     record('F1', 'Registro', `${p.role === 'recruiter' ? 'reclutador' : 'candidato'}: ${p.fullName}`, ok,
       `${Date.now() - t0} ms; destino ${await s.page.evaluate(() => location.pathname)}; rol guardado «${doc?.role}»`);
     if (p.key === 'andrea' || p.key === 'carolina') await shot(s.page, `F1_${p.key}_tras_registro`);
+    // Desde la 1.1 una reclutadora nace sin aprobar (no ve candidatas ni publica). `/api/admin/users` (approve_recruiter)
+    // lo hace en la aplicación; aquí se simula con el SDK de administración para que las fases siguientes puedan publicar.
+    if (p.role === 'recruiter' && uid) {
+      record('F1', 'Registro', `reclutador nace sin aprobar: ${p.fullName}`, doc?.recruiterApproved !== true, 'recruiterApproved ausente o falso');
+      await db.doc(`users/${uid}`).update({ recruiterApproved: true });
+    }
     await s.ctx.close();
   }
   saveState();

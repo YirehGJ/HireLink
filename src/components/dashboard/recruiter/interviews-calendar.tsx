@@ -49,6 +49,8 @@ export function InterviewsCalendar({ jobId, organizationRef, candidateUid }: Int
     // Mientras la persona no elija un día, el calendario se abre en la próxima entrevista (antes abría siempre en hoy
     // y decía «no hay entrevistas» aunque hubiera para otro día).
     const [pickedByUser, setPickedByUser] = useState(false);
+    // El mes que se ve se controla aparte: si la próxima entrevista cae en otro mes, el calendario se mueve a él.
+    const [month, setMonth] = useState<Date>(new Date());
     const auth = useAuth();
     const { readOnly } = useApp();
     const { toast } = useToast();
@@ -83,6 +85,7 @@ export function InterviewsCalendar({ jobId, organizationRef, candidateUid }: Int
         const horizon = Date.now() - 3600_000;
         const next = interviews.find(i => i.start.getTime() >= horizon) ?? interviews[interviews.length - 1];
         setDate(next.start);
+        setMonth(next.start);
     }, [interviews, pickedByUser]);
 
     const selectedDayInterviews = date
@@ -114,6 +117,8 @@ export function InterviewsCalendar({ jobId, organizationRef, candidateUid }: Int
                    <Calendar
                         mode="single"
                         selected={date}
+                        month={month}
+                        onMonthChange={setMonth}
                         onSelect={(d) => { setPickedByUser(true); setDate(d); }}
                         locale={es}
                         className="p-0"

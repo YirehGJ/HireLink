@@ -69,6 +69,8 @@ service cloud.firestore {
         && d.get('location', '') is string && d.get('location', '').size() <= 200
         && d.get('fullName', '') is string && d.get('fullName', '').size() <= 120
         && d.get('email', '') is string && d.get('email', '').size() <= 200
+        // El correo del perfil es el que ven las reclutadoras: debe ser el de la cuenta (sin distinguir mayúsculas).
+        && (d.get('email', '') == '' || d.get('email', '').lower() == request.auth.token.email.lower())
         && d.get('skills', []) is list && d.get('skills', []).size() <= 60
         && d.get('experience', []) is list && d.get('experience', []).size() <= 20
         && d.get('education', []) is list && d.get('education', []).size() <= 15
@@ -103,7 +105,10 @@ service cloud.firestore {
         && request.resource.data.status == 'active'
         && request.resource.data.keys().hasOnly(['id', 'email', 'fullName', 'role', 'status', 'phone'])
         && request.resource.data.fullName is string
-        && request.resource.data.fullName.size() <= 120;
+        && request.resource.data.fullName.size() <= 120
+        // El correo del documento debe ser el de la cuenta de Authentication (sin distinguir mayúsculas).
+        && request.resource.data.email is string
+        && request.resource.data.email.lower() == request.auth.token.email.lower();
 
       // La persona ve su propio documento aunque esté suspendida; las admins ven todos.
       allow get: if isSignedIn() && (isOwner(userId) || isAdmin());

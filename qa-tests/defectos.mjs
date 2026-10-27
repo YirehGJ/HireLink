@@ -374,7 +374,8 @@ await probe('P21', 'Cancelar una entrevista la elimina y avisa al candidato', as
   if (cellH.asElement()) await cellH.asElement().click();
   await sleep(900);
   const cancelBtn = await s.page.$('button[aria-label="Cancelar entrevista"]');
-  if (cancelBtn) { await cancelBtn.click(); await sleep(3500); }
+  // Cancelar pide confirmación desde la 1.1.
+  if (cancelBtn) { await cancelBtn.click(); await sleep(700); await clickText(s.page, 'Cancelar entrevista', 'button', '[role="alertdialog"]'); await sleep(3500); }
   const after = (await db.collection(`users/${diego}/notifications`).get()).size;
   const gone = !(await db.doc(`interviews/${iid}`).get()).exists;
   await db.doc(`interviews/${iid}`).delete().catch(() => {});
