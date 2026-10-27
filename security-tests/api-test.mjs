@@ -211,6 +211,10 @@ try {
   results.push({ name: 'H03 Strict-Transport-Security presente', ok: !!h.get('strict-transport-security'), note: String(h.get('strict-transport-security')) });
   results.push({ name: 'H04 no revela X-Powered-By', ok: !h.get('x-powered-by'), note: String(h.get('x-powered-by')) });
   results.push({ name: 'H05 API sin caché (no-store)', ok: (await api('/api/audit', null, {})).headers.get('cache-control') === 'no-store', note: '' });
+  const csp = h.get('content-security-policy') || '';
+  results.push({ name: "H06 Content-Security-Policy activa (sin plugins, sin <base> ajeno, formularios y marcos solo propios)", ok: ["default-src 'self'", "object-src 'none'", "base-uri 'self'", "form-action 'self'", "frame-ancestors 'none'"].every((d) => csp.includes(d)), note: csp.slice(0, 120) });
+  results.push({ name: 'H07 la política no abre scripts a otros dominios ni permite eval', ok: !/script-src[^;]*(https?:|\*)/.test(csp) && !/script-src[^;]*'unsafe-eval'/.test(csp), note: (csp.match(/script-src[^;]*/) || [''])[0] });
+  results.push({ name: 'H08 Cross-Origin-Opener-Policy presente', ok: !!h.get('cross-origin-opener-policy'), note: String(h.get('cross-origin-opener-policy')) });
   // ---------- 9) las Server Actions de IA ya no son públicas ----------
   const src = ['src/ai/flows/extract-cv-data-flow.ts', 'src/ai/flows/generate-job-description-flow.ts', 'src/ai/flows/match-candidate-job-flow.ts'].map((f) => fs.readFileSync(f, 'utf8'));
   results.push({ name: 'A27 los flujos de IA no están expuestos como Server Actions', ok: src.every((s) => !/^\s*['"]use server['"]/m.test(s)), note: '' });

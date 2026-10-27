@@ -12,7 +12,7 @@ delete process.env.GROQ_FALLBACK_MODEL_ID;
 globalThis.__ia = { llamadas: [], responder: async () => ({ score: 0.8, reasons: ['Experiencia sólida en React'] }) };
 globalThis.__avisos = [];
 
-const { evaluateMatch, overlapScore, matchHash, isUpToDate } = await import('../../src/lib/server/matching.ts');
+const { evaluateMatch, overlapScore, matchHash, isUpToDate, cleanReasons } = await import('../../src/lib/server/matching.ts');
 const { runAi, isQuotaExhausted, AI_QUOTA_MESSAGE, AI_INCOMPLETE_MESSAGE, AI_BUSY_MESSAGE } = await import('../../src/lib/server/ai-runner.ts');
 const { activeModelId, engineVersion, resetModelState, GROQ_MODEL_ID, GROQ_FALLBACK_MODEL_ID } = await import('../../src/ai/model.ts');
 const { ApiError, aiUnavailableMessage } = await import('../../src/lib/api-client.ts');
@@ -152,6 +152,22 @@ test('si la vacante se elimina mientras la IA trabaja, no se guarda una recomend
   assert.equal(db.almacen.has('recommendations/c1_j1'), false);
 });
 
+test('cleanReasons: quita vacías y repetidas, recorta a cinco y nunca devuelve una lista vacía', () => {
+  assert.deepEqual(cleanReasons(['  React sólido ', 'react solido', '', '   ', 'Falta Next.js'], 0.7), ['React sólido', 'Falta Next.js']);
+  assert.equal(cleanReasons(['a', 'b', 'c', 'd', 'e', 'f', 'g'], 0.9).length, 5);
+  assert.deepEqual(cleanReasons([], 0), ['Sin coincidencias claras con la vacante']);
+  assert.deepEqual(cleanReasons(undefined, 0.6), ['La IA no detalló las razones']);
+  assert.equal(cleanReasons(['x'.repeat(500)], 0.5)[0].length, 140);
+});
+
+test('si el modelo contesta puntaje 0 sin razones, la recomendación se guarda con una explicación', async () => {
+  const db = nuevaPrueba();
+  globalThis.__ia.responder = async () => ({ score: 0, reasons: [] });
+  const r = await evaluateMatch(db, 'c1', candidato(), 'j1', vacante());
+  assert.deepEqual(r.reasons, ['Sin coincidencias claras con la vacante']);
+  assert.deepEqual(db.almacen.get('recommendations/c1_j1').reasons, ['Sin coincidencias claras con la vacante']);
+});
+
 test('matchHash y isUpToDate: la huella solo cambia con lo que ve el modelo', () => {
   const base = matchHash(candidato(), vacante());
   assert.match(base, /^[0-9a-f]{24}$/);
@@ -167,10 +183,12 @@ test('matchHash y isUpToDate: la huella solo cambia con lo que ve el modelo', ()
   otraVacante.searchTags = ['Vue'];
   assert.notEqual(matchHash(candidato(), otraVacante), base);
 
-  assert.equal(isUpToDate({ inputHash: base, score: 0.7 }, base), true);
-  assert.equal(isUpToDate({ inputHash: base, score: 0.7 }, 'otra'), false);
-  assert.equal(isUpToDate({ inputHash: base }, base), false, 'sin puntaje no sirve');
-  assert.equal(isUpToDate({ score: 0.7 }, base), false, 'las recomendaciones anteriores a la huella se recalculan una vez');
+  assert.equal(isUpToDate({ inputHash: base, score: 0.7, reasons: ['React sólido'] }, base), true);
+  assert.equal(isUpToDate({ inputHash: base, score: 0.7, reasons: ['React sólido'] }, 'otra'), false);
+  assert.equal(isUpToDate({ inputHash: base, reasons: ['React sólido'] }, base), false, 'sin puntaje no sirve');
+  assert.equal(isUpToDate({ score: 0.7, reasons: ['React sólido'] }, base), false, 'las recomendaciones anteriores a la huella se recalculan una vez');
+  assert.equal(isUpToDate({ inputHash: base, score: 0, reasons: [] }, base), false, 'una guardada sin razones se vuelve a evaluar una vez');
+  assert.equal(isUpToDate({ inputHash: base, score: 0.7 }, base), false);
   assert.equal(isUpToDate(undefined, base), false);
 });
 

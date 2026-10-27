@@ -62,13 +62,36 @@ function matchInput(candidate: FirebaseFirestore.DocumentData, job: FirebaseFire
   };
 }
 
+/**
+ * Las razones que se guardan y se muestran: cinco como máximo, sin vacías ni repetidas. Si el modelo no explicó nada
+ * (el modelo de respaldo a veces contesta puntaje 0 con la lista vacía) se deja una explicación fija, para que toda
+ * recomendación se pueda leer; la explicación sale del puntaje, no se inventa un motivo.
+ */
+export function cleanReasons(reasons: unknown, score: number): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const r of Array.isArray(reasons) ? reasons : []) {
+    const text = String(r ?? "").trim().slice(0, 140);
+    const key = normalize(text);
+    if (!text || seen.has(key)) continue;
+    seen.add(key);
+    out.push(text);
+    if (out.length === 5) break;
+  }
+  if (out.length === 0) out.push(score < 0.2 ? "Sin coincidencias claras con la vacante" : "La IA no detalló las razones");
+  return out;
+}
+
 /** Huella del par candidato ↔ vacante tal como lo ve el modelo. */
 export const matchHash = (candidate: FirebaseFirestore.DocumentData, job: FirebaseFirestore.DocumentData) =>
   inputHash(matchInput(candidate, job));
 
-/** ¿La recomendación guardada sigue vigente? (el perfil y la vacante no cambiaron desde que se calculó). */
+/**
+ * ¿La recomendación guardada sigue vigente? (el perfil y la vacante no cambiaron desde que se calculó). Una que se
+ * guardó sin razones (antes de que se limpiaran) no cuenta: se vuelve a evaluar una vez y queda explicada.
+ */
 export const isUpToDate = (rec: FirebaseFirestore.DocumentData | undefined, hash: string) =>
-  !!rec && rec.inputHash === hash && typeof rec.score === "number";
+  !!rec && rec.inputHash === hash && typeof rec.score === "number" && Array.isArray(rec.reasons) && rec.reasons.length > 0;
 
 /**
  * Calcula con la IA la compatibilidad candidato ↔ vacante (perfil + CV analizado)
@@ -94,7 +117,8 @@ export async function evaluateMatch(
     return { score: previous.score as number, reasons: (previous.reasons ?? []) as string[], cached: true };
   }
 
-  const match = { ...(await runAi(() => matchCandidateToJob(input))), cached: false };
+  const raw = await runAi(() => matchCandidateToJob(input));
+  const match = { score: raw.score, reasons: cleanReasons(raw.reasons, raw.score), cached: false };
 
   // Si durante la llamada se pasó al modelo de respaldo (se agotó el cupo diario del principal), la huella y la
   // versión que se guardan son las del modelo que de verdad dio el puntaje.

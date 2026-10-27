@@ -3,7 +3,7 @@
 //   node qa-tests/defectos.mjs <etiqueta> [P01 P02 ...]      (sin códigos = todas)
 import fs from 'fs';
 import path from 'path';
-import { BASE, PASS, sleep, db, TS, uidOf, launch, browser, OUT_DIR } from './lib.mjs';
+import { BASE, PASS, sleep, db, TS, uidOf, launch, browser, OUT_DIR, cspViolations, watchCsp } from './lib.mjs';
 
 const TAG = process.argv[2] || 'despues';
 const ONLY = process.argv.slice(3);
@@ -12,6 +12,7 @@ async function session(email, { uncheckRemember = false } = {}) {
   const ctx = await browser.createBrowserContext();
   const page = await ctx.newPage();
   const log = { console: [], requests: [] };
+  watchCsp(page);
   page.on('console', (m) => { if (m.type() === 'error') log.console.push(m.text().slice(0, 240)); });
   page.on('request', (r) => log.requests.push(r.url()));
   if (email) {
@@ -436,6 +437,11 @@ await probe('P23', 'El aviso de entrevista muestra la hora agendada (servidor en
   for (const a of audits.docs) if (a.data().action === 'interview_scheduled' && a.data().createdAt.toMillis() >= started) await a.ref.delete();
   await s.ctx.close();
   return { defecto: !ok, detalle: `agendada a las 10:00 (hora local); el aviso dice: «${body.slice(-70)}»` };
+});
+// ---------------------------------------------------------------- P24 política de contenido (CSP)
+await probe('P24', 'La política de contenido no bloquea nada de lo que la aplicación necesita', async () => {
+  const vistas = [...new Set(cspViolations)];
+  return { defecto: vistas.length > 0, detalle: vistas.length ? `${vistas.length} bloqueos: ${vistas.slice(0, 3).join(' | ')}` : 'ninguna violación en todas las sondas anteriores (cabecera Content-Security-Policy activa)' };
 });
 fs.writeFileSync(path.join(OUT_DIR, `defectos_${TAG}.json`), JSON.stringify(results, null, 2));
 await browser.close();

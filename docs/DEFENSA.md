@@ -29,15 +29,15 @@ para que se escriba el número real y no uno inventado.
 
 | Tema | Cifra | Fuente |
 |---|---|---|
-| Reglas de Firestore | 61 pruebas de ataque y permiso, 61 correctas; 12 vulnerabilidades corregidas antes de endurecerlas | `security-tests/sec-test.mjs` |
-| API, límites de uso y carga | 67 correctas; 100 usuarios simultáneos, 100/100 en cerca de 1 s; una ráfaga abusiva de 100 llamadas queda en 15 atendidas y 85 con 429, sin errores 5xx | `security-tests/api-test.mjs` |
-| Flujos con las reglas endurecidas | 23/23 | `security-tests/flow-test.mjs` |
-| Pruebas unitarias | 26/26 | `npm run test:unit` |
+| Reglas de Firestore | 110 pruebas de ataque y permiso, 110 correctas (61 en la 1.0); 12 vulnerabilidades corregidas en la 1.0 y las de la revisión de la 1.1 (ver el CHANGELOG) | `security-tests/sec-test.mjs` |
+| API, cabeceras, límites de uso y carga | 96 correctas; 100 usuarios simultáneos, 100/100 en cerca de 1 s; una ráfaga abusiva de 100 llamadas queda en unas 15 atendidas y el resto con 429, sin errores 5xx | `security-tests/api-test.mjs` |
+| Flujos con las reglas endurecidas | 29/29 | `security-tests/flow-test.mjs` |
+| Pruebas unitarias | 46/46 | `npm run test:unit` |
 | Regresión con navegador | 10 o más registros por función; 40 puntos de mejora encontrados y corregidos (9 altos, 20 medios, 11 bajos) | Informe extra de la Semana 4, `qa-tests/` |
 | Accesibilidad | 0 violaciones de axe-core (WCAG 2.2 AA) en 13 pantallas, escritorio y celular, tema claro y oscuro; Lighthouse de accesibilidad 100 | `qa-tests/medicion/` |
-| Teclado y celular | 57/57 comprobaciones | `qa-tests/accesibilidad.mjs` |
+| Teclado y celular | 58/58 comprobaciones | `qa-tests/accesibilidad.mjs` |
 | Rendimiento en celular | Páginas con sesión de 65 a 67 puntos a 81 y 82 (mediana de tres mediciones de Lighthouse); entre 37 % y 48 % menos JavaScript transferido | `qa-tests/medicion/` |
-| Dependencias | Avisos de `npm audit`: 96 a 84; críticos 2 a 0; altos 30 a 20 | [CHECKLIST_SEGURIDAD_PRIVACIDAD.md](CHECKLIST_SEGURIDAD_PRIVACIDAD.md) |
+| Dependencias | Avisos de `npm audit`: 96 a 84 en la 1.0 (críticos 2 a 0; altos 30 a 20) y 80 el 26 de octubre (0 críticos, 14 altos) | [CHECKLIST_SEGURIDAD_PRIVACIDAD.md](CHECKLIST_SEGURIDAD_PRIVACIDAD.md) |
 | Piloto | Participantes, tareas sin ayuda, puntaje SUS y hallazgos: **[completar con la bitácora de la Semana 7]** | [piloto/](piloto/README.md) |
 
 ## 4. Preguntas probables y respuestas
@@ -77,9 +77,9 @@ para analizarlo. Solo las reclutadoras que un administrador aprobó pueden ver e
 ven candidatas ni publican); que la persona controle la visibilidad es una limitación conocida (riesgo R1) con solución
 planeada. Las notas privadas de la reclutadora viven aparte de la postulación y la candidata no las lee.
 
-**¿Cumplen con la ley de datos personales?** La plataforma tiene un aviso de privacidad para el piloto, pero falta uno
-permanente en el registro y un botón para eliminar la cuenta. Ambos están en el backlog con prioridad alta. No se debe decir que
-cumple por completo.
+**¿Cumplen con la ley de datos personales?** La plataforma tiene un aviso de privacidad para el piloto y, desde la 1.1,
+«Eliminar mi cuenta» en Configuración (borra el perfil, las postulaciones y los avisos). Falta un aviso permanente con
+consentimiento en el registro, que está en el backlog con prioridad alta. No se debe decir que cumple por completo.
 
 **¿Por qué no guardan el PDF?** Firebase Storage exige plan de pago y un CV trae datos personales. La decisión está
 documentada en [DECISION_STORAGE_CV.md](DECISION_STORAGE_CV.md).
@@ -90,11 +90,16 @@ apagado por ahora, Resend (correo). No hay analítica ni publicidad.
 ### Sobre seguridad
 
 **¿Qué tan segura es?** En capas: reglas de Firestore (rol, propiedad, empresa, tamaño), endpoints con sesión, rol y límite de
-uso, cabeceras HTTP, validación de datos y 151 pruebas automáticas de seguridad. Hubo 12 vulnerabilidades reales que se
-corrigieron y se documentan en `security-tests/README.md`.
+uso, cabeceras HTTP (incluida una política de contenido), validación de datos y 235 pruebas automáticas de seguridad (110 de
+reglas, 96 de API y cabeceras, 29 de flujos). Hubo 12 vulnerabilidades reales en la 1.0 que se corrigieron y se documentan en
+`security-tests/README.md`, y la revisión de la 1.1 cerró otras (notas privadas legibles, reclutadoras sin aprobación,
+entrevistas falsificables, cuentas suspendidas que seguían leyendo; ver el CHANGELOG).
 
-**¿Qué vulnerabilidades quedan?** Hay 20 avisos altos de dependencias sin corrección menor (cadena de Firebase, Genkit y
-herramientas de compilación) y no hay política de seguridad de contenido. Están en el checklist con su plan.
+**¿Qué vulnerabilidades quedan?** Hay 14 avisos altos de dependencias sin corrección menor (cadena de Firebase, Genkit, `zod` 3
+y `postcss` de Next.js; revisados uno por uno, ninguno afecta a una ruta que la aplicación use hoy). La política de contenido
+conserva `'unsafe-inline'` en los scripts porque Next.js hidrata con scripts en línea. El correo no se verifica al registrarse
+y una reclutadora a la que se revoca la aprobación conserva la lectura de las postulaciones y entrevistas de su empresa. Todo
+está en el checklist con su plan.
 
 **¿Cómo lo probaron?** Con cuentas desechables que los scripts crean y eliminan, contra un proyecto de pruebas separado de
 producción. Los scripts se niegan a correr contra producción.

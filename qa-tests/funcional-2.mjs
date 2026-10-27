@@ -7,6 +7,7 @@ import path from 'path';
 import {
   BASE, PASS, ENV, sleep, db, auth, TS, uidOf, tryUid, launch, close, session, loginUI, go, bodyText, hasText, waitText,
   setInput, clickText, pickSelect, record, results, saveResults, deleteJobCascade, OUT_DIR, STATE_FILE,
+  checkCsp,
 } from './lib.mjs';
 import { RECRUITERS, CANDIDATES, jobOwner } from './datos.mjs';
 
@@ -149,6 +150,8 @@ if (run('F7')) {
     const blocked = ['withdrawn', 'rejected', 'hired'].includes(before);
     const expectedStatus = ['applied', 'screening', 'assessment'].includes(before) ? 'interview' : before;
     await go(s.page, `/dashboard/jobs/${jobId}`, 'Candidatos Postulados');
+    // La fila llega con la lectura de Firestore: tras un arranque en frío del servidor tarda más que el reposo fijo de arriba.
+    await waitText(s.page, c.fullName, 30000);
     await s.page.evaluate((js) => { const row = eval(js); [...row.querySelectorAll('button')].find((b) => b.textContent.trim() === 'Detalles').click(); }, rowOf(c.fullName));
     await sleep(1200);
     await setInput(s.page, '#int-date', date);
@@ -800,6 +803,7 @@ if (run('F13')) {
   }
 }
 
+checkCsp('CSP');
 saveResults(path.join(OUT_DIR, `funcional-2_${TAG}.json`));
 await close();
 const fails = results.filter((r) => !r.ok);

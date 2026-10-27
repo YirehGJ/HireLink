@@ -29,6 +29,13 @@ del 24 de octubre. Orden de publicación y cómo se revierte: [docs/RELEASE_v1.1
 - Las contraseñas de las cuentas de demostración salen del README y de los guiones (solo quedan en `docs/CUENTAS_DEMO.md`,
   marcadas como de staging).
 - Los formularios de acceso envían por POST: si se envían antes de que cargue el JavaScript, la contraseña ya no viaja en la URL.
+- **Política de contenido (`Content-Security-Policy`)** y `Cross-Origin-Opener-Policy`: la página solo carga código, estilos,
+  fuentes e imágenes propios, se conecta solo a Firebase y Sentry, y no admite plugins, `<base>`, formularios ni marcos de
+  otros sitios. `script-src` conserva `'unsafe-inline'` (Next.js hidrata con scripts en línea). `CSP_REPORT_ONLY=true` la
+  deja en solo aviso si algún cambio necesita otro origen.
+- El correo del perfil (`users` y `candidates`) debe ser el de la propia cuenta: nadie puede poner en su perfil la
+  dirección de otra persona, que es lo que ve la reclutadora.
+- `robots.txt`: los buscadores leen la portada y los accesos, no el panel ni la API.
 
 ### IA
 - **Modelo de respaldo automático**: al agotarse el cupo diario del modelo principal se pasa a `openai/gpt-oss-20b`
@@ -38,13 +45,17 @@ del 24 de octubre. Orden de publicación y cómo se revierte: [docs/RELEASE_v1.1
   «Error interno». Tope de 50 s por operación (antes Vercel cortaba con «Error 504»).
 - Las pantallas explican por qué no hay recomendaciones (cupo, respuestas incompletas) y «Buscar candidatos» dice cuántas
   evaluaciones fallaron o quedaron pendientes.
+- Toda recomendación se guarda con al menos una razón: el modelo de respaldo a veces contestaba puntaje 0 con la lista
+  vacía y la tarjeta quedaba sin explicación. Las razones se limpian (sin vacías ni repetidas, cinco como máximo) y las que
+  ya estaban guardadas vacías se recalculan una vez.
 
 ### Flujos y pantallas
 - El correo con un espacio al final ya no se rechaza (importa en el celular) y el campo es de tipo correo.
 - El registro deshace la cuenta si no se puede guardar el perfil, y el panel ofrece cerrar sesión si el perfil nunca carga.
 - «Retirado» ya no se ofrece a la reclutadora ni se puede reactivar una postulación retirada; rechazar pide confirmación;
   agendar una entrevista y cambiar el estado es una sola operación y no pisa «Oferta» ni «Contratado».
-- El calendario de entrevistas se abre en la próxima entrevista y cancelar pide confirmación.
+- El calendario de entrevistas se abre en la próxima entrevista (también cambia de mes) y cancelar pide confirmación. Volver
+  a tocar el día elegido ya no lo deselecciona: antes el panel decía «Ningún día seleccionado».
 - «Sin preferencia» de seniority se guarda; aplicar las sugerencias del CV no borra campos con datos vacíos.
 - Configuración respeta «Ver como» (solo lectura). El botón «Google» queda apagado salvo `NEXT_PUBLIC_GOOGLE_LOGIN=true`.
 - La página de una vacante carga el calendario y los matches al abrir su pestaña (369 kB a 347 kB de JavaScript inicial).
@@ -57,13 +68,19 @@ del 24 de octubre. Orden de publicación y cómo se revierte: [docs/RELEASE_v1.1
 
 ### Cambios que obligan a un paso manual
 Publicar `firestore.rules`, aprobar a las reclutadoras que ya existen y mover las notas anteriores (ver
-[docs/RELEASE_v1.1.md](docs/RELEASE_v1.1.md)). Variables nuevas, ambas opcionales: `GROQ_FALLBACK_MODEL_ID` y
-`NEXT_PUBLIC_GOOGLE_LOGIN`.
+[docs/RELEASE_v1.1.md](docs/RELEASE_v1.1.md)). Variables nuevas, todas opcionales: `GROQ_FALLBACK_MODEL_ID`,
+`NEXT_PUBLIC_GOOGLE_LOGIN` y `CSP_REPORT_ONLY`.
 
 ### Pruebas
-- Unitarias: 44 (eran 26 en la 1.0.0: reintento con `Schema validation failed`, 502 claro, modelo de respaldo, tiempos
-  de espera, tope de tiempo, formularios de acceso y `safeNextPath`). Reglas de Firestore: 107/107. API y carga: 93/93.
-  Flujos: 29/29 (todas contra `hirelink-staging`). `npm run build:staging` y `npx tsc --noEmit` sin errores.
+- Unitarias: 46 (eran 26 en la 1.0.0: reintento con `Schema validation failed`, 502 claro, modelo de respaldo, tiempos
+  de espera, tope de tiempo, formularios de acceso, `safeNextPath` y limpieza de las razones de la IA). Reglas de
+  Firestore: 110/110. API, cabeceras y carga: 96/96. Flujos: 29/29 (todas contra `hirelink-staging`). `npm run
+  build:staging` y `npx tsc --noEmit` sin errores.
+- Con navegador, sobre la compilación final (27 de octubre): funcionales 1 y 2 (registro, empresas, vacantes, perfiles,
+  postulaciones, estados, entrevistas, matches, filtros, avisos, administración y cuenta), sondas de defectos 23/23,
+  accesibilidad 58/58 y lectura de CV en PDF 8/8. Cada suite comprueba además que la política de contenido no bloquee nada.
+  Las fases de IA de `funcional-1` y `funcional-2` (F3, F4, F9) corrieron antes del último cambio y el cupo diario del
+  modelo de respaldo se agotó con ellas, así que no se repitieron (ver [docs/RELEASE_v1.1.md](docs/RELEASE_v1.1.md)).
 
 ### Corregido
 - **La IA devolvía un JSON incompleto y la persona veía «Error interno».** Cuando el modelo contestaba un JSON válido al que le faltaba una

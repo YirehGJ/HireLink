@@ -30,7 +30,7 @@ y responde un 502 claro si sigue mal; si el cupo diario del modelo principal se 
 también se agotó responde de inmediato con un 503 claro; reintenta tiempos de espera y errores de conexión, responde «la IA está
 ocupada» si un límite por minuto no cede y respeta el tope de tiempo de 50 s), el campo de correo de los formularios de
 acceso (`emailField`: recorta espacios antes de validar) y las funciones de formato (`fixEscapedNewlines`, etiquetas, años,
-direcciones http y búsqueda sin acentos) y la ruta a la que se vuelve tras iniciar sesión (`safeNextPath`). Son 44 pruebas.
+direcciones http y búsqueda sin acentos) y la ruta a la que se vuelve tras iniciar sesión (`safeNextPath`). Son 46 pruebas.
 Cargan directamente los archivos de `src/` con un cargador propio (`unitarias/cargador.mjs`) que sustituye lo que
 hablaría con servicios externos.
 
@@ -66,14 +66,18 @@ npm run build:staging
 npm run start:staging        # http://localhost:3100
 ```
 
+`TZ=UTC` (y el modelo de respaldo de la IA) se definen **solo en la terminal del servidor**. En Windows el navegador
+ignora `TZ` y Node no, así que si también se define en la terminal de las pruebas, las horas que estas calculan (entrevistas
+y avisos) dejan de coincidir con las de la pantalla; `lib.mjs` lo avisa.
+
 En otra terminal, desde la raíz del proyecto:
 
 ```bash
 python qa-tests/crear-cvs.py                       # crea 10 CV en PDF en qa-tests/cvs/
 node qa-tests/funcional-1.mjs corrida              # F0 a F4: limpieza, registro, empresas, vacantes, perfiles con CV
 node qa-tests/funcional-2.mjs corrida              # F5 a F13: el resto de las funciones
-node qa-tests/defectos.mjs corrida                 # sondas de defectos P01 a P23
-node qa-tests/accesibilidad.mjs corrida            # teclado, celular y primeros pasos (57 comprobaciones, sin IA)
+node qa-tests/defectos.mjs corrida                 # sondas de defectos P01 a P24
+node qa-tests/accesibilidad.mjs corrida            # teclado, celular y primeros pasos (58 comprobaciones, sin IA)
 node qa-tests/cv-pdf.mjs corrida                   # lectura de PDF con pdf.js (la IA se simula)
 ```
 
@@ -89,7 +93,7 @@ Variables opcionales: `BASE_URL` (por defecto `http://localhost:3100`), `ENV_FIL
 | Fase | Función | Qué se hace |
 |---|---|---|
 | F0 | Limpieza | Elimina las cuentas y los datos de una ejecución anterior |
-| F1 | Registro e inicio de sesión | 4 validaciones, 15 altas por la pantalla de registro (10 candidatos, 5 reclutadores) e inicio de sesión de todas |
+| F1 | Registro e inicio de sesión | 4 validaciones, 15 altas por la pantalla de registro (10 candidatos, 5 reclutadores) e inicio de sesión de todas. Las reclutadoras nacen sin aprobar (se comprueba) y la prueba las aprueba con el SDK de administración, como haría una administradora |
 | F2 | Perfil de la empresa | 5 empresas; rechazo de sitios sin http(s) y de descripciones cortas |
 | F3 | Vacantes | 10 vacantes (5 con descripción generada por la IA); etiquetas, seniority y modalidad |
 | F4 | Perfil con CV e IA | 10 CV en PDF analizados, vista previa, aplicar sugerencias y guardar el perfil |
@@ -103,9 +107,14 @@ Variables opcionales: `BASE_URL` (por defecto `http://localhost:3100`), `ENV_FIL
 | F12 | Panel del administrador | Indicadores, roles, suspensión, organizaciones, vacantes en cascada, auditoría y «Ver como» |
 | F13 | Cuenta y configuración | Nombre, contraseña, preferencias de correo, tema y recuperación de contraseña |
 
-Las sondas de [`defectos.mjs`](defectos.mjs) comprueban un defecto concreto cada una (P01 a P23) y devuelven
+Las sondas de [`defectos.mjs`](defectos.mjs) comprueban un defecto concreto cada una (P01 a P24) y devuelven
 `defecto: true` si todavía existe. Se ejecutaron antes y después de cada corrección para demostrar que el cambio
 funciona.
+
+**Política de contenido.** `lib.mjs` vigila la consola de cada página (`watchCsp`): si la cabecera
+`Content-Security-Policy` bloquea un script, una imagen, una conexión o un formulario, el navegador lo avisa y la suite
+termina con la comprobación «Política de contenido» en rojo (`checkCsp`; en `defectos.mjs`, la sonda P24). Así un cambio
+que necesite un origen nuevo no pasa inadvertido.
 
 ## Accesibilidad, teclado y celular (`accesibilidad.mjs`)
 
@@ -185,8 +194,13 @@ FALLA [F4] Perfil del candidato | guardar perfil  -> no aparece el aviso de éxi
   Detalles en [docs/ENTORNOS.md](../docs/ENTORNOS.md).
 - **F8 y F8b modifican datos de ejemplo.** Aceptan y rechazan matches de las cuentas demo (por ejemplo
   `candidato@example.com`), así que esas recomendaciones dejan de estar «en espera» y se crean postulaciones. Para
-  repetir la fase, restaura el conjunto con `npm run seed:apply` (vuelve a escribir los valores originales);
-  `funcional-1.mjs` (F0) elimina las postulaciones que creó la ejecución anterior.
+  repetir la fase, restaura el conjunto con `node scripts/seed.mjs --env .env.staging --apply` (vuelve a escribir los
+  valores originales; con `--env` explícito, porque `npm run seed:apply` apunta a `.env.local`, que suele ser producción
+  y el script se niega); `funcional-1.mjs` (F0) elimina las postulaciones que creó la ejecución anterior.
+- **Las fases de `funcional-2.mjs` dependen unas de otras y del estado que deja `funcional-1.mjs`.** F12 y F13
+  cambian roles, nombres, contraseñas y vacantes de las cuentas de prueba, así que repetir una fase suelta después de
+  una corrida completa falla por el estado y no por la aplicación. Para repetir, vuelva a correr `funcional-1.mjs`
+  (F0 limpia y recrea todo) y luego las fases que necesite.
 - **Los datos son ficticios** (correos `@example.com`) y la contraseña es la de las cuentas de demostración
   ([docs/CUENTAS_DEMO.md](../docs/CUENTAS_DEMO.md)). F0 los elimina al empezar, así que la suite se puede repetir.
 - **No se prueban** el inicio de sesión con Google (ventana emergente del proveedor), el envío real de correos

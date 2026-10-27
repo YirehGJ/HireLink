@@ -6,7 +6,7 @@
 // prueba:  python qa-tests/crear-cvs.py
 import path from 'path';
 import {
-  BASE, CV_DIR, OUT_DIR, sleep, launch, close, session, record, results, saveResults,
+  BASE, CV_DIR, OUT_DIR, sleep, launch, close, session, record, results, saveResults, checkCsp,
 } from './lib.mjs';
 
 const TAG = process.argv[2] || 'corrida';
@@ -59,6 +59,7 @@ try {
   const externas = peticiones.filter((u) => /cdnjs|unpkg|jsdelivr/.test(u));
   record(F, 'Terceros', 'no se pide nada a un CDN de terceros', externas.length === 0, `${externas.length} solicitudes`);
   record(F, 'Consola', 'sin errores relacionados con pdf.js o el worker', !s.log.console.some((c) => /worker|pdf/i.test(c)), s.log.console.join(' | ').slice(0, 200));
+  checkCsp(F);
   await s.ctx.close();
 } finally {
   saveResults(path.join(OUT_DIR, `cv-pdf_${TAG}.json`));

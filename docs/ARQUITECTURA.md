@@ -160,6 +160,7 @@ Reglas que conviene recordar:
 
 1. **Reglas de Firestore:** rol, propiedad, aislamiento entre empresas, cuentas suspendidas y tamaños máximos.
 2. **Route Handlers:** `requireUser` (token, cuenta existente y activa, rol) y `enforceRateLimit` en cada endpoint.
-3. **Cabeceras HTTP** (`next.config.mjs`): HSTS, `X-Frame-Options`, `nosniff`, política de referencia y de permisos.
+3. **Cabeceras HTTP** (`next.config.mjs`): política de contenido (`Content-Security-Policy`), HSTS, `X-Frame-Options`,
+   `nosniff`, política de referencia, de permisos y de apertura entre orígenes.
 4. **Datos de entrada:** esquemas de `zod` en formularios, topes de tamaño y normalización de lo que devuelve la IA.
 5. **Pruebas:** `security-tests/` (reglas, API y carga) y `qa-tests/` (unitarias, regresión con navegador y sondas).

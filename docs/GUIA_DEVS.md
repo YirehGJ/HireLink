@@ -141,6 +141,17 @@ ahí; la pantalla no se dibuja hasta conocer el rol de la persona.
 con la versión en el nombre; el minificador de Next no acepta el worker empaquetado. Si cambias la versión de `pdfjs-dist`,
 ejecuta `npm run worker:pdf` y confirma con `npm run test:unit` (hay una prueba que falla si no coinciden).
 
+### Política de contenido (CSP)
+
+`next.config.mjs` envía una `Content-Security-Policy` estricta: la página solo carga código, estilos, fuentes e imágenes de
+sí misma y solo se conecta a Firebase (`*.googleapis.com`) y a Sentry. Si una pantalla nueva necesita algo de otro dominio
+(una imagen externa, un script, una API llamada desde el navegador), agregue ese origen a la directiva que corresponda
+(`img-src`, `connect-src`...) y no use `unsafe-eval`. Las suites con navegador (`qa-tests/`) fallan con «Política de
+contenido» si el navegador bloquea algo, y `security-tests/api-test.mjs` (H06 a H08) comprueba la cabecera. En desarrollo
+(`npm run dev`) la política añade lo que necesita Next (`unsafe-eval` y la conexión de recarga en caliente). Si en
+producción algo deja de cargar por la política, `CSP_REPORT_ONLY=true` en Vercel (y un nuevo despliegue) la deja solo en
+aviso mientras se corrige.
+
 ### Scripts que usan Firebase Admin
 
 `firebase-admin` 14 ya no exporta la API con espacios de nombres (`admin.firestore()`). En los scripts y las pruebas usa la
@@ -201,6 +212,7 @@ Las reglas de Firestore se publican aparte (consola de Firebase o Firebase CLI);
 | «Connection error» al usar la IA | La clave de Groq trae un espacio o salto de línea | Pégala de nuevo; el código aplica `.trim()` |
 | `permission-denied` en una lista | La consulta no incluye los campos que exigen las reglas | Agrega `organizationRef` o el filtro que corresponda |
 | «La IA alcanzó su límite de uso gratuito por hoy» | Se agotó el cupo diario | Esperar (ventana de 24 h) o usar `GROQ_MODEL_ID=openai/gpt-oss-20b` |
+| «Refused to load/connect… Content Security Policy» en la consola, o algo externo no carga | La política de contenido no permite ese origen | Agregarlo en `next.config.mjs` (ver «Política de contenido»); mientras tanto, `CSP_REPORT_ONLY=true` |
 | Las horas de los avisos salen distintas | El servidor corre en UTC | El navegador envía su zona horaria; para reproducirlo en local usa `TZ=UTC` |
 | Quedaron postulaciones de una vacante borrada | Se borró desde fuera de la aplicación | `node scripts/limpiar-huerfanos.mjs --env .env.staging` (simulación por defecto) |
 

@@ -48,13 +48,13 @@ las veces que haga falta; lo que sí depende está marcado con 🤖 y gasta cupo
 
 | Cifra | Valor | De dónde sale |
 |---|---|---|
-| Pruebas de reglas de Firestore | 61/61 | `security-tests/sec-test.mjs` |
-| Pruebas de la API, límites de uso y carga | 67/67 (100 usuarios simultáneos, 100/100) | `security-tests/api-test.mjs` |
-| Pruebas de flujos con las reglas endurecidas | 23/23 | `security-tests/flow-test.mjs` |
-| Pruebas unitarias | 26/26, sin red ni IA | `npm run test:unit` |
-| Pruebas de teclado, celular y primeros pasos | 57/57 | `qa-tests/accesibilidad.mjs` |
-| Accesibilidad automática | 0 violaciones en 13 pantallas, escritorio y celular, tema claro y oscuro | axe-core, WCAG 2.2 AA |
-| Avisos de dependencias | 96 a 84 (críticos 2 a 0, altos 30 a 20) | `npm audit` antes y después de actualizar |
+| Pruebas de reglas de Firestore | 110/110 (61/61 en la 1.0) | `security-tests/sec-test.mjs` |
+| Pruebas de la API, cabeceras, límites de uso y carga | 96/96 (100 usuarios simultáneos, 100/100) | `security-tests/api-test.mjs` |
+| Pruebas de flujos con las reglas endurecidas | 29/29 | `security-tests/flow-test.mjs` |
+| Pruebas unitarias | 46/46, sin red ni IA | `npm run test:unit` |
+| Pruebas de teclado, celular y primeros pasos | 58/58 | `qa-tests/accesibilidad.mjs` |
+| Accesibilidad automática | 0 violaciones en 13 pantallas, escritorio y celular, tema claro y oscuro (medido en la 1.0) | axe-core, WCAG 2.2 AA |
+| Avisos de dependencias | 96 a 84 en la 1.0 (críticos 2 a 0, altos 30 a 20); 80 el 26 de octubre, con 14 altos | `npm audit` antes y después de actualizar |
 | Peso de la página del perfil | 94 kB a 14 kB | `next build` |
 | Costo mensual | $0 | Firebase Spark, Vercel y Groq en planes gratuitos |
 

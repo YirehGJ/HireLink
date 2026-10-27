@@ -13,7 +13,7 @@ M: de 1 a 3 días, L: más de 3 días) y lo que habría que decidir antes de emp
 | 3 | Visibilidad del perfil controlada por la persona candidata | R1 | M | Hoy cualquier reclutador ve correo y texto del CV de todos | Qué ve una empresa antes de una postulación o match |
 | 4 | Verificación de reclutadores y empresas. **Parcial en la 1.1**: un administrador aprueba a cada reclutadora; falta comprobar que la empresa exista | R1 | M | Cualquiera puede registrarse como reclutador (sin aprobar no ve candidatas ni publica) | Cómo se verifica una empresa |
 | 5 | Elegir el rol al entrar por primera vez con Google | R3 | S | Hoy queda como candidato y solo un administrador puede cambiarlo | Ninguna |
-| 6 | Content-Security-Policy y proteger el detalle de `/api/health` | R6 | M | Reduce el daño de un XSS y la información que se expone | Primero en modo solo reporte |
+| 6 | ~~Content-Security-Policy~~ **Hecha en la 1.1** (le falta una versión con nonce para quitar `'unsafe-inline'`); proteger el detalle de `/api/health` sigue pendiente | R6 | M | Reduce el daño de un XSS y la información que se expone | Con nonce, las páginas dejan de ser estáticas |
 
 ## Prioridad alta: operación de la IA
 
@@ -43,7 +43,7 @@ M: de 1 a 3 días, L: más de 3 días) y lo que habría que decidir antes de emp
 | 18 | Pruebas con navegador en cada despliegue (integración continua) | Semana 4 | M | Hoy se ejecutan a mano |
 | 19 | Accesibilidad: revisión con lector de pantalla y con personas usuarias | Semana 6 | M | Las pruebas automáticas cubren una parte de las barreras |
 | 20 | ~~Variables Preview en Vercel y dominio autorizado en Authentication de staging~~ **Hecho el 19 de octubre de 2026** | Semana 4 | S | Cada rama tiene su entorno de prueba ([ENTORNOS.md](ENTORNOS.md)) |
-| 21 | Actualizar a la siguiente versión mayor de las dependencias con avisos sin corrección | Semana 5 | M | Quedan 20 avisos altos (cadena de Firebase, Genkit y herramientas de compilación). Se probó `firebase` 13.0.0: compila y pasa las pruebas unitarias, pero suma unos 68 kB por ruta y solo quita un aviso alto |
+| 21 | Actualizar a la siguiente versión mayor de las dependencias con avisos sin corrección | Semana 5 | M | Quedan 14 avisos altos el 26 de octubre (cadena de Firebase, Genkit, `zod` 3 y `postcss` de Next.js). Se probó `firebase` 13.0.0: compila y pasa las pruebas unitarias, pero suma unos 68 kB por ruta y solo quita un aviso alto |
 
 ## Hallazgos de la revisión por áreas (24 de octubre de 2026)
 
@@ -64,6 +64,16 @@ por confirmar. Ninguno estaba en los puntos anteriores.
 | 30 | Panel del administrador: el embudo muestra el estado actual y no la conversión, los errores de lectura salen como ceros, «Ver como» no queda en la auditoría y Configuración sigue editable en ese modo | M | **Parcial en la 1.1**: Configuración ya respeta «Ver como»; faltan el embudo, los errores de lectura y la auditoría de «Ver como» |
 | 31 | Pruebas de reglas que faltan: lectura de perfiles ajenos o de notas por una candidata, entrevistas ajenas, cuentas suspendidas, reclutadora sin empresa y `/api/health` | M | **Parcial en la 1.1**: hay pruebas de reglas y de la API para todo lo nuevo; faltan reclutadora sin empresa y `/api/health` |
 
+## Hallazgos de la auditoría del 26 de octubre de 2026
+
+Pruebas de reglas, de la API y de navegador, más la lectura de `firestore.rules` y de las cabeceras. Lo corregido en la
+misma auditoría está en el [CHANGELOG](../CHANGELOG.md); esto es lo que se dejó para después, ambos de gravedad baja.
+
+| # | Qué | Esfuerzo | Estado |
+|---|---|---|---|
+| 32 | El correo no se verifica al registrarse: alguien puede crear una cuenta con la dirección de otra persona y la reclutadora la vería en el perfil. Firebase envía el aviso de verificación sin costo y las reglas pedirían `email_verified` | M | Pendiente. Mitigación del piloto: participantes invitadas y reclutadoras aprobadas a mano |
+| 33 | A una reclutadora a la que se revoca la aprobación se le sigue permitiendo leer postulaciones, entrevistas y recomendaciones de su empresa (no los perfiles ni el CV, que sí se cierran). Exigir `isActiveRecruiterOf` también en esas lecturas y que las pantallas lo contemplen | S | Pendiente. Lo que ve ya lo había visto mientras estuvo aprobada |
+
 ## Ideas para después
 
 - Aplicación instalable (PWA) y avisos push.
@@ -75,7 +85,7 @@ por confirmar. Ninguno estaba en los puntos anteriores.
 
 ## Cómo se decide qué entra primero
 
-1. Lo que protege datos personales (puntos 1 a 6, 22 y 23).
+1. Lo que protege datos personales (puntos 1 a 6, 22, 23, 32 y 33).
 2. Lo que evita que la IA deje de funcionar (7 a 9, 25 y 26).
 3. Lo que una persona del piloto pidió dos veces.
 4. El resto, por esfuerzo.

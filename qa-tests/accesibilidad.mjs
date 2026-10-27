@@ -6,7 +6,7 @@
 // de primeros pasos aparezca, avance y se pueda cerrar. Las cuentas que crea se eliminan al terminar.
 import path from 'path';
 import {
-  BASE, PASS, sleep, launch, close, session, go, record, results, saveResults, deleteAccountCascade, OUT_DIR,
+  BASE, PASS, sleep, launch, close, session, go, record, results, saveResults, deleteAccountCascade, OUT_DIR, checkCsp,
 } from './lib.mjs';
 
 const TAG = process.argv[2] || 'corrida';
@@ -70,9 +70,11 @@ try {
   await go(p, '/login', null, 800);
   const orden = [];
   for (let i = 0; i < 9; i++) { await tab(p); const a = await activo(p); orden.push(a.texto || a.tag); }
-  const esperado = ['Saltar al contenido', 'HireLink', 'tu@email.com', '********', 'Mostrar contraseña', 'Recuérdame', '¿Olvidaste', 'Entrar', 'Google'];
-  const enOrden = esperado.every((x, i) => (x === 'Recuérdame' ? orden[i] === 'button' || orden[i] === 'Recuérdame' || /checkbox/.test(orden[i]) || orden[i] === '' : orden[i]?.includes(x)));
-  ok('Inicio de sesión', 'el teclado recorre en orden: saltar, logo, correo, contraseña, ver contraseña, recuérdame, olvidé, entrar, Google', enOrden, orden.join(' > '));
+  // Desde la 1.1 el botón «Google» está apagado salvo NEXT_PUBLIC_GOOGLE_LOGIN=true: después de «Entrar» sigue el enlace de registro.
+  const esperado = ['Saltar al contenido', 'HireLink', 'tu@email.com', '********', 'Mostrar contraseña', 'Recuérdame', '¿Olvidaste', 'Entrar'];
+  const enOrden = esperado.every((x, i) => (x === 'Recuérdame' ? orden[i] === 'button' || orden[i] === 'Recuérdame' || /checkbox/.test(orden[i]) || orden[i] === '' : orden[i]?.includes(x)))
+    && /Google|Regístrate/.test(orden[8] || '');
+  ok('Inicio de sesión', 'el teclado recorre en orden: saltar, logo, correo, contraseña, ver contraseña, recuérdame, olvidé, entrar y, al final, Google (si está activo) o el enlace de registro', enOrden, orden.join(' > '));
   await anon.ctx.close();
 
   // ---------------------------------------------------------------- 2. escritorio autenticado
@@ -231,6 +233,7 @@ try {
   await demo.ctx.close();
 } finally {
   for (const e of [EMAIL_CAND, EMAIL_REC]) await deleteAccountCascade(e).catch(() => {});
+  checkCsp('CSP');
   saveResults(path.join(OUT_DIR, `accesibilidad_${TAG}.json`));
   await close();
 }

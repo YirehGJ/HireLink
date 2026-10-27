@@ -119,7 +119,8 @@ export function InterviewsCalendar({ jobId, organizationRef, candidateUid }: Int
                         selected={date}
                         month={month}
                         onMonthChange={setMonth}
-                        onSelect={(d) => { setPickedByUser(true); setDate(d); }}
+                        // Volver a tocar el día elegido lo deseleccionaba y el panel decía «Ningún día seleccionado»: se conserva.
+                        onSelect={(d) => { setPickedByUser(true); if (d) setDate(d); }}
                         locale={es}
                         className="p-0"
                         modifiers={{

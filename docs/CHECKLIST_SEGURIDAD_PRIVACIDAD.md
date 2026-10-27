@@ -4,18 +4,20 @@ Revisión de cierre de la versión 1.0, hecha el 17 de octubre de 2026 sobre el 
 firebase-admin 14.5.0). Cada punto dice qué se verificó, con qué prueba o archivo, y si está hecho (✅), parcial (🟡) o
 pendiente (❌). Lo pendiente no se oculta: pasa a [BACKLOG_V2.md](BACKLOG_V2.md) o queda como riesgo aceptado con su motivo.
 
-## 1. Resultados de las pruebas (repetidas después de actualizar las dependencias)
+## 1. Resultados de las pruebas
 
-| Batería | Qué prueba | Resultado |
-|---|---|---|
-| `security-tests/sec-test.mjs` | Reglas de Firestore: escalada de privilegios, aislamiento entre empresas, cuentas suspendidas, integridad y tamaños | **61/61** |
-| `security-tests/api-test.mjs` | Endpoints `/api/*` (sesión, roles, empresa ajena, entrada inválida, límites de uso, cabeceras) y carga de 100 usuarios | **67/67** |
-| `security-tests/flow-test.mjs` | Los flujos normales siguen funcionando con las reglas endurecidas | **23/23** |
-| `npm run test:unit` | Motor de recomendaciones, política de reintentos de la IA, formato y versión del worker de pdf.js | **26/26** |
-| `qa-tests/accesibilidad.mjs` | Teclado, menú del celular, foco en diálogos, HTML estático y guía de primeros pasos con navegador real | **57/57** |
-| axe-core (WCAG 2.2 AA) | 13 pantallas en escritorio y celular, tema claro y oscuro | **0 violaciones** |
+| Batería | Qué prueba | 1.0 (17 oct) | 1.1 (27 oct) |
+|---|---|---|---|
+| `security-tests/sec-test.mjs` | Reglas de Firestore: escalada de privilegios, aislamiento entre empresas, cuentas suspendidas, integridad, tamaños, notas privadas, aprobación de reclutadoras, entrevistas y correo del perfil | **61/61** | **110/110** |
+| `security-tests/api-test.mjs` | Endpoints `/api/*` (sesión, roles, empresa ajena, API de administración, entrada inválida, límites de uso, cabeceras y política de contenido) y carga de 100 usuarios | **67/67** | **96/96** |
+| `security-tests/flow-test.mjs` | Los flujos normales siguen funcionando con las reglas endurecidas | **23/23** | **29/29** |
+| `npm run test:unit` | Motor de recomendaciones, política de reintentos y modelo de respaldo de la IA, formato, formularios de acceso y versión del worker de pdf.js | **26/26** | **46/46** |
+| `qa-tests/accesibilidad.mjs` | Teclado, menú del celular, foco en diálogos, HTML estático y guía de primeros pasos con navegador real | **57/57** | **58/58** |
+| `qa-tests/funcional-1.mjs`, `funcional-2.mjs`, `defectos.mjs`, `cv-pdf.mjs` | Recorrido completo con navegador real, sondas de defectos y lectura de CV en PDF | (informe de la Semana 4) | **72/72, 131/131 (F6 a F13 sin F9), 23 sondas sin defectos, 8/8** |
+| axe-core (WCAG 2.2 AA) | 13 pantallas en escritorio y celular, tema claro y oscuro | **0 violaciones** | sin repetir en la 1.1 |
 
-Las tres baterías de seguridad se ejecutaron contra `hirelink-staging` y se niegan a correr contra producción.
+Las baterías de seguridad y de navegador se ejecutaron contra `hirelink-staging` y se niegan a correr contra producción.
+Las cifras de la 1.0 son las del cierre del 17 de octubre; las de la 1.1 están en [RELEASE_v1.1.md](RELEASE_v1.1.md).
 
 ## 2. Seguridad
 
@@ -28,6 +30,9 @@ Las tres baterías de seguridad se ejecutaron contra `hirelink-staging` y se nie
 | Una cuenta suspendida no puede escribir ni reactivarse sola | ✅ | `isActive()` en las reglas; pruebas S06b, S07, S08 y S33b. Desde la 1.1 el estado, el rol y la aprobación solo los cambia el servidor (`/api/admin/users`): ni siquiera una administradora lo escribe desde el navegador (S40 a S40d) |
 | Una cuenta suspendida, o con el rol cambiado, no puede leer datos | ✅ | Desde la 1.1 todas las lecturas exigen cuenta activa (salvo el propio documento de usuario, que la pantalla necesita para avisar) y `isRecruiterForOrg` exige el rol de reclutadora; suspender también deshabilita la cuenta de Authentication y revoca las sesiones. Pruebas S50 a S52 |
 | Una reclutadora solo ve candidatas y publica vacantes si un administrador la aprobó | ✅ | `recruiterApproved` (solo lo escribe el servidor) en las reglas y en `canManageOrg` de cada ruta; sin aprobar puede completar su empresa. Pruebas S46 a S49, U01 a U11 |
+| Revocar la aprobación de una reclutadora le cierra los perfiles, el CV y la publicación | 🟡 | Los perfiles y el texto del CV se cierran de inmediato; las postulaciones, entrevistas y recomendaciones de su empresa siguen legibles para ella (lo que ya había visto). Backlog, punto 33 |
+| El correo del perfil es el de la cuenta (el que ve la reclutadora) | ✅ | Reglas de `users` y `candidates`, sin distinguir mayúsculas; pruebas S57, S58 y su control |
+| El correo se verifica al registrarse | ❌ | No: alguien puede registrarse con la dirección de otra persona. Mitigación del piloto: participantes invitadas y reclutadoras aprobadas a mano. Backlog, punto 32 |
 | Las notas privadas y la shortlist de la reclutadora no las lee la candidata | ✅ | Viven en `/jobs/{id}/applicantNotes/{uid}` y no en la postulación; pruebas S41 a S45 |
 | Una entrevista solo se agenda para quien se postuló a una vacante de la propia empresa | ✅ | Regla de `interviews` (existe la postulación, la vacante es de la empresa, `interviewerRef` es quien llama); pruebas S53 a S54b |
 | El reclutador solo ve y gestiona su empresa | ✅ | `isRecruiterForOrg`, pruebas de empresa ajena |
@@ -54,7 +59,8 @@ Las tres baterías de seguridad se ejecutaron contra `hirelink-staging` y se nie
 |---|---|---|
 | HSTS, `X-Frame-Options: DENY`, `nosniff`, política de referencia y de permisos | ✅ | `next.config.mjs`; pruebas H01 a H04 (la política de referencia y la de permisos se configuran en el mismo archivo, sin prueba propia) |
 | No se anuncia el servidor (`X-Powered-By`) | ✅ | `poweredByHeader: false` |
-| Content-Security-Policy | ❌ | Backlog (punto 6): se activará primero en modo solo reporte |
+| Content-Security-Policy | ✅ | Desde la 1.1 (`next.config.mjs`): código, estilos, fuentes e imágenes solo del propio sitio; conexiones solo a Firebase (`googleapis.com`) y Sentry; sin plugins (`object-src 'none'`), sin `<base>`, formularios ni marcos hacia otros sitios. Pruebas H06 y H07; cada suite con navegador revisa que no se bloquee nada (control positivo: la política frena un script, una imagen, una salida de datos y un formulario ajenos). Límite: `script-src` conserva `'unsafe-inline'` porque Next.js inserta scripts de hidratación; una política con nonce queda para la versión 2. Si un cambio futuro necesita otro origen, `CSP_REPORT_ONLY=true` (y un nuevo despliegue) la deja en solo aviso mientras se ajusta |
+| Aislamiento de la pestaña y política entre dominios | ✅ | `Cross-Origin-Opener-Policy: same-origin-allow-popups` y `X-Permitted-Cross-Domain-Policies: none` (prueba H08) |
 | Sin `dangerouslySetInnerHTML` con contenido de personas | ✅ | Solo se usa en `ui/chart.tsx` con CSS fijo; las descripciones se dibujan con un Markdown propio (`src/lib/markdown.tsx`) |
 | Solo enlaces `http` o `https` en datos escritos por personas | ✅ | `isHttpUrl` en `src/lib/format.ts` |
 | Redirección tras iniciar sesión limitada a rutas propias | ✅ | `safeNextPath` en `src/lib/auth-flags.ts` |
@@ -72,21 +78,31 @@ Las tres baterías de seguridad se ejecutaron contra `hirelink-staging` y se nie
 
 ### 2.5 Dependencias
 
-| | Antes (16 oct) | Después (17 oct) |
-|---|---|---|
-| Avisos de `npm audit` | 96 | **84** |
-| Críticos | 2 | **0** |
-| Altos | 30 | **20** |
-| Moderados | 64 | 64 |
+| | Antes (16 oct) | Después (17 oct) | Rama 1.1 (26 oct) |
+|---|---|---|---|
+| Avisos de `npm audit` | 96 | **84** | **80** |
+| Críticos | 2 | **0** | **0** |
+| Altos | 30 | **20** | **14** |
+| Moderados | 64 | 64 | 66 |
+
+La base de avisos de npm cambia con el tiempo, así que la cifra del 26 de octubre se compara con las anteriores solo como
+referencia.
 
 Qué se hizo: `next` 14.2.35 a 15.5.28, `firebase-admin` a 14.5.0, `pdfjs-dist` a 6.4.299, `@sentry/nextjs` a 11.8.0 y
 `npm audit fix` para los parches seguros. Se exige Node 22 (`engines`).
 
-Qué queda y por qué no se corrigió: los 20 avisos altos están en la cadena del cliente de Firebase (`undici` y
-`@grpc/grpc-js`), en Genkit y OpenTelemetry (trazas del servidor) y en herramientas de compilación (`tailwindcss`,
-`postcss`, `braces`). Ninguno tiene corrección que no exija cambiar de versión mayor de un paquete central
-(`firebase`, `genkit`, `tailwindcss` 4 o `next` 16). Se documentan como riesgo conocido y están en el punto 21 del
-backlog. El aviso restante de `next` es moderado y viene de `postcss`, que se usa al compilar.
+Qué queda y por qué no se corrigió: los avisos altos (20 el 17 de octubre, 14 el 26) están en la cadena del cliente de
+Firebase 10.14 (`firebase`, `@firebase/*`, `undici`), en Genkit (`@genkit-ai/*`, `openai`, `@grpc/grpc-js`,
+`body-parser`, OpenTelemetry), en `zod` 3 y en `postcss`, que trae `next` y solo se usa al compilar. Ninguno tiene
+corrección que no exija cambiar de versión mayor de un paquete central (`firebase`, `genkit`, `zod` 4 o `next` 16). Se
+documentan como riesgo conocido y están en el punto 21 del backlog.
+
+Revisión del 26 de octubre de 2026 (¿pueden usarse desde la aplicación?): los avisos de `@grpc/grpc-js` son de servidores
+gRPC con certificados de cliente y la aplicación solo es cliente; los de `body-parser` y de OpenTelemetry (propagador
+Jaeger) están en el servidor de flujos de Genkit y en su telemetría, que no se usan (los flujos se llaman como funciones y
+Jaeger no está configurado); los de `undici` son de su cliente HTTP y WebSocket, que llega con el cliente web de Firebase
+(las rutas del servidor usan `firebase-admin`, no ese cliente); los de `postcss` exigen que alguien controle el CSS que se compila; el de `zod` exige cuerpos enormes y
+Vercel limita las peticiones a 4,5 MB. Es una revisión de lectura, no una prueba de explotación.
 
 ### 2.6 Observabilidad y auditoría
 
@@ -145,9 +161,9 @@ backlog. El aviso restante de `next` es moderado y viene de `postcss`, que se us
 |---|---|---|
 | R1: las reclutadoras aprobadas ven el correo y el texto del CV de todas las personas candidatas | Es el comportamiento del producto; desde la 1.1 solo con la aprobación de un administrador | Aviso en el piloto; control de visibilidad en el backlog |
 | R3: quien entra con Google no elige su rol | Se evita pidiendo registrarse con correo | El administrador puede cambiar el rol |
-| R6: sin Content-Security-Policy | Una política mal puesta rompe la aplicación | Primero en modo solo reporte (backlog) |
+| R6: la Content-Security-Policy conserva `'unsafe-inline'` en `script-src` | Next.js inserta scripts de hidratación en cada página; con nonce habría que generarlas todas en cada visita | El resto de la política es estricto (ver 2.3); React escapa el contenido y solo hay un `dangerouslySetInnerHTML` con CSS fijo; política con nonce en el backlog |
 | R8: la clave de Groq se comparte entre entornos | Costo cero | No correr pruebas con IA los días de piloto o de defensa; el modelo de respaldo tiene cupo propio |
-| 20 avisos altos de `npm audit` sin corrección menor | Exigen versiones mayores de paquetes centrales | Documentados y planificados para la versión 2 |
+| 14 avisos altos de `npm audit` sin corrección menor (20 en la 1.0) | Exigen versiones mayores de paquetes centrales | Revisados uno por uno (2.5): ninguno afecta a una ruta que la aplicación use hoy; planificados para la versión 2 |
 
 ## 5. Qué repetir antes de la defensa
 

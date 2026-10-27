@@ -38,6 +38,11 @@ if (PRODUCTION_PROJECT_IDS.includes(ENV.FIREBASE_PROJECT_ID)) {
   process.exit(2);
 }
 console.log(`Proyecto de pruebas: ${ENV.FIREBASE_PROJECT_ID}  |  aplicación: ${BASE}`);
+if (process.env.TZ) {
+  // En Windows el navegador ignora TZ y Node no: las horas que calculan las pruebas (entrevistas, avisos) dejarían de
+  // coincidir con las de la pantalla. TZ=UTC va solo en la terminal que sirve la aplicación (para imitar a Vercel).
+  console.warn(`AVISO: TZ=${process.env.TZ} está definida en esta terminal; defínala solo donde corre «npm run start:staging».`);
+}
 initializeApp({
   credential: cert({
     projectId: ENV.FIREBASE_PROJECT_ID,
@@ -95,11 +100,27 @@ export function record(fase, funcion, caso, ok, detalle = '') {
 }
 export function saveResults(file) { fs.writeFileSync(file, JSON.stringify(results, null, 2)); }
 
+// Violaciones de la política de contenido (cabecera Content-Security-Policy) que vio cualquier página de la suite:
+// si la política bloqueara algo que la aplicación necesita, el navegador lo avisa en la consola.
+export const cspViolations = [];
+const CSP_MESSAGE = /Content[- ]Security[- ]Policy|violates the following|Refused to (load|connect|execute|apply|frame|create|run)/i;
+export function watchCsp(page) {
+  page.on('console', (m) => {
+    const t = m.text();
+    if (CSP_MESSAGE.test(t)) cspViolations.push(`${page.url().replace(BASE, '') || '/'} :: ${t.slice(0, 220)}`);
+  });
+}
+export function checkCsp(fase) {
+  return record(fase, 'Política de contenido', 'ninguna violación en toda la suite', cspViolations.length === 0,
+    cspViolations.length ? `${cspViolations.length}: ${[...new Set(cspViolations)].slice(0, 3).join(' | ')}` : 'el navegador no bloqueó nada');
+}
+
 // ------------------------------------------------------------------ sesiones del navegador
 export async function session(email, opts = {}) {
   const ctx = await browser.createBrowserContext();
   const page = await ctx.newPage();
   const log = { console: [], requests: [], responses: [] };
+  watchCsp(page);
   page.on('console', (m) => {
     if (m.type() !== 'error') return;
     const t = m.text();

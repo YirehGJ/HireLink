@@ -6,6 +6,7 @@ import path from 'path';
 import {
   BASE, PASS, sleep, db, auth, TS, uidOf, tryUid, launch, close, session, loginUI, go, bodyText, hasText, waitText,
   setInput, clickText, pickSelect, record, results, saveResults, deleteAccountCascade, deleteJobCascade, OUT_DIR, CV_DIR, STATE_FILE,
+  checkCsp,
 } from './lib.mjs';
 import { RECRUITERS, CANDIDATES, ALL_QA_EMAILS } from './datos.mjs';
 
@@ -244,6 +245,7 @@ if (run('F4')) {
   if (times.length) record('F4', 'IA: análisis de CV', `resumen de ${times.length} análisis`, true, `promedio ${Math.round(times.reduce((a, b) => a + b, 0) / times.length)} ms; mínimo ${Math.min(...times)} ms; máximo ${Math.max(...times)} ms`);
 }
 
+checkCsp('CSP');
 saveResults(path.join(OUT_DIR, `funcional-1_${TAG}.json`));
 await close();
 const fails = results.filter((r) => !r.ok);
