@@ -1,0 +1,11 @@
+﻿Proyecto de pruebas: hirelink-staging  |  aplicación: http://localhost:3100
+OK   [CV] Carga diferida | al abrir el perfil no se descarga nada de pdf.js  -> 0 solicitudes
+OK   [CV] Extracción | carolina.mejia.pdf: el texto del PDF llega completo  -> 910 caracteres
+OK   [CV] Extracción | daniela.ochoa.pdf: el texto del PDF llega completo  -> 809 caracteres
+OK   [CV] Extracción | sebastian.arellano.pdf: el texto del PDF llega completo  -> 1005 caracteres
+OK   [CV] Worker | el worker se pide al propio sitio, con la versión en el nombre  -> /pdf.worker.6.4.299.min.mjs
+OK   [CV] Terceros | no se pide nada a un CDN de terceros  -> 0 solicitudes
+OK   [CV] Consola | sin errores relacionados con pdf.js o el worker
+OK   [CV] Política de contenido | ninguna violación en toda la suite  -> el navegador no bloqueó nada
+
+8/8 correctas, 0 fallas

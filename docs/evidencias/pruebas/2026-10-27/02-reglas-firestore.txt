@@ -1,0 +1,237 @@
+﻿Proyecto de pruebas: hirelink-staging  [.env.staging]
+node : [2026-10-27T06:38:38.485Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 
+0x45cff851 error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+En línea: 4 Carácter: 1
++ node security-tests/sec-test.mjs --env .env.staging *> "$sp\sec-final ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([2026-10-27T06:...nt permissions.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+[2026-10-27T06:38:39.988Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff859 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:38:41.654Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff85a 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:38:43.346Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff85b 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:38:44.862Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff85c 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:38:46.448Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff85d 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:38:47.913Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff85e 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:38:49.161Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff85f 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:38:50.238Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff860 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:38:51.333Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff861 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:38:52.439Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff862 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:38:58.010Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff864 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:38:59.141Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff854 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:00.462Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff865 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:01.621Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff866 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:02.701Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff867 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:03.816Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff868 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:05.016Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff869 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:10.144Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff86a 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:13.381Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff86b 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:14.389Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff852 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:17.700Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff86d 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:22.156Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff86e 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:23.256Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff86f 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:24.334Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff870 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:25.529Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff871 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:26.573Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff872 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:27.687Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff873 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:28.850Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff874 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:29.921Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff875 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:31.410Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff876 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:32.884Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff877 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:33.918Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff878 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:35.002Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff879 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:36.074Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff87a 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:37.177Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff87b 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:40.215Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff87c 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:42.185Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff87d 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:43.791Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff87e 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:44.855Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff87f 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:45.917Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff880 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:47.047Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff881 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:50.107Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff883 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:51.190Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff884 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:52.228Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff885 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:39:59.308Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff888 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:40:01.483Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff88a 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:40:03.495Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff88b 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:40:04.675Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff88c 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:40:05.809Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff88d 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:40:06.864Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff88e 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:40:07.914Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff88f 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:40:08.978Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff890 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:40:10.015Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff891 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:40:11.192Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff892 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:40:12.222Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff893 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:40:13.299Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff894 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:40:14.397Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff895 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+[2026-10-27T06:40:15.514Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x45cff896 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+OK    CTRL candidato lee su propio perfil -> permitido
+OK    CTRL candidato edita su perfil profesional -> permitido
+OK    CTRL candidato actualiza su nombre en users -> permitido
+OK    CTRL candidato lista vacantes publicadas -> permitido
+OK    CTRL candidato lee vacante publicada -> permitido
+OK    CTRL candidato postula correctamente -> permitido
+OK    CTRL reclutador A lee postulantes de su vacante -> permitido
+OK    CTRL reclutador A lista sus vacantes (incluye borradores) -> permitido
+OK    CTRL reclutador A edita su vacante -> permitido
+OK    CTRL reclutador A edita su organización -> permitido
+OK    CTRL reclutador A lista las entrevistas de su vacante (jobRef + organizationRef) -> permitido
+OK    CTRL reclutador A cambia estado de postulación -> permitido
+OK    CTRL reclutador A guarda notas y shortlist (applicantNotes) -> permitido
+OK    CTRL reclutador A lee las notas de su vacante -> permitido
+OK    CTRL reclutador A agenda entrevista con una persona que se postuló -> permitido
+OK    CTRL reclutador A cambia el lugar de una entrevista -> permitido
+OK    CTRL reclutador A lee candidatas -> permitido
+OK    CTRL admin lista usuarios -> permitido
+OK    CTRL admin lista candidatas -> permitido
+OK    CTRL reclutadora sin aprobar edita su propia organización -> permitido
+OK    CTRL reclutadora sin aprobar lee su propio documento de usuario -> permitido
+OK    CTRL candidata suspendida sí lee su propio documento de usuario (la pantalla le avisa) -> permitido
+OK    S01 candidato se auto-asigna rol admin -> denegado
+OK    S02 candidato se une a la organización A (organizationRef) -> denegado
+OK    S03 reclutador B se cambia a la organización A -> denegado
+OK    S04 registro nuevo con rol admin -> denegado
+OK    S05 registro nuevo como reclutador de la org A -> denegado
+OK    S06 usuario cambia su propio email en users -> denegado
+OK    S06b usuario se marca a sí mismo como suspendido/activo arbitrario -> denegado
+OK    S07 usuario suspendido se reactiva solo -> denegado
+OK    S08 usuario suspendido escribe su perfil de candidato -> denegado
+OK    S09 reclutador B edita vacante de A -> denegado
+OK    S10 reclutador B borra vacante de A -> denegado
+OK    S11 reclutador B lee postulantes de A -> denegado
+OK    S12 reclutador B lee entrevistas de A -> denegado
+OK    S12b reclutador B lee entrevistas de A fijando organizationRef de A -> denegado
+OK    S13 reclutador B lee recomendaciones de A -> denegado
+OK    S14 reclutador B edita organización de A -> denegado
+OK    S15 reclutador A edita organización de B -> denegado
+OK    S16 reclutador B crea vacante a nombre de la org A -> denegado
+OK    S16b reclutador B cambia la vacante de A a su propia organización (robo) -> denegado
+OK    S17 candidato crea vacante -> denegado
+OK    S18 candidato borra vacante -> denegado
+OK    S19 candidato agenda entrevista -> denegado
+OK    S20 candidato lista todos los usuarios -> denegado
+OK    S21 reclutador lista todos los usuarios -> denegado
+OK    S22 candidato lee auditLogs -> denegado
+OK    S23 reclutador lee auditLogs -> denegado
+OK    S24 candidato escribe en auditLogs -> denegado
+OK    S25 candidato lee vacante en borrador -> denegado
+OK    S26 candidato lista borradores -> denegado
+OK    S26b candidato borra organización -> denegado
+OK    S27 candidato 2 edita el perfil del candidato 1 -> denegado
+OK    S28 candidato 2 lee las postulaciones de candidato 1 -> denegado
+OK    S29 candidato 2 lee notificaciones de candidato 1 -> denegado
+OK    S30 candidato se crea una notificación -> denegado
+OK    S31 candidato 2 lee el documento de usuario de candidato 1 -> denegado
+OK    S32 candidato 2 lee recomendaciones de candidato 1 -> denegado
+OK    S32b candidato lee la postulación de otro candidato en la vacante -> denegado
+OK    S33 candidato crea postulación con estado "hired" -> denegado
+OK    S33b candidato suspendido intenta postularse -> denegado
+OK    S33c candidato postula a una vacante cerrada/borrador -> denegado
+OK    S34 candidato crea postulación a nombre de otro -> denegado
+OK    S35 candidato crea espejo con estado "hired" -> denegado
+OK    S36 candidato escribe una recomendación -> denegado
+OK    S37 candidato modifica campos de una notificación -> denegado
+OK    S37b candidato se cambia su propio estado de postulación -> denegado
+OK    S38 candidato guarda perfil de 500 KB (DoS/costo) -> denegado
+OK    S39 reclutador crea vacante con descripción de 500 KB -> denegado
+OK    S40 administrador cambia un rol desde el cliente -> denegado
+OK    S40b administrador suspende a alguien desde el cliente -> denegado
+OK    S40c administrador aprueba a una reclutadora desde el cliente -> denegado
+OK    S40d administrador borra un usuario desde el cliente -> denegado
+OK    S41 candidata lee sus notas privadas -> denegado
+OK    S41b candidata lista las notas de la vacante -> denegado
+OK    S41c candidata escribe una nota privada -> denegado
+OK    S41d reclutador B lee las notas de la empresa A -> denegado
+OK    S41e reclutador A guarda un campo ajeno en la nota -> denegado
+OK    S41f reclutador A guarda una nota de 500 KB -> denegado
+OK    S43 reclutador A escribe la shortlist en la postulación (campo prohibido) -> denegado
+OK    S44 reclutador A pone una postulación en «retirado» -> denegado
+OK    S45 reclutador A revive una postulación que la candidata retiró -> denegado
+OK    S46 reclutadora sin aprobar lista candidatas -> denegado
+OK    S46b reclutadora sin aprobar lee una candidata -> denegado
+OK    S47 reclutadora sin aprobar publica una vacante -> denegado
+OK    S48 reclutadora se aprueba a sí misma -> denegado
+OK    S49 registro nuevo como reclutadora ya aprobada -> denegado
+OK    S50 candidata suspendida lee su perfil de candidata -> denegado
+OK    S50b candidata suspendida lee sus postulaciones -> denegado
+OK    S50c candidata suspendida lee sus avisos -> denegado
+OK    S50d candidata suspendida lista vacantes publicadas -> denegado
+OK    S51 reclutadora suspendida lista candidatas -> denegado
+OK    S51b reclutadora suspendida lee los postulantes de su vacante -> denegado
+OK    S51c reclutadora suspendida edita su vacante -> denegado
+OK    S52 quien dejó de ser reclutadora lee los postulantes de su antigua empresa -> denegado
+OK    S52b quien dejó de ser reclutadora edita la vacante de su antigua empresa -> denegado
+OK    S52c quien dejó de ser reclutadora lista candidatas -> denegado
+OK    S53 reclutador A agenda con una persona que no se postuló -> denegado
+OK    S53b reclutador A agenda con una vacante de otra empresa -> denegado
+OK    S53c reclutador A agenda a nombre de otra reclutadora -> denegado
+OK    S53d reclutador A agenda con un tipo de entrevista inválido -> denegado
+OK    S54 reclutador A cambia a quién va una entrevista -> denegado
+OK    S54b reclutador A mueve una entrevista a otra empresa -> denegado
+OK    S55 usuario escribe un teléfono que no es texto -> denegado
+OK    S55b usuario escribe un nombre de 500 caracteres -> denegado
+OK    S56 candidata guarda habilidades que no son una lista -> denegado
+OK    S56b reclutador A guarda etiquetas que no son una lista -> denegado
+OK    S57 registro nuevo con un correo que no es el de la cuenta -> denegado
+OK    S58 candidata guarda en su perfil el correo de otra persona -> denegado
+OK    CTRL candidata guarda su correo con otras mayúsculas -> permitido
+
+110/110 correctas, 0 vulnerabilidades/fallos

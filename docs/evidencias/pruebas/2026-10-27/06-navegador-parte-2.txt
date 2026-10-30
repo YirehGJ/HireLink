@@ -1,0 +1,148 @@
+﻿Proyecto de pruebas: hirelink-staging  |  aplicación: http://localhost:3100
+
+== F6: Gestión de postulantes (estado, shortlist y notas) ==
+OK   [F6] Gestión de postulantes | estado de Carolina Mejía Barrera → En Revisión  -> postulación screening; copia del candidato screening; aviso al candidato sí
+OK   [F6] Gestión de postulantes | shortlist de Carolina Mejía Barrera  -> en applicantNotes y no en la postulación
+OK   [F6] Gestión de postulantes | notas privadas de Carolina Mejía Barrera  -> en applicantNotes y no en la postulación
+OK   [F6] Gestión de postulantes | estado de Fernando Treviño Salas → Evaluación  -> postulación assessment; copia del candidato assessment; aviso al candidato sí
+OK   [F6] Gestión de postulantes | notas privadas de Fernando Treviño Salas  -> en applicantNotes y no en la postulación
+OK   [F6] Gestión de postulantes | estado de Daniela Ochoa Fuentes → En Revisión  -> postulación screening; copia del candidato screening; aviso al candidato sí
+OK   [F6] Gestión de postulantes | shortlist de Daniela Ochoa Fuentes  -> en applicantNotes y no en la postulación
+OK   [F6] Gestión de postulantes | notas privadas de Daniela Ochoa Fuentes  -> en applicantNotes y no en la postulación
+OK   [F6] Gestión de postulantes | estado de Ricardo Alonso Peña → Evaluación  -> postulación assessment; copia del candidato assessment; aviso al candidato sí
+OK   [F6] Gestión de postulantes | notas privadas de Ricardo Alonso Peña  -> en applicantNotes y no en la postulación
+OK   [F6] Gestión de postulantes | estado de Valentina Cruz Moreno → Oferta  -> postulación offer; copia del candidato offer; aviso al candidato sí
+OK   [F6] Gestión de postulantes | shortlist de Valentina Cruz Moreno  -> en applicantNotes y no en la postulación
+OK   [F6] Gestión de postulantes | notas privadas de Valentina Cruz Moreno  -> en applicantNotes y no en la postulación
+OK   [F6] Gestión de postulantes | estado de Emiliano Rojas Cabrera → Contratado  -> postulación hired; copia del candidato hired; aviso al candidato sí
+OK   [F6] Gestión de postulantes | notas privadas de Emiliano Rojas Cabrera  -> en applicantNotes y no en la postulación
+OK   [F6] Gestión de postulantes | estado de Jimena Salgado Ríos → Rechazado  -> postulación rejected; copia del candidato rejected; aviso al candidato sí
+OK   [F6] Gestión de postulantes | shortlist de Jimena Salgado Ríos  -> en applicantNotes y no en la postulación
+OK   [F6] Gestión de postulantes | notas privadas de Jimena Salgado Ríos  -> en applicantNotes y no en la postulación
+OK   [F6] Gestión de postulantes | estado de Sebastián Arellano Díaz → En Revisión  -> postulación screening; copia del candidato screening; aviso al candidato sí
+OK   [F6] Gestión de postulantes | notas privadas de Sebastián Arellano Díaz  -> en applicantNotes y no en la postulación
+OK   [F6] Gestión de postulantes | estado de Regina Palacios Soto → Evaluación  -> postulación assessment; copia del candidato assessment; aviso al candidato sí
+OK   [F6] Gestión de postulantes | shortlist de Regina Palacios Soto  -> en applicantNotes y no en la postulación
+OK   [F6] Gestión de postulantes | notas privadas de Regina Palacios Soto  -> en applicantNotes y no en la postulación
+OK   [F6] Gestión de postulantes | estado de Alejandro Quiroz Beltrán → Oferta  -> postulación offer; copia del candidato offer; aviso al candidato sí
+OK   [F6] Gestión de postulantes | notas privadas de Alejandro Quiroz Beltrán  -> en applicantNotes y no en la postulación
+
+== F7: Entrevistas ==
+OK   [F7] Entrevistas | agendar videollamada con Carolina Mejía Barrera (2026-10-29 09:00)  -> entrevista creada; fecha exacta true; estado de la postulación interview (esperado interview); el aviso dice «…de octubre de 2026 a las 9:00 a.m.»
+OK   [F7] Entrevistas | agendar teléfono con Fernando Treviño Salas (2026-10-30 10:00)  -> entrevista creada; fecha exacta true; estado de la postulación interview (esperado interview); el aviso dice «…e octubre de 2026 a las 10:00 a.m.»
+OK   [F7] Entrevistas | agendar presencial con Daniela Ochoa Fuentes (2026-10-31 11:00)  -> entrevista creada; fecha exacta true; estado de la postulación interview (esperado interview); el aviso dice «…e octubre de 2026 a las 11:00 a.m.»
+OK   [F7] Entrevistas | agendar videollamada con Ricardo Alonso Peña (2026-11-01 12:00)  -> entrevista creada; fecha exacta true; estado de la postulación interview (esperado interview); el aviso dice «…noviembre de 2026 a las 12:00 p.m.»
+OK   [F7] Entrevistas | agendar teléfono con Valentina Cruz Moreno (2026-11-02 13:00)  -> entrevista creada; fecha exacta true; estado de la postulación offer (esperado offer); el aviso dice «… noviembre de 2026 a las 1:00 p.m.»
+OK   [F7] Entrevistas | no se agenda con Emiliano Rojas Cabrera: su postulación está «hired»  -> entrevista no creada; estado hired; aviso no
+OK   [F7] Entrevistas | no se agenda con Jimena Salgado Ríos: su postulación está «rejected»  -> entrevista no creada; estado rejected; aviso no
+OK   [F7] Entrevistas | agendar teléfono con Sebastián Arellano Díaz (2026-11-05 16:00)  -> entrevista creada; fecha exacta true; estado de la postulación interview (esperado interview); el aviso dice «… noviembre de 2026 a las 4:00 p.m.»
+OK   [F7] Entrevistas | agendar presencial con Regina Palacios Soto (2026-11-06 17:00)  -> entrevista creada; fecha exacta true; estado de la postulación interview (esperado interview); el aviso dice «… noviembre de 2026 a las 5:00 p.m.»
+OK   [F7] Entrevistas | agendar videollamada con Alejandro Quiroz Beltrán (2026-11-07 09:00)  -> entrevista creada; fecha exacta true; estado de la postulación offer (esperado offer); el aviso dice «… noviembre de 2026 a las 9:00 a.m.»
+OK   [F7] Entrevistas | cancelar la entrevista de Carolina Mejía Barrera  -> visible en el calendario true; eliminada true; aviso al candidato sí
+OK   [F7] Entrevistas | cancelar la entrevista de Fernando Treviño Salas  -> visible en el calendario true; eliminada true; aviso al candidato sí
+OK   [F7] Entrevistas | cancelar la entrevista de Daniela Ochoa Fuentes  -> visible en el calendario true; eliminada true; aviso al candidato sí
+OK   [F7] Entrevistas | Ricardo Alonso Peña ve su entrevista en «Mis postulaciones»  -> muestra la vacante y la hora 12:00
+OK   [F7] Entrevistas | Valentina Cruz Moreno ve su entrevista en «Mis postulaciones»  -> muestra la vacante y la hora 13:00
+OK   [F7] Entrevistas | Sebastián Arellano Díaz ve su entrevista en «Mis postulaciones»  -> muestra la vacante y la hora 16:00
+
+== F8: Matches de la IA: aceptar y rechazar ==
+OK   [F8] Matches de la IA | aceptar a Diego Hernández Soto (83%)  -> match pending → accepted; postulación applied; aviso al candidato sí; auditoría sí
+OK   [F8] Matches de la IA | aceptar a Gabriela Montes Orozco (80%)  -> match pending → accepted; postulación applied; aviso al candidato sí; auditoría sí
+OK   [F8] Matches de la IA | rechazar a Candidato Prueba (52%)  -> match pending → rejected_by_recruiter; sin postulación nueva; aviso al candidato sí; auditoría sí
+OK   [F8] Matches de la IA | aceptar a Roberto Salazar Peña (74%)  -> match pending → accepted; postulación applied; aviso al candidato sí; auditoría sí
+OK   [F8] Matches de la IA | rechazar a Samuel Vargas Echeverría (45%)  -> match pending → rejected_by_recruiter; sin postulación nueva; aviso al candidato sí; auditoría sí
+OK   [F8] Matches de la IA | aceptar a Iván Santillán Pedraza (82%)  -> match pending → accepted; postulación screening; aviso al candidato sí; auditoría sí
+OK   [F8] Matches de la IA | aceptar a Luis Fernando Ramos Aguilar (74%)  -> match pending → accepted; postulación screening; aviso al candidato sí; auditoría sí
+OK   [F8] Matches de la IA | aceptar a Natalia Cervantes Ponce (84%)  -> match pending → accepted; postulación applied; aviso al candidato sí; auditoría sí
+OK   [F8] Matches de la IA | aceptar a Elena Navarro Pineda (85%)  -> match pending → accepted; postulación applied; aviso al candidato sí; auditoría sí
+OK   [F8] Matches de la IA | rechazar a Paulina Castillo Ríos (58%)  -> match pending → rejected_by_recruiter; sin postulación nueva; aviso al candidato sí; auditoría sí
+OK   [F8] Matches de la IA | fernanda.ortiz rechaza el match de «QA Engineer»  -> match rejected_by_candidate; postulación withdrawn; reclutadores avisados 1/1; sigue visible false
+OK   [F8] Matches de la IA | valeria.nunez rechaza el match de «Analista de Riesgo Crediticio (Data)»  -> match rejected_by_candidate; postulación withdrawn; reclutadores avisados 1/1; sigue visible false
+OK   [F8] Matches de la IA | carlos.mendoza rechaza el match de «Desarrollador Backend Java (Pagos)»  -> match rejected_by_candidate; postulación withdrawn; reclutadores avisados 1/1; sigue visible false
+
+== F10: Búsqueda y filtros ==
+OK   [F10] Explorar vacantes (candidato) | texto «python»  -> pantalla 8, base de datos 8
+OK   [F10] Explorar vacantes (candidato) | texto «diseñador» (con acento)  -> pantalla 2, base de datos 2
+OK   [F10] Explorar vacantes (candidato) | texto «disenador» (sin acento) da lo mismo  -> pantalla 2, base de datos 2
+OK   [F10] Explorar vacantes (candidato) | seniority Senior  -> pantalla 8, base de datos 8
+OK   [F10] Explorar vacantes (candidato) | modalidad remota + Junior  -> pantalla 3, base de datos 3
+OK   [F10] Explorar vacantes (candidato) | publicadas en los últimos 7 días  -> pantalla 20, base de datos 20
+OK   [F10] Explorar vacantes (candidato) | publicadas en las últimas 24 horas  -> pantalla 12, base de datos 12
+OK   [F10] Explorar vacantes (candidato) | presencial + texto «ciudad de mexico» (sin acento)  -> pantalla 4, base de datos 4
+OK   [F10] Explorar vacantes (candidato) | texto «react» + Junior  -> pantalla 3, base de datos 3
+OK   [F10] Explorar vacantes (candidato) | texto sin coincidencias «zzzz»  -> pantalla 0, base de datos 0
+OK   [F10] Explorar vacantes (candidato) | la búsqueda no distingue acentos  -> «diseñador» 2 = «disenador» 2
+OK   [F10] Explorar candidatos (reclutador) | total de candidatos sin filtros  -> pantalla 30, base de datos 30
+OK   [F10] Explorar candidatos (reclutador) | texto «react»  -> pantalla 5, base de datos 5
+OK   [F10] Explorar candidatos (reclutador) | texto «ingenieria» (sin acento)  -> pantalla 1, base de datos 1
+OK   [F10] Explorar candidatos (reclutador) | seniority objetivo Junior  -> pantalla 5, base de datos 5
+OK   [F10] Explorar candidatos (reclutador) | solo disponibles  -> pantalla 27, base de datos 27
+OK   [F10] Explorar candidatos (reclutador) | alguna habilidad de nivel 5  -> pantalla 16, base de datos 16
+OK   [F10] Explorar candidatos (reclutador) | texto «monterrey» + disponibles  -> pantalla 1, base de datos 1
+
+== F11: Notificaciones ==
+OK   [F11] Notificaciones | contador de la campana de luis.ramos  -> campana 4, base de datos 4
+OK   [F11] Notificaciones | «Marcar todas como leídas» de luis.ramos  -> sin leer antes 4, después 0
+OK   [F11] Notificaciones | contador de la campana de andres.gutierrez  -> campana 2, base de datos 2
+OK   [F11] Notificaciones | contador de la campana de oscar.dominguez  -> campana 0, base de datos 0
+OK   [F11] Notificaciones | contador de la campana de rebeca.zamora  -> campana 1, base de datos 1
+OK   [F11] Notificaciones | contador de la campana de laura.beltran  -> campana 18, base de datos 18
+OK   [F11] Notificaciones | contador de la campana de ricardo.fuentes  -> campana 1, base de datos 1
+OK   [F11] Notificaciones | «Marcar todas como leídas» de ricardo.fuentes  -> sin leer antes 1, después 0
+OK   [F11] Notificaciones | contador de la campana de karla.medina  -> campana 3, base de datos 3
+OK   [F11] Notificaciones | contador de la campana de daniela.cortes  -> campana 2, base de datos 2
+OK   [F11] Notificaciones | contador de la campana de andrea.villasenor  -> campana 2, base de datos 2
+OK   [F11] Notificaciones | «Marcar todas como leídas» de andrea.villasenor  -> sin leer antes 2, después 0
+OK   [F11] Notificaciones | contador de la campana de carolina.mejia  -> campana 4, base de datos 4
+
+== F12: Panel del administrador ==
+OK   [F12] Panel: indicadores | Usuarios Totales  -> pantalla 46, base de datos 46
+OK   [F12] Panel: indicadores | Candidatos  -> pantalla 30, base de datos 30
+OK   [F12] Panel: indicadores | Organizaciones  -> pantalla 15, base de datos 15
+OK   [F12] Panel: indicadores | Vacantes abiertas  -> pantalla 28, base de datos 28
+OK   [F12] Panel: indicadores | Vacantes cerradas  -> pantalla 2, base de datos 2
+OK   [F12] Panel: indicadores | Postulaciones  -> pantalla 68, base de datos 68
+OK   [F12] Usuarios | la tabla lista a todos los usuarios y empieza por los administradores  -> filas 46 de 46; primer rol «Admin»
+OK   [F12] Usuarios | búsqueda por nombre
+OK   [F12] Usuarios | cambiar el rol de Alejandro a Reclutador
+OK   [F12] Usuarios | devolver a Alejandro al rol Candidato
+OK   [F12] Usuarios | suspender a Regina
+OK   [F12] Usuarios | la cuenta suspendida no puede iniciar sesión (aviso en pantalla, Authentication deshabilitada)  -> aviso true; Authentication deshabilitada true; token no (USER_DISABLED)
+OK   [F12] Usuarios | reactivar a Regina y volver a entrar
+OK   [F12] Usuarios | asignar a Ximena a otra organización
+OK   [F12] Usuarios | devolver a Ximena a su organización
+OK   [F12] Organizaciones | nombre vacío se rechaza
+OK   [F12] Organizaciones | sitio web que no es http(s) se rechaza
+OK   [F12] Organizaciones | crear «Salud Digital Norte»
+OK   [F12] Organizaciones | editar la descripción de «Salud Digital Norte»
+OK   [F12] Vacantes | desactivar una vacante
+OK   [F12] Vacantes | reactivar la vacante
+OK   [F12] Vacantes | eliminar una vacante borra todo lo que depende de ella y avisa al candidato  -> restos {"vacante":false,"postulaciones":0,"copia":false,"recs":0,"entrevistas":0}; aviso a Regina sí
+OK   [F12] Auditoría | el registro muestra las acciones recién hechas  -> 7/7: todas
+OK   [F12] Auditoría | el embudo cuenta todas las postulaciones  -> pantalla «(67 en total)», base de datos 67
+OK   [F12] Ver como | modo de solo lectura: banner visible y acciones deshabilitadas  -> banner true; «Cerrar vacante» deshabilitado true
+OK   [F12] Ver como | salir vuelve a la gestión de usuarios
+OK   [F12] Usuarios | ficha de un candidato muestra su perfil profesional
+OK   [F12] Administrador | su perfil muestra nombre, correo, rol y estado
+
+== F13: Configuración de la cuenta ==
+OK   [F13] Cuenta | cambiar el nombre de Carolina Mejía Barrera  -> perfil «Carolina Mejía-Barrera»; cuenta de acceso «Carolina Mejía-Barrera»; barra lateral actualizada true
+OK   [F13] Cuenta | cambiar el nombre de Fernando Treviño Salas  -> perfil «Fernando Treviño S.»; cuenta de acceso «Fernando Treviño S.»; barra lateral actualizada true
+OK   [F13] Cuenta | cambiar el nombre de Daniela Ochoa Fuentes  -> perfil «Daniela Ochoa F.»; cuenta de acceso «Daniela Ochoa F.»; barra lateral actualizada true
+OK   [F13] Cuenta | cambiar el nombre de Ricardo Alonso Peña  -> perfil «Ricardo A. Peña»; cuenta de acceso «Ricardo A. Peña»; barra lateral actualizada true
+OK   [F13] Cuenta | cambiar el nombre de Valentina Cruz Moreno  -> perfil «Valentina Cruz-Moreno»; cuenta de acceso «Valentina Cruz-Moreno»; barra lateral actualizada true
+OK   [F13] Cuenta | cambiar la contraseña de fernando.trevino  -> entra con la nueva true; con la anterior false
+OK   [F13] Cuenta | cambiar la contraseña de daniela.ochoa  -> entra con la nueva true; con la anterior false
+OK   [F13] Cuenta | cambiar la contraseña de ricardo.alonso  -> entra con la nueva true; con la anterior false
+OK   [F13] Cuenta | la confirmación de contraseña distinta se rechaza
+OK   [F13] Cuenta | preferencias de notificación de valentina.cruz  -> por defecto ["true","true","true","true"]; guardado communication_emails=false; tras recargar ["false","true","true","true"]
+OK   [F13] Cuenta | preferencias de notificación de emiliano.rojas  -> por defecto ["true","true","true","true"]; guardado communication_emails=false; tras recargar ["false","true","true","true"]
+OK   [F13] Cuenta | preferencias de notificación de jimena.salgado  -> por defecto ["true","true","true","true"]; guardado communication_emails=false; tras recargar ["false","true","true","true"]
+OK   [F13] Cuenta | tema de la interfaz de regina.palacios  -> inicial oscuro; tras un clic claro; tras recargar claro
+OK   [F13] Cuenta | tema de la interfaz de sebastian.arellano  -> inicial oscuro; tras un clic claro; tras recargar claro
+OK   [F13] Recuperar contraseña | solicitar el correo para carolina.mejia  -> respuestas 200 de Firebase: 2
+OK   [F13] Recuperar contraseña | solicitar el correo para emiliano.rojas  -> respuestas 200 de Firebase: 2
+OK   [F13] Recuperar contraseña | solicitar el correo para alejandro.quiroz  -> respuestas 200 de Firebase: 2
+OK   [CSP] Política de contenido | ninguna violación en toda la suite  -> el navegador no bloqueó nada
+
+Pruebas: 131 | correctas: 131 | con falla: 0

@@ -1,0 +1,104 @@
+﻿Proyecto de pruebas: hirelink-staging  [.env.staging]
+LOAD 100 visitas simultáneas a /login: 100/100 OK | total 165ms | p50 150ms p95 151ms max 151ms
+LOAD 100 visitas simultáneas a /: 100/100 OK | total 125ms | p50 109ms p95 115ms max 116ms
+LOAD 100 USUARIOS DISTINTOS llamando a la vez a la API autenticada (token + Firestore + auditoría): 100/100 OK | total 1060ms | p50 952ms p95 1009ms max 1055ms
+LOAD ráfaga abusiva de 1 usuario x100: 14 OK, 86 bloqueadas (429), 0 errores 5xx | max 4249ms
+LOAD 100 lecturas simultáneas de Firestore con reglas (REST): 100/100 OK | total 1770ms | p50 1035ms p95 1710ms max 1746ms
+OK    A01 sin token -> /api/audit -> HTTP 401 (esperado 401)
+OK    A02 token falso -> /api/audit -> HTTP 401 (esperado 401)
+OK    A01 sin token -> /api/ai/extract-cv -> HTTP 401 (esperado 401)
+OK    A02 token falso -> /api/ai/extract-cv -> HTTP 401 (esperado 401)
+OK    A01 sin token -> /api/ai/generate-description -> HTTP 401 (esperado 401)
+OK    A02 token falso -> /api/ai/generate-description -> HTTP 401 (esperado 401)
+OK    A01 sin token -> /api/applications/notify-new -> HTTP 401 (esperado 401)
+OK    A02 token falso -> /api/applications/notify-new -> HTTP 401 (esperado 401)
+OK    A01 sin token -> /api/applications/notify-status -> HTTP 401 (esperado 401)
+OK    A02 token falso -> /api/applications/notify-status -> HTTP 401 (esperado 401)
+OK    A01 sin token -> /api/recommendations/generate -> HTTP 401 (esperado 401)
+OK    A02 token falso -> /api/recommendations/generate -> HTTP 401 (esperado 401)
+OK    A01 sin token -> /api/recommendations/generate-for-job -> HTTP 401 (esperado 401)
+OK    A02 token falso -> /api/recommendations/generate-for-job -> HTTP 401 (esperado 401)
+OK    A01 sin token -> /api/matches/respond -> HTTP 401 (esperado 401)
+OK    A02 token falso -> /api/matches/respond -> HTTP 401 (esperado 401)
+OK    A01 sin token -> /api/jobs/delete -> HTTP 401 (esperado 401)
+OK    A02 token falso -> /api/jobs/delete -> HTTP 401 (esperado 401)
+OK    A01 sin token -> /api/interviews/cancel -> HTTP 401 (esperado 401)
+OK    A02 token falso -> /api/interviews/cancel -> HTTP 401 (esperado 401)
+OK    A01 sin token -> /api/admin/users -> HTTP 401 (esperado 401)
+OK    A02 token falso -> /api/admin/users -> HTTP 401 (esperado 401)
+OK    A01 sin token -> /api/account/delete -> HTTP 401 (esperado 401)
+OK    A02 token falso -> /api/account/delete -> HTTP 401 (esperado 401)
+OK    A03 candidato usa generar descripción (solo reclutador) -> HTTP 403 (esperado 403)
+OK    A04 reclutador usa análisis de CV (solo candidato) -> HTTP 403 (esperado 403)
+OK    A05 candidato registra auditoría de admin -> HTTP 403 (esperado 403)
+OK    A06 reclutador registra auditoría de admin -> HTTP 403 (esperado 403)
+OK    A07 reclutador registra auditoría permitida -> HTTP 200 (esperado 200)
+OK    A08 candidato manda notify-status -> HTTP 403 (esperado 403)
+OK    A09 candidato genera candidatos de una vacante -> HTTP 403 (esperado 403)
+OK    A10 reclutador usa generar recomendaciones de candidato -> HTTP 403 (esperado 403)
+OK    A11 reclutador B notify-status en vacante de A -> HTTP 403 (esperado 403)
+OK    A12 reclutador B genera candidatos de vacante de A -> HTTP 403 (esperado 403)
+OK    A13 reclutador B acepta match de A -> HTTP 403 (esperado 403)
+OK    A14 notify a un usuario sin postulación -> HTTP 404 (esperado 404)
+OK    A15 estado que no coincide con la postulación -> HTTP 409 (esperado 409)
+OK    A16 estado inválido -> HTTP 400 (esperado 400)
+OK    A17 notify correcto (estado coincide) -> HTTP 200 (esperado 200)
+OK    A18 candidato 2 rechaza match de candidato 1 -> HTTP 403 (esperado 403)
+OK    A19 candidato intenta ACEPTAR su propio match -> HTTP 403 (esperado 403)
+OK    A20 acción inválida en match -> HTTP 400 (esperado 400)
+OK    A21 CV demasiado largo (DoS) -> HTTP 413 (esperado 413)
+OK    A22 CV vacío -> HTTP 400 (esperado 400)
+OK    A23 body no-JSON -> HTTP 403 (esperado 400,403)
+OK    N01 candidato elimina una vacante -> HTTP 403 (esperado 403)
+OK    N02 reclutador B elimina la vacante de A -> HTTP 403 (esperado 403)
+OK    N03 eliminar una vacante inexistente -> HTTP 404 (esperado 404)
+OK    N04 eliminar sin jobId -> HTTP 400 (esperado 400)
+OK    N05 candidato cancela una entrevista -> HTTP 403 (esperado 403)
+OK    N06 reclutador B cancela la entrevista de A -> HTTP 403 (esperado 403)
+OK    N07 cancelar una entrevista inexistente -> HTTP 404 (esperado 404)
+OK    N08 reclutador A cancela su entrevista: se elimina y se avisa al candidato -> HTTP 200; aviso true
+OK    N09 reclutador A elimina su vacante en cascada (postulaciones, copia del candidato y recomendación) -> HTTP 200; restos [false,0,false,false]
+OK    U01 reclutadora sin aprobar elimina su vacante -> HTTP 403 (esperado 403)
+OK    U02 reclutadora sin aprobar busca candidatos de su vacante -> HTTP 403 (esperado 403)
+OK    U03 candidato usa la API de administración -> HTTP 403 (esperado 403)
+OK    U04 reclutadora usa la API de administración -> HTTP 403 (esperado 403)
+OK    U05 admin registra un evento de cuentas por /api/audit (ya no se acepta desde el navegador) -> HTTP 403 (esperado 403)
+OK    U05b reclutadora registra un evento sobre una vacante de otra empresa -> HTTP 403 (esperado 403)
+OK    U06 admin: acción inválida -> HTTP 400 (esperado 400)
+OK    U07 admin: usuario inexistente -> HTTP 404 (esperado 404)
+OK    U07b admin: solo se aprueba a reclutadoras -> HTTP 400 (esperado 400)
+OK    U08 admin aprueba a la reclutadora: queda recruiterApproved y queda en la auditoría -> HTTP 200; aprobada true; auditoría true
+OK    U09 reclutadora ya aprobada elimina su vacante (cascada) -> HTTP 200 (esperado 200)
+OK    U10 admin revoca la aprobación -> HTTP 200 (esperado 200)
+OK    U11 reclutadora con la aprobación revocada ya no elimina su vacante -> HTTP 403 (esperado 403)
+OK    U12 suspender deshabilita la cuenta de Authentication y bloquea el inicio de sesión -> HTTP 200; Auth deshabilitada true; estado true; inicio bloqueado true
+OK    U13 reactivar vuelve a habilitar la cuenta -> HTTP 200; habilitada true
+OK    U14 admin no puede suspenderse a sí mismo -> HTTP 409 (esperado 409)
+OK    U15 admin no puede cambiar su propio rol -> HTTP 409 (esperado 409)
+OK    U16 admin no se elimina por la API de administración -> HTTP 409 (esperado 409)
+OK    U17 cambiar el rol: la reclutadora nombrada queda aprobada; al volver a candidata pierde empresa y aprobación -> HTTP 200/200
+OK    U18 admin elimina una cuenta con todo lo que depende de ella (perfil, postulación y copia, notas, recomendación, entrevista, avisos y Authentication) -> HTTP 200; restos [false,false,false,false,false,false,false,false,false]
+OK    U19 «Eliminar mi cuenta» sin escribir la confirmación -> HTTP 400 (esperado 400)
+OK    U20 «Eliminar mi cuenta» borra el perfil, el documento de usuario y la cuenta de Authentication -> HTTP 200; restos [false,false,false]
+OK    A24 cuenta suspendida -> /api/audit -> HTTP 403 (esperado 403)
+OK    A24 cuenta suspendida -> /api/ai/extract-cv -> HTTP 403 (esperado 403)
+OK    A24 cuenta suspendida -> /api/recommendations/generate -> HTTP 403 (esperado 403)
+OK    A24 cuenta suspendida -> /api/applications/notify-new -> HTTP 403 (esperado 403)
+OK    A25 notify-new es idempotente (2ª llamada no duplica avisos) -> 1ª=200, 2ª duplicate=true
+OK    A26 límite de uso en IA (10/h): a la 11ª llamada -> 429 -> 400,400,400,400,400,400,400,400,400,400,429,429,429
+OK    H01 X-Frame-Options=DENY -> DENY
+OK    H02 X-Content-Type-Options=nosniff -> nosniff
+OK    H03 Strict-Transport-Security presente -> max-age=63072000; includeSubDomains; preload
+OK    H04 no revela X-Powered-By -> null
+OK    H05 API sin caché (no-store) -> 
+OK    H06 Content-Security-Policy activa (sin plugins, sin <base> ajeno, formularios y marcos solo propios) -> default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'sel
+OK    H07 la política no abre scripts a otros dominios ni permite eval -> script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'
+OK    H08 Cross-Origin-Opener-Policy presente -> same-origin-allow-popups
+OK    A27 los flujos de IA no están expuestos como Server Actions -> 
+OK    L05 ráfaga abusiva de 1 usuario: sin errores 5xx y sin colgarse (<6s) -> 14 OK / 86 x 429 / 0 x 5xx, máx 4249ms
+OK    L01 100 simultáneos: /login -> 100/100
+OK    L02 100 simultáneos: / -> 100/100
+OK    L03 100 simultáneos: API autenticada -> 100/100
+OK    L04 100 simultáneos: lecturas Firestore -> 100/100
+
+96/96 correctas, 0 fallos

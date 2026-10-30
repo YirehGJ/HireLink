@@ -1,0 +1,86 @@
+﻿Proyecto de pruebas: hirelink-staging  |  aplicación: http://localhost:3100
+
+== F0: limpieza de cuentas y datos de ejecuciones anteriores ==
+cuentas eliminadas: 15
+
+== F1: Registro e inicio de sesión ==
+OK   [F1] Registro | validación: correo inválido  -> mensaje esperado «Email inválido»
+OK   [F1] Registro | validación: contraseña de menos de 8 caracteres  -> mensaje esperado «Mínimo 8 caracteres»
+OK   [F1] Registro | validación: nombre de un solo carácter  -> mensaje esperado «Mínimo 2 caracteres»
+OK   [F1] Registro | correo ya registrado  -> aviso «Email ya registrado.»
+OK   [F1] Inicio de sesión | contraseña incorrecta  -> permanece en /login con aviso
+OK   [F1] Registro | reclutador: Andrea Villaseñor Lozano  -> 6804 ms; destino /dashboard/jobs; rol guardado «recruiter»
+OK   [F1] Registro | reclutador nace sin aprobar: Andrea Villaseñor Lozano  -> recruiterApproved ausente o falso
+OK   [F1] Registro | reclutador: Mauricio Escalante Reyes  -> 5417 ms; destino /dashboard/jobs; rol guardado «recruiter»
+OK   [F1] Registro | reclutador nace sin aprobar: Mauricio Escalante Reyes  -> recruiterApproved ausente o falso
+OK   [F1] Registro | reclutador: Fabiola Contreras Navarro  -> 5455 ms; destino /dashboard/jobs; rol guardado «recruiter»
+OK   [F1] Registro | reclutador nace sin aprobar: Fabiola Contreras Navarro  -> recruiterApproved ausente o falso
+OK   [F1] Registro | reclutador: Gustavo Lara Mendoza  -> 5491 ms; destino /dashboard/jobs; rol guardado «recruiter»
+OK   [F1] Registro | reclutador nace sin aprobar: Gustavo Lara Mendoza  -> recruiterApproved ausente o falso
+OK   [F1] Registro | reclutador: Ximena Robles Ibáñez  -> 5446 ms; destino /dashboard/jobs; rol guardado «recruiter»
+OK   [F1] Registro | reclutador nace sin aprobar: Ximena Robles Ibáñez  -> recruiterApproved ausente o falso
+OK   [F1] Registro | candidato: Carolina Mejía Barrera  -> 5637 ms; destino /dashboard; rol guardado «candidate»
+OK   [F1] Registro | candidato: Fernando Treviño Salas  -> 5440 ms; destino /dashboard; rol guardado «candidate»
+OK   [F1] Registro | candidato: Daniela Ochoa Fuentes  -> 5395 ms; destino /dashboard; rol guardado «candidate»
+OK   [F1] Registro | candidato: Ricardo Alonso Peña  -> 5445 ms; destino /dashboard; rol guardado «candidate»
+OK   [F1] Registro | candidato: Valentina Cruz Moreno  -> 5498 ms; destino /dashboard; rol guardado «candidate»
+OK   [F1] Registro | candidato: Emiliano Rojas Cabrera  -> 5421 ms; destino /dashboard; rol guardado «candidate»
+OK   [F1] Registro | candidato: Jimena Salgado Ríos  -> 5442 ms; destino /dashboard; rol guardado «candidate»
+OK   [F1] Registro | candidato: Sebastián Arellano Díaz  -> 5449 ms; destino /dashboard; rol guardado «candidate»
+OK   [F1] Registro | candidato: Regina Palacios Soto  -> 5468 ms; destino /dashboard; rol guardado «candidate»
+OK   [F1] Registro | candidato: Alejandro Quiroz Beltrán  -> 5453 ms; destino /dashboard; rol guardado «candidate»
+OK   [F1] Inicio de sesión | 15 cuentas nuevas inician sesión con su contraseña  -> 15/15
+
+== F2: Perfil de la empresa ==
+OK   [F2] Perfil de la empresa | sitio web sin https:// se rechaza
+OK   [F2] Perfil de la empresa | descripción de menos de 20 caracteres se rechaza
+OK   [F2] Perfil de la empresa | un enlace javascript: se rechaza
+OK   [F2] Perfil de la empresa | crear «Innova Salud Labs»  -> organizationRef=enlazada
+OK   [F2] Perfil de la empresa | crear «Logística Inteligente MX»  -> organizationRef=enlazada
+OK   [F2] Perfil de la empresa | crear «Banca Digital Pacífico»  -> organizationRef=enlazada
+OK   [F2] Perfil de la empresa | crear «Educación Conectada AC»  -> organizationRef=enlazada
+OK   [F2] Perfil de la empresa | crear «Turismo Tech Riviera»  -> organizationRef=enlazada
+
+== F3: Vacantes ==
+OK   [F3] Vacantes | crear «Analista de Datos Clínicos»  -> etiquetas guardadas ["Python","SQL","Power BI","Estadística"]
+OK   [F3] IA: descripción de vacante | «Desarrollador Móvil iOS»  -> 2039 ms; 1869 caracteres
+OK   [F3] Vacantes | crear «Desarrollador Móvil iOS»  -> etiquetas guardadas ["Swift","SwiftUI","Firebase","REST APIs"]
+OK   [F3] IA: descripción de vacante | «Ingeniero de Calidad de Software (QA Automation)»  -> 2040 ms; 2165 caracteres
+OK   [F3] Vacantes | crear «Ingeniero de Calidad de Software (QA Automation)»  -> etiquetas guardadas ["Cypress","Selenium","Python","Jenkins"]
+OK   [F3] Vacantes | crear «Administrador de Sistemas Linux»  -> etiquetas guardadas ["Linux","Bash","Ansible","Nagios"]
+OK   [F3] IA: descripción de vacante | «Desarrollador .NET Senior»  -> 3053 ms; 1792 caracteres
+OK   [F3] Vacantes | crear «Desarrollador .NET Senior»  -> etiquetas guardadas ["C#",".NET Core","SQL Server","Azure"]
+OK   [F3] Vacantes | crear «Arquitecto de Software»  -> etiquetas guardadas ["Microservicios","Java","Kafka","AWS"]
+OK   [F3] Vacantes | crear «Desarrollador Frontend Junior (React)»  -> etiquetas guardadas ["React","JavaScript","CSS","Git"]
+OK   [F3] IA: descripción de vacante | «Diseñador UI para Plataformas Educativas»  -> 3056 ms; 1452 caracteres
+OK   [F3] Vacantes | crear «Diseñador UI para Plataformas Educativas»  -> etiquetas guardadas ["Figma","Adobe XD","Sistemas de diseño","Prototipado"]
+OK   [F3] Vacantes | crear «Analista de Producto Digital»  -> etiquetas guardadas ["Google Analytics","SQL","Pruebas A/B","Producto"]
+OK   [F3] IA: descripción de vacante | «Ingeniero de Machine Learning»  -> 3060 ms; 1981 caracteres
+OK   [F3] Vacantes | crear «Ingeniero de Machine Learning»  -> etiquetas guardadas ["Python","PyTorch","MLOps","Docker"]
+OK   [F3] IA: descripción de vacante | resumen de 5 generaciones  -> promedio 2650 ms; mínimo 2039 ms; máximo 3060 ms
+
+== F4: Perfil del candidato y análisis de CV con IA ==
+OK   [F4] IA: análisis de CV | Carolina Mejía Barrera  -> 2561 ms; habilidades 8, experiencia 2, educación 1
+OK   [F4] Perfil del candidato | guardar perfil de Carolina Mejía Barrera  -> titular «QA Automation Engineer»; 8 habilidades; objetivo mid
+OK   [F4] IA: análisis de CV | Fernando Treviño Salas  -> 2868 ms; habilidades 8, experiencia 2, educación 1
+OK   [F4] Perfil del candidato | guardar perfil de Fernando Treviño Salas  -> titular «Desarrollador .NET Senior»; 8 habilidades; objetivo senior
+OK   [F4] IA: análisis de CV | Daniela Ochoa Fuentes  -> 2490 ms; habilidades 8, experiencia 2, educación 1
+OK   [F4] Perfil del candidato | guardar perfil de Daniela Ochoa Fuentes  -> titular «Diseñadora UI»; 8 habilidades; objetivo junior
+OK   [F4] IA: análisis de CV | Ricardo Alonso Peña  -> 2455 ms; habilidades 7, experiencia 2, educación 1
+OK   [F4] Perfil del candidato | guardar perfil de Ricardo Alonso Peña  -> titular «Analista de Datos»; 7 habilidades; objetivo mid
+OK   [F4] IA: análisis de CV | Valentina Cruz Moreno  -> 3252 ms; habilidades 8, experiencia 2, educación 1
+OK   [F4] Perfil del candidato | guardar perfil de Valentina Cruz Moreno  -> titular «Desarrolladora iOS»; 8 habilidades; objetivo mid
+OK   [F4] IA: análisis de CV | Emiliano Rojas Cabrera  -> 2309 ms; habilidades 8, experiencia 2, educación 1
+OK   [F4] Perfil del candidato | guardar perfil de Emiliano Rojas Cabrera  -> titular «Administrador de Sistemas Senior»; 8 habilidades; objetivo senior
+OK   [F4] IA: análisis de CV | Jimena Salgado Ríos  -> 3080 ms; habilidades 7, experiencia 2, educación 1
+OK   [F4] Perfil del candidato | guardar perfil de Jimena Salgado Ríos  -> titular «Analista de Producto Digital»; 7 habilidades; objetivo mid
+OK   [F4] IA: análisis de CV | Sebastián Arellano Díaz  -> 2774 ms; habilidades 8, experiencia 2, educación 2
+OK   [F4] Perfil del candidato | guardar perfil de Sebastián Arellano Díaz  -> titular «Ingeniero de Machine Learning»; 8 habilidades; objetivo mid
+OK   [F4] IA: análisis de CV | Regina Palacios Soto  -> 2719 ms; habilidades 6, experiencia 1, educación 1
+OK   [F4] Perfil del candidato | guardar perfil de Regina Palacios Soto  -> titular «Desarrolladora Frontend Junior»; 6 habilidades; objetivo junior
+OK   [F4] IA: análisis de CV | Alejandro Quiroz Beltrán  -> 2769 ms; habilidades 7, experiencia 2, educación 1
+OK   [F4] Perfil del candidato | guardar perfil de Alejandro Quiroz Beltrán  -> titular «Arquitecto de Software»; 7 habilidades; objetivo lead
+OK   [F4] IA: análisis de CV | resumen de 10 análisis  -> promedio 2728 ms; mínimo 2309 ms; máximo 3252 ms
+OK   [CSP] Política de contenido | ninguna violación en toda la suite  -> el navegador no bloqueó nada
+
+Pruebas: 72 | correctas: 72 | con falla: 0

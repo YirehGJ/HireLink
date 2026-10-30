@@ -1,0 +1,89 @@
+
+> nextn@0.1.0 build:staging
+> node scripts/dev-staging.mjs build
+
+Staging (build): proyecto hirelink-staging
+   ▲ Next.js 15.5.28
+   - Environments: .env.local
+   - Experiments (use with caution):
+     · clientTraceMetadata
+
+   Creating an optimized production build ...
+node.exe :  ⚠ Compiled with warnings in 22.2s
+En línea: 1 Carácter: 1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ( ⚠ Compiled with warnings in 22.2s:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+./node_modules/@opentelemetry/sdk-node/build/src/TracerProviderWithEnvExporter.js
+Module not found: Can't resolve '@opentelemetry/exporter-jaeger' in 
+'<raiz del proyecto>\node_modules\@opentelemetry\sdk-node\build\src'
+
+Import trace for requested module:
+./node_modules/@opentelemetry/sdk-node/build/src/TracerProviderWithEnvExporter.js
+./node_modules/@opentelemetry/sdk-node/build/src/sdk.js
+./node_modules/@opentelemetry/sdk-node/build/src/index.js
+./node_modules/@genkit-ai/core/lib/tracing/node-telemetry-provider.mjs
+./node_modules/@genkit-ai/core/lib/node.mjs
+./node_modules/genkit/lib/common.mjs
+./node_modules/genkit/lib/index.mjs
+./src/ai/genkit.ts
+./src/ai/flows/generate-job-description-flow.ts
+./src/app/api/ai/generate-description/route.ts
+
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/34) ...
+   Generating static pages (8/34) 
+   Generating static pages (16/34) 
+   Generating static pages (25/34) 
+ ✓ Generating static pages (34/34)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                   Size  First Load JS
+┌ ○ /                                      6.32 kB         157 kB
+├ ○ /_not-found                              361 B         140 kB
+├ ƒ /api/account/delete                      360 B         140 kB
+├ ƒ /api/admin/users                         362 B         140 kB
+├ ƒ /api/ai/extract-cv                       360 B         140 kB
+├ ƒ /api/ai/generate-description             362 B         140 kB
+├ ƒ /api/applications/notify-new             360 B         140 kB
+├ ƒ /api/applications/notify-status          360 B         140 kB
+├ ƒ /api/audit                               360 B         140 kB
+├ ƒ /api/health                              359 B         140 kB
+├ ƒ /api/interviews/cancel                   359 B         140 kB
+├ ƒ /api/jobs/delete                         362 B         140 kB
+├ ƒ /api/matches/respond                     360 B         140 kB
+├ ƒ /api/recommendations/generate            361 B         140 kB
+├ ƒ /api/recommendations/generate-for-job    360 B         140 kB
+├ ○ /dashboard                             9.91 kB         306 kB
+├ ○ /dashboard/admin/audit                 11.9 kB         271 kB
+├ ○ /dashboard/admin/jobs                  4.59 kB         315 kB
+├ ○ /dashboard/admin/organizations         7.53 kB         281 kB
+├ ○ /dashboard/admin/overview              5.44 kB         269 kB
+├ ○ /dashboard/admin/users                 8.74 kB         319 kB
+├ ○ /dashboard/applications                24.2 kB         306 kB
+├ ○ /dashboard/candidates                  6.79 kB         298 kB
+├ ○ /dashboard/explore                     4.62 kB         300 kB
+├ ○ /dashboard/jobs                        3.27 kB         303 kB
+├ ƒ /dashboard/jobs/[id]                   19.5 kB         347 kB
+├ ○ /dashboard/jobs/new                    1.64 kB         326 kB
+├ ○ /dashboard/profile                     14.1 kB         329 kB
+├ ○ /dashboard/settings                    14.1 kB         315 kB
+├ ƒ /dashboard/users/[id]                   8.9 kB         272 kB
+├ ○ /forgot-password                       8.07 kB         295 kB
+├ ○ /login                                 12.7 kB         300 kB
+├ ○ /register                              5.42 kB         324 kB
+└ ○ /robots.txt                              361 B         140 kB
++ First Load JS shared by all               140 kB
+  ├ chunks/4bd1b696-ffae9903273a89f4.js    54.4 kB
+  ├ chunks/7841-890e4a69843282c2.js          82 kB
+  └ other shared chunks (total)            3.38 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

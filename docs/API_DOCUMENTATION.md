@@ -1,123 +1,62 @@
 # Documentación de la API | HireLink
 
-> **Documento obsoleto.** Describe la primera versión (Server Actions de Genkit con Gemini). Hoy la lógica de servidor
-> está en los Route Handlers de `src/app/api/` (todos exigen sesión y rol) y la IA usa Groq con Genkit. La referencia
-> vigente está en [CONTEXTO_PROYECTO.md](CONTEXTO_PROYECTO.md) y [ARQUITECTURA.md](ARQUITECTURA.md); este archivo se
-> reescribirá.
+Referencia de los endpoints del servidor (`src/app/api/**/route.ts`, Route Handlers de Next.js que corren como funciones sin
+servidor en Vercel). Esta versión sustituye a la primera (Server Actions de Genkit con Gemini y archivos en Storage), que ya
+no existe: hoy la IA usa Groq con Genkit y el PDF del CV nunca se sube.
 
-HireLink utiliza un enfoque de **Client-Side Data Access** mediante Firebase para la base de datos y **Server Actions** mediante Genkit para la lógica de Inteligencia Artificial. A continuación se detallan los "endpoints" (funciones de servidor) y la estructura de acceso a datos.
+## 1. Cómo se usa
 
----
+- Todas las rutas son `POST` con cuerpo JSON, salvo `GET /api/health`. El navegador las llama con
+  `callAuthedApi` (`src/lib/api-client.ts`), que agrega la cabecera `Authorization: Bearer <ID token de Firebase>`.
+- `requireUser(request, roles?)` (`src/lib/server/guard.ts`) verifica el token, que la cuenta exista y no esté suspendida y
+  el rol. Las rutas que actúan en nombre de una empresa usan además `canManageOrg`: la reclutadora debe ser de esa empresa y
+  estar **aprobada** por un administrador.
+- `enforceRateLimit(db, uid, clave, máximo, ventana)` limita el uso por persona y por acción (ventana de una hora). Al
+  superarlo responde `429`.
+- Las respuestas de la API llevan `Cache-Control: no-store`. Los errores inesperados se reportan a Sentry; los `401`, `403`
+  y `429` no.
 
-## 1. Servicios de Inteligencia Artificial (Genkit Server Actions)
+| Código | Cuándo |
+|---|---|
+| 400 | Parámetros inválidos |
+| 401 | Sin sesión o token inválido |
+| 403 | Rol o empresa sin permiso, cuenta suspendida o reclutadora sin aprobar |
+| 404 | La vacante, postulación o entrevista no existe |
+| 409 | El estado actual no permite la operación |
+| 413 | El texto enviado es demasiado largo |
+| 429 | Límite de uso por persona |
+| 502 | La IA devolvió una respuesta incompleta después de reintentar |
+| 503 | La IA no tiene cupo o está muy ocupada (con un mensaje claro) |
 
-Estas funciones se ejecutan en el servidor y son llamadas de forma segura desde los componentes cliente.
+## 2. Endpoints
 
-### 1.1. Extraer Datos de CV
-Extrae información profesional estructurada a partir de texto plano extraído de un archivo PDF.
+| Endpoint | Quién | Límite por hora | Cuerpo | Respuesta |
+|---|---|---|---|---|
+| `POST /api/ai/extract-cv` | Candidata | 10 | `cvText` (30 a 8 000 caracteres) | Perfil: `headline`, `location`, `yearsOfExperience`, `skills[]`, `experience[]`, `education[]`, `summary` |
+| `POST /api/ai/generate-description` | Reclutadora o administradora | 20 | `title`, `seniority`, `searchTags[]` | `descriptionMd` |
+| `POST /api/recommendations/generate` | Candidata | 10 | (vacío) | `processed`, `cached`, `skipped`, `failed`, `aiLimit`, `results[]` |
+| `POST /api/recommendations/generate-for-job` | Reclutadora aprobada de la empresa o administradora | 15 | `jobId` | `processed`, `cached`, `skipped`, `failed`, `aiLimit` |
+| `POST /api/matches/respond` | Candidata (solo rechazar) o empresa de la vacante | 120 | `recId`, `action` | `ok`, `status` (`accepted`, `rejected_by_recruiter` o `rejected_by_candidate`) |
+| `POST /api/applications/notify-new` | Candidata | 60 | `jobId` | `ok`, `notified` (idempotente: `duplicate`) |
+| `POST /api/applications/notify-status` | Reclutadora aprobada de la empresa o administradora | 300 | `jobId`, `candidateUid`, `newStatus`, `interviewAt?`, `interviewType?`, `timeZone?` | `ok` |
+| `POST /api/interviews/cancel` | Reclutadora aprobada de la empresa o administradora | 120 | `interviewId`, `timeZone` | `ok` |
+| `POST /api/jobs/delete` | Reclutadora aprobada de la empresa o administradora | 30 | `jobId` | `ok` (borra en cascada postulaciones, recomendaciones, entrevistas y notas) |
+| `POST /api/admin/users` | Administradora | 120 | `uid`, `action` (`approve_recruiter`, `revoke_recruiter`, `suspend`, `reactivate`, `set_role`, `set_organization`, `delete`), `role?`, `organizationRef?` | `ok` y el nuevo estado; registra la acción en la auditoría desde el servidor |
+| `POST /api/account/delete` | Cualquier persona con sesión, sobre su propia cuenta | 5 | `confirm: "ELIMINAR"` | `ok`, `removed` |
+| `POST /api/audit` | Reclutadora o administradora | 120 | `action`, `targetType`, `targetId`, `details?` | `ok`; solo acepta eventos de vacantes y empresas, y una reclutadora no puede registrar eventos de otra empresa |
+| `GET /api/health` | Pública | sin límite por persona | `?deep=1` prueba también la clave de la IA | Estado de las variables (sí o no, nunca sus valores) e inicialización de Firebase Admin; la lectura de Firestore se guarda 30 s en memoria |
 
-*   **Tipo de método:** Server Action (POST)
-*   **Función:** `extractCvData` (ubicada en `@/ai/flows/extract-cv-data-flow`)
-*   **Descripción:** Procesa el texto de un currículum usando Gemini 1.0 Pro y devuelve un perfil profesional estructurado listo para ser guardado en la base de datos.
-*   **Parámetros:**
-    *   `cvText` (string): Texto completo extraído del documento CV mediante el lector de PDF del cliente.
-*   **Ejemplo de Request:**
-    ```json
-    {
-      "cvText": "Juan Pérez. Ingeniero de Software con 5 años de experiencia en React y Node.js. Residente en Madrid."
-    }
-    ```
-*   **Ejemplo de Response:**
-    ```json
-    {
-      "headline": "Ingeniero de Software",
-      "location": "Madrid, España",
-      "yearsOfExperience": 5,
-      "skills": [
-        { "name": "React", "level": 5, "years": 4 },
-        { "name": "Node.js", "level": 4, "years": 3 }
-      ]
-    }
-    ```
-*   **Códigos de error:**
-    *   `Error: No se proporcionó texto del CV`: Cuando el input está vacío.
-    *   `Error: La IA no pudo generar una respuesta`: Falla en el modelo de lenguaje o API key inválida.
-*   **Autenticación requerida:** Sí (Usuario autenticado con rol `candidate`).
+## 3. Cómo se calcula la compatibilidad (`/api/recommendations/*`)
 
----
+El detalle del procedimiento, con el esquema de entrada y salida, la huella de caché y los experimentos de validación, está en
+[ARQUITECTURA.md](ARQUITECTURA.md) y en [evidencias/ia/README.md](evidencias/ia/README.md). En resumen, para cada par
+candidata y vacante el modelo recibe el titular, las habilidades con nivel y años, el resumen y un extracto de 1 800
+caracteres del CV, y la vacante (título, nivel, etiquetas y descripción recortada a 2 500 caracteres), y devuelve un puntaje de
+0 a 1 y hasta 5 razones. Cada llamada evalúa 2 pares a la vez y deja de iniciar evaluaciones nuevas a los 30 s (Vercel corta a
+los 60 s).
 
-### 1.2. Generar Descripción de Vacante
-Redacta automáticamente una descripción profesional en formato Markdown para una oferta de empleo.
+## 4. Acceso directo a Firestore
 
-*   **Tipo de método:** Server Action (POST)
-*   **Función:** `generateJobDescription` (ubicada en `@/ai/flows/generate-job-description-flow`)
-*   **Descripción:** Crea responsabilidades, requisitos y beneficios atractivos basados en el título del puesto y etiquetas tecnológicas.
-*   **Parámetros:**
-    *   `title` (string): El nombre del puesto de trabajo.
-    *   `seniority` (string): Nivel de experiencia requerido (junior, mid, senior, lead).
-    *   `searchTags` (string[]): Lista de tecnologías o habilidades clave.
-*   **Ejemplo de Request:**
-    ```json
-    {
-      "title": "Desarrollador Full Stack",
-      "seniority": "senior",
-      "searchTags": ["Next.js", "Firebase", "TypeScript"]
-    }
-    ```
-*   **Ejemplo de Response:**
-    ```json
-    {
-      "descriptionMd": "## Descripción del Puesto\nEstamos buscando un Desarrollador Full Stack Senior...\n### Responsabilidades\n- Diseñar arquitecturas escalables con Next.js..."
-    }
-    ```
-*   **Códigos de error:**
-    *   `Error: El título y el seniority son requeridos`: Validación de campos obligatorios.
-    *   `500`: Error interno en el procesamiento del prompt de Genkit.
-*   **Autenticación requerida:** Sí (Usuario autenticado con rol `recruiter`).
-
----
-
-## 2. API de Datos (Firestore Client Access)
-
-HireLink interactúa directamente con Firestore. Las rutas descritas aquí corresponden a los paths de los documentos y colecciones protegidos por Firebase Security Rules.
-
-### 2.1. Gestión de Vacantes (`/jobs`)
-*   **Métodos Soportados:** `GET` (Listar), `POST` (Crear), `PATCH` (Actualizar), `DELETE` (Eliminar).
-*   **Descripción:** Acceso a las ofertas de empleo publicadas en la plataforma.
-*   **Esquema de Datos (Job):**
-    ```json
-    {
-      "organizationRef": "ID_DE_LA_ORG",
-      "title": "Nombre del puesto",
-      "descriptionMd": "Contenido en Markdown",
-      "location": "Ubicación física o remota",
-      "seniority": "junior | mid | senior | lead",
-      "status": "published | draft | closed",
-      "searchTags": ["React", "IA"]
-    }
-    ```
-*   **Autenticación:** Requerida. Lectura pública para usuarios; escritura solo para reclutadores de la organización.
-
-### 2.2. Postulaciones (`/jobs/{jobId}/applications`)
-*   **Métodos Soportados:** `GET`, `POST`.
-*   **Descripción:** Colección anidada para gestionar los candidatos interesados en una vacante específica.
-*   **Request (POST - Postularse):**
-    ```json
-    {
-      "candidateRef": "AUTH_UID",
-      "status": "applied",
-      "appliedAt": "ServerTimestamp",
-      "cvRef": "Referencia a Storage"
-    }
-    ```
-*   **Autenticación:** Requerida. El `candidateRef` debe coincidir con el UID del usuario que realiza la petición.
-
----
-
-## 3. Códigos de Error Comunes
-
-| Código | Descripción | Resolución |
-| :--- | :--- | :--- |
-| `auth/invalid-api-key` | La clave de Firebase es incorrecta. | Revisar variables de entorno `.env`. |
-| `permission-denied` | Intento de acceder a datos sin autorización. | Verificar que el usuario tenga el rol adecuado en Firestore Rules. |
-| `not-found` | El documento solicitado no existe. | Verificar el ID del documento en la URL. |
+El navegador también lee y escribe Firestore sin pasar por estos endpoints, siempre bajo las reglas de [`firestore.rules`](../firestore.rules)
+(rol, propiedad, aislamiento entre empresas, cuentas suspendidas y tamaños máximos). Colecciones y permisos: sección 2 de
+[CONTEXTO_PROYECTO.md](CONTEXTO_PROYECTO.md) y [CHECKLIST_SEGURIDAD_PRIVACIDAD.md](CHECKLIST_SEGURIDAD_PRIVACIDAD.md).

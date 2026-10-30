@@ -4,7 +4,7 @@ Todos los cambios importantes de HireLink, de lo más reciente a lo más antiguo
 `v1.0.0` (commit `302e211`, 19 de octubre de 2026) es la última publicada; antes, `v0.9-rc` (commit `94c6762`,
 24 de septiembre de 2026). Cómo se publicó y cómo se revierte: [docs/RELEASE_v1.0.md](docs/RELEASE_v1.0.md).
 
-## [1.1.0] sin publicar
+## [1.1.0] candidata a publicar (etiqueta `v1.1.0-rc1`, 30 de octubre de 2026)
 
 Incluye lo que iba a ser la 1.0.1 (el arreglo del JSON incompleto de la IA) y las correcciones de la revisión por áreas
 del 24 de octubre. Orden de publicación y cómo se revierte: [docs/RELEASE_v1.1.md](docs/RELEASE_v1.1.md).
@@ -48,6 +48,9 @@ del 24 de octubre. Orden de publicación y cómo se revierte: [docs/RELEASE_v1.1
 - Toda recomendación se guarda con al menos una razón: el modelo de respaldo a veces contestaba puntaje 0 con la lista
   vacía y la tarjeta quedaba sin explicación. Las razones se limpian (sin vacías ni repetidas, cinco como máximo) y las que
   ya estaban guardadas vacías se recalculan una vez.
+- El porcentaje se presenta como lo que es: una compatibilidad estimada con los requisitos escritos de la vacante, no una
+  probabilidad de contratación (aviso en la tarjeta de la candidata, en el detalle del postulante, en la lista de postulantes y
+  en los candidatos recomendados). La decisión sigue siendo de la reclutadora.
 
 ### Flujos y pantallas
 - El correo con un espacio al final ya no se rechaza (importa en el celular) y el campo es de tipo correo.
@@ -65,6 +68,12 @@ del 24 de octubre. Orden de publicación y cómo se revierte: [docs/RELEASE_v1.1
   `migrar-notas` y `respaldar-datos`; `seed` y `limpiar-huerfanos` conocen lo nuevo.
 - Verificación automática en GitHub (`.github/workflows/verificacion.yml`): tipos y pruebas unitarias en cada cambio a `main`.
 - `/api/health` guarda 30 s en memoria la lectura de Firestore (es pública y leía en cada visita).
+- **Validación de la IA reproducible** (`scripts/evaluacion/`, datos y resultados en `docs/evidencias/ia/`): extracción de CV contra
+  datos conocidos, compatibilidad de 50 pares frente a una línea base de etiquetas, casos difíciles (relleno de habilidades y
+  sinónimos), prueba contrafactual de sesgo y latencia de lectura. Solo corren contra staging. `matchInput` se exporta de
+  `src/lib/server/matching.ts` para que los scripts armen la entrada igual que la aplicación.
+- **Evidencias**: índice en `docs/EVIDENCIAS.md`, registros de las pruebas del 26 y 27 de octubre en `docs/evidencias/pruebas/` y
+  `docs/API_DOCUMENTATION.md` reescrita con los 13 endpoints, los roles, los límites de uso y los códigos de error.
 
 ### Cambios que obligan a un paso manual
 Publicar `firestore.rules`, aprobar a las reclutadoras que ya existen y mover las notas anteriores (ver

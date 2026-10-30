@@ -1,0 +1,58 @@
+﻿
+> nextn@0.1.0 test:unit
+> node --import ./qa-tests/unitarias/registrar.mjs --test "qa-tests/unitarias/*.test.mjs"
+
+✔ fixEscapedNewlines convierte los «\n» escritos como texto cuando no hay saltos reales (0.8726ms)
+✔ fixEscapedNewlines no toca un texto con saltos reales ni uno sin secuencias (0.1307ms)
+✔ fixEscapedNewlines también convierte «\r\n» y «\t» escritos como texto (0.0941ms)
+✔ parseTags quita vacíos y repetidos (sin distinguir mayúsculas) y respeta los límites (0.841ms)
+✔ yearsLabel concuerda en singular y plural (0.155ms)
+✔ isHttpUrl solo acepta direcciones http o https con dominio (0.9008ms)
+✔ normalizeText y matchesText buscan sin distinguir acentos ni mayúsculas (0.2506ms)
+✔ seniorityLabel usa la misma etiqueta en todas las pantallas (0.1143ms)
+✔ safeNextPath solo acepta rutas internas del dashboard (sin «..», dobles barras ni direcciones externas) (1.4995ms)
+✔ emailField acepta un correo con espacios al inicio o al final y lo devuelve recortado (1.0392ms)
+✔ emailField rechaza un correo mal formado con el mensaje indicado (0.3755ms)
+✔ emailField rechaza espacios dentro del correo (0.1204ms)
+✔ emailField distingue «requerido» de «inválido» solo si se da el mensaje de requerido (0.1647ms)
+✔ overlapScore: fracción de habilidades de la vacante que aparecen en el perfil, sin distinguir acentos (0.7869ms)
+✔ primera evaluación: llama a la IA, guarda la recomendación con su huella y avisa (1.0145ms)
+✔ sin cambios en el perfil ni en la vacante: reutiliza el puntaje guardado y NO llama a la IA (0.6419ms)
+✔ un cambio que el modelo no ve (origen de la habilidad, disponibilidad, ubicación) no invalida el caché (0.279ms)
+✔ si cambia el perfil (una habilidad nueva) se vuelve a evaluar, sin pisar la decisión del reclutador (0.4214ms)
+✔ si cambia la descripción de la vacante se vuelve a evaluar (0.286ms)
+✔ las recomendaciones anteriores a la huella (sin inputHash) se evalúan una vez y la guardan (0.2768ms)
+✔ si la vacante se elimina mientras la IA trabaja, no se guarda una recomendación huérfana (0.1943ms)
+✔ cleanReasons: quita vacías y repetidas, recorta a cinco y nunca devuelve una lista vacía (0.125ms)
+✔ si el modelo contesta puntaje 0 sin razones, la recomendación se guarda con una explicación (0.2597ms)
+✔ matchHash y isUpToDate: la huella solo cambia con lo que ve el modelo (0.2335ms)
+✔ isQuotaExhausted distingue el límite diario del límite por minuto y de otros errores (0.47ms)
+✔ con el cupo diario del modelo principal agotado, runAi pasa al modelo de respaldo y se recupera (0.2982ms)
+✔ con el cupo diario agotado en los dos modelos, runAi responde de inmediato con un 503 claro (0.4595ms)
+✔ un límite por minuto, aunque pida esperar mucho, no se toma por el cupo diario (0.0601ms)
+✔ runAi sí reintenta el límite por minuto y se recupera (1763.6275ms)
+✔ runAi espera lo que pide el proveedor en el límite por minuto (antes esperaba 1, 2 y 4 s) (2523.6956ms)
+✔ runAi reintenta, sin esperar, una salida malformada del modelo y se recupera (1.1421ms)
+✔ si la salida sigue malformada tras los reintentos, runAi responde un 502 claro (ya no «Error interno») (0.6808ms)
+✔ runAi reintenta un JSON que no cumple el esquema («Schema validation failed») y se recupera (0.5277ms)
+✔ si el JSON sigue sin cumplir el esquema, runAi responde un 502 claro y no repite sin fin (0.5963ms)
+✔ el mensaje del error de esquema se reconoce aunque Genkit solo conserve el texto original (0.4186ms)
+✔ un INVALID_ARGUMENT que no es de esquema (p. ej. la petición es demasiado grande) no se reintenta ni se disfraza (0.3307ms)
+✔ el mensaje del 502 llega a la pantalla: aiUnavailableMessage lo muestra y no confunde una página de error de la plataforma (0.3123ms)
+✔ runAi no reintenta errores que no son transitorios (0.2629ms)
+✔ runAi reintenta un tiempo de espera agotado y un error de conexión (2517.4443ms)
+✔ runAi reconoce el estado de Genkit escrito en texto (UNAVAILABLE) y reintenta (1074.7569ms)
+✔ si un límite por minuto no cede tras los reintentos, runAi responde «la IA está ocupada» (503) y no «Error interno» (1262.227ms)
+✔ runAi respeta el tope de tiempo: si la IA no contesta, responde 503 sin esperar a que Vercel corte la función (153.1804ms)
+✔ runAi no espera un reintento que ya no cabe en el tope de tiempo (0.4061ms)
+✔ public/ tiene el worker de pdf.js 6.4.299 (0.995ms)
+✔ el worker de public/ es idéntico al de node_modules (2.5506ms)
+✔ solo hay un worker de pdf.js en public/ (sin versiones viejas) (1.1328ms)
+ℹ tests 46
+ℹ suites 0
+ℹ pass 46
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9895.0556

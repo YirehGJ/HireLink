@@ -1,0 +1,42 @@
+﻿Proyecto de pruebas: hirelink-staging  [.env.staging]
+node : [2026-10-27T06:40:28.532Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 
+0x32449c28 error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+En línea: 9 Carácter: 1
++ node security-tests/flow-test.mjs --env .env.staging *> "$sp\flow-fin ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([2026-10-27T06:...nt permissions.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+[2026-10-27T06:40:31.055Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x32449c2b 
+error. Code: 7 Message: 7 PERMISSION_DENIED: Missing or insufficient permissions.
+OK    Registro de reclutador (users)
+OK    Registro de candidato (users)
+OK    Reclutador crea su empresa (con ownerUid)
+OK    Reclutador se enlaza a SU empresa recién creada
+OK    Reclutador edita su empresa (setDoc merge)
+OK    Reclutadora sin aprobar NO puede publicar (denegado)
+OK    Reclutadora sin aprobar NO lista candidatas (denegado)
+OK    Un administrador aprueba a la reclutadora
+OK    Reclutador publica una vacante
+OK    Reclutador edita la vacante (setDoc merge)
+OK    Reclutador lista sus vacantes (where organizationRef)
+OK    Candidato guarda su perfil con CV analizado
+OK    Candidato explora vacantes publicadas
+OK    Candidato postula (batch: postulación + espejo)
+OK    Candidato lee su postulación (espejo)
+OK    Candidato consulta si ya postuló (get)
+OK    Reclutador ve postulantes
+OK    Reclutador ve el perfil del candidato
+OK    Reclutador cambia estado de la postulación
+OK    Reclutador marca shortlist y deja notas (applicantNotes)
+OK    Reclutador lee sus notas
+OK    Candidata NO lee sus notas privadas (denegado)
+OK    Reclutador NO retira una postulación (estado «withdrawn», denegado)
+OK    Reclutador agenda entrevista
+OK    Candidato ve sus entrevistas
+OK    Reclutador cierra la vacante (setStatus)
+OK    Candidato aún puede ver la vacante cerrada
+OK    Reclutador actualiza su nombre (users)
+OK    Reclutador elimina la vacante
+
+29/29 flujos correctos

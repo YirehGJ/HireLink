@@ -184,6 +184,8 @@ escribir en producción sin `--allow-production`. Cómo separar desarrollo, stag
   [docs/GUIA_USO.md](docs/GUIA_USO.md) — cómo está hecho, cómo trabajar en el código y cómo usar la plataforma.
 - [docs/CHECKLIST_SEGURIDAD_PRIVACIDAD.md](docs/CHECKLIST_SEGURIDAD_PRIVACIDAD.md) y
   [docs/BACKLOG_V2.md](docs/BACKLOG_V2.md) — seguridad y privacidad al cierre, y lo que queda para la versión 2.
+- [docs/EVIDENCIAS.md](docs/EVIDENCIAS.md) — índice de evidencias de la versión 1.1: pruebas, validación de la IA con datos
+  de referencia, rendimiento y cómo repetirlo todo; [docs/API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md) documenta la API.
 - [docs/piloto/README.md](docs/piloto/README.md) — plan y materiales del piloto con personas reales.
 - [docs/GUION_DEMO_FINAL.md](docs/GUION_DEMO_FINAL.md) y [docs/DEFENSA.md](docs/DEFENSA.md) — demostración final y
   preparación de la defensa.

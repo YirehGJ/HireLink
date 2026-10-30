@@ -1,0 +1,71 @@
+﻿Proyecto de pruebas: hirelink-staging  |  aplicación: http://localhost:3100
+
+== 1. Páginas públicas: «Saltar al contenido», landmarks y HTML estático ==
+OK   [A11Y] Inicio | tiene exactamente un <main> y un <h1>  -> main 1, h1 1
+OK   [A11Y] Inicio | tiene el enlace «Saltar al contenido» y su destino
+OK   [A11Y] Inicio | el primer Tab llega al enlace «Saltar al contenido» y se ve  -> Saltar al contenido principal
+OK   [A11Y] Inicio | Enter lleva el foco al contenido principal
+OK   [A11Y] Iniciar sesión | tiene exactamente un <main> y un <h1>  -> main 1, h1 1
+OK   [A11Y] Iniciar sesión | tiene el enlace «Saltar al contenido» y su destino
+OK   [A11Y] Iniciar sesión | el primer Tab llega al enlace «Saltar al contenido» y se ve  -> Saltar al contenido principal
+OK   [A11Y] Iniciar sesión | Enter lleva el foco al contenido principal
+OK   [A11Y] Registro | tiene exactamente un <main> y un <h1>  -> main 1, h1 1
+OK   [A11Y] Registro | tiene el enlace «Saltar al contenido» y su destino
+OK   [A11Y] Registro | el primer Tab llega al enlace «Saltar al contenido» y se ve  -> Saltar al contenido principal
+OK   [A11Y] Registro | Enter lleva el foco al contenido principal
+OK   [A11Y] Recuperar contraseña | tiene exactamente un <main> y un <h1>  -> main 1, h1 1
+OK   [A11Y] Recuperar contraseña | tiene el enlace «Saltar al contenido» y su destino
+OK   [A11Y] Recuperar contraseña | el primer Tab llega al enlace «Saltar al contenido» y se ve  -> Saltar al contenido principal
+OK   [A11Y] Recuperar contraseña | Enter lleva el foco al contenido principal
+OK   [A11Y] Inicio de sesión | el formulario viene en el HTML inicial (se dibuja antes de que cargue el JavaScript)  -> 18023 bytes
+OK   [A11Y] Registro | el formulario viene en el HTML inicial (se dibuja antes de que cargue el JavaScript)  -> 18651 bytes
+OK   [A11Y] Inicio de sesión | el teclado recorre en orden: saltar, logo, correo, contraseña, ver contraseña, recuérdame, olvidé, entrar y, al final, Google (si está activo) o el enlace de registro  -> Saltar al contenido principal > HireLink, ir al inicio > tu@email.com > ******** > Mostrar contraseña > button > ¿Olvidaste tu contraseña? > Entrar > Regístrate
+
+== 2. Escritorio con sesión de candidato ==
+OK   [A11Y] Menú lateral | landmarks: un main, la navegación «Menú principal» y la barra lateral
+OK   [A11Y] Menú lateral | la opción actual se marca con aria-current  -> Inicio
+OK   [A11Y] Menú lateral | la barra superior del celular no se ve en escritorio
+OK   [A11Y] Teclado | primer Tab: «Saltar al contenido principal»
+OK   [A11Y] Teclado | el salto deja el foco en el contenido (no en el menú)
+OK   [A11Y] Teclado | el siguiente Tab cae dentro del contenido, no en el menú  -> button «Rechazar match»
+OK   [A11Y] Teclado | el foco del menú se ve (anillo u contorno)
+
+== 3. Celular (375 px) ==
+OK   [A11Y] Inicio | no hay desbordamiento horizontal a 375 px  -> ancho 375
+OK   [A11Y] Inicio | el menú lateral no ocupa la pantalla
+OK   [A11Y] Explorar vacantes | no hay desbordamiento horizontal a 375 px  -> ancho 375
+OK   [A11Y] Explorar vacantes | el menú lateral no ocupa la pantalla
+OK   [A11Y] Mi perfil | no hay desbordamiento horizontal a 375 px  -> ancho 375
+OK   [A11Y] Mi perfil | el menú lateral no ocupa la pantalla
+OK   [A11Y] Mis postulaciones | no hay desbordamiento horizontal a 375 px  -> ancho 375
+OK   [A11Y] Mis postulaciones | el menú lateral no ocupa la pantalla
+OK   [A11Y] Configuración | no hay desbordamiento horizontal a 375 px  -> ancho 375
+OK   [A11Y] Configuración | el menú lateral no ocupa la pantalla
+OK   [A11Y] Menú del celular | hay barra superior con botón de menú y campana  -> {"barra":true,"boton":true,"w":44,"h":44,"nombre":"Abrir o cerrar el menú","campana":true}
+OK   [A11Y] Menú del celular | el botón de menú mide al menos 44 x 44 px  -> 44x44
+OK   [A11Y] Menú del celular | el botón de menú tiene nombre accesible en español  -> Abrir o cerrar el menú
+OK   [A11Y] Menú del celular | Enter abre el panel con la navegación  -> Inicio, Explorar Vacantes, Mi Perfil, Mis Postulaciones, Configuración
+OK   [A11Y] Menú del celular | el foco queda dentro del panel
+OK   [A11Y] Menú del celular | el panel tiene fondo opaco (no se transparenta la página)  -> rgb(15, 19, 29)
+OK   [A11Y] Menú del celular | el foco no se escapa del panel al recorrerlo con Tab
+OK   [A11Y] Menú del celular | Esc cierra el panel
+OK   [A11Y] Menú del celular | al cerrar, el foco vuelve al botón de menú
+OK   [A11Y] Menú del celular | al elegir una opción se navega y el panel se cierra
+
+== 4. Diálogos: el foco entra y vuelve ==
+OK   [A11Y] Detalles del candidato | el botón abre un diálogo y el foco pasa a él
+OK   [A11Y] Detalles del candidato | Esc lo cierra y el foco vuelve al botón «Detalles»
+
+== 5. Guía de primeros pasos (cuentas nuevas) ==
+OK   [A11Y] Registro | sin parámetro, el tipo de cuenta por defecto es candidato  -> Candidato (Busco empleo)
+OK   [A11Y] Primeros pasos | candidata nueva: aparece la guía con 0 de 3 pasos
+OK   [A11Y] Primeros pasos | el paso del CV está marcado como opcional
+OK   [A11Y] Primeros pasos | se puede cerrar
+OK   [A11Y] Primeros pasos | al recargar sigue cerrada (se recuerda en el navegador)
+OK   [A11Y] Registro | con ?role=recruiter el tipo de cuenta queda en Reclutador  -> Reclutador (Busco talento)
+OK   [A11Y] Primeros pasos | reclutador nuevo: aparece la guía con 0 de 2 pasos
+OK   [A11Y] Primeros pasos | enlaza al perfil de la empresa y a crear la vacante
+OK   [A11Y] Primeros pasos | una candidata con perfil y postulaciones no ve la guía
+OK   [CSP] Política de contenido | ninguna violación en toda la suite  -> el navegador no bloqueó nada
+
+58/58 correctas, 0 fallas

@@ -1,0 +1,49 @@
+﻿Proyecto de pruebas: hirelink-staging  |  aplicación: http://localhost:3100
+P01  OK       Recuperar contraseña envía un correo real
+       -> solicitudes a Firebase (sendOobCode): 2; mensaje de éxito mostrado: true
+P02  OK       «Recuérdame» desmarcado limita la sesión a la pestaña
+       -> sesión en IndexedDB (persistente): 0; en sessionStorage: 1
+P02b OK       «Recuérdame» marcado (por defecto) mantiene la sesión persistente
+       -> sesión en IndexedDB (persistente): 1; en sessionStorage: 0
+P03  OK       Un candidato no ve la pantalla de gestión de vacantes
+       -> bloqueado o redirigido
+P04  OK       Las descripciones se muestran sin símbolos de Markdown
+       -> símbolos «##» visibles: tarjetas=0, detalle=0
+P05  OK       Concordancia «1 año / N años» de experiencia
+       -> apariciones de «1 años»: 0
+P06  OK       El perfil del administrador muestra sus datos
+       -> muestra la tarjeta con rol, estado e id
+P07  OK       Eliminar una vacante no deja datos huérfanos
+       -> tras eliminar: {"vacante":0,"postulaciones":0,"copiasCandidato":0,"recomendaciones":0,"entrevistas":0}
+P08  OK       No se puede agendar una entrevista en una fecha pasada
+       -> entrevistas creadas con fecha 2024-01-15: 0; aviso en pantalla: rechazada con aviso
+P09  OK       Las habilidades de la vacante se normalizan (sin vacíos ni duplicados)
+       -> etiquetas guardadas: ["React","Node.js"]
+P10  OK       En el detalle de una vacante, «Volver» regresa a Explorar
+       -> enlace «Volver»: /dashboard/explore
+P11  OK       El inicio del candidato no genera errores de permisos en consola
+       -> errores relevantes: 0
+P12  OK       Un reclutador en /admin no dispara consultas no autorizadas
+       -> consultas denegadas: 0
+P13  OK       Con contraseña actual incorrecta no se aplica ningún cambio de cuenta
+       -> aviso: «contraseña actual incorrecta»; nombre guardado: «Samuel Vargas Echeverría» (original «Samuel Vargas Echeverría»)
+P16  OK       El documento declara el idioma español
+       -> lang="es", título="HireLink | Plataforma de talento con IA explicable"
+P17  OK       Las preferencias de correo muestran el valor que el servidor aplica
+       -> interruptores sin preferencia guardada: ["true","true","true","true"] (el servidor envía por defecto)
+P18  OK       La aplicación no solicita imágenes a servicios externos
+       -> solicitudes a picsum.photos: 0 (se envía el identificador de cada persona)
+P19  OK       El panel del administrador no etiqueta «nuevos» al total de candidatos
+       -> etiqueta corregida
+P20  OK       El reclutador ve en el calendario las entrevistas agendadas de su vacante
+       -> consultas denegadas por Firestore: 0; calendario muestra «N entrevistas en total»: true
+P21  OK       Cancelar una entrevista la elimina y avisa al candidato
+       -> botón de cancelar disponible: true; entrevista eliminada: true; avisos del candidato antes/después: 2/3
+P22  OK       Sin sesión, una página del dashboard lleva al inicio de sesión y regresa tras entrar
+       -> redirigido a: /login?next=%2Fdashboard%2Fjobs%2Fseed_job_bi; tras iniciar sesión: /dashboard/jobs/seed_job_bi
+P23  OK       El aviso de entrevista muestra la hora agendada (servidor en UTC)
+       -> agendada a las 10:00 (hora local); el aviso dice: «na entrevista (videollamada) el 30 de octubre de 2026 a las 10:00 a.m.»
+P24  OK       La política de contenido no bloquea nada de lo que la aplicación necesita
+       -> ninguna violación en todas las sondas anteriores (cabecera Content-Security-Policy activa)
+
+Sondas: 23 | con defecto: 0 | correctas: 23 | con error de sonda: 0
