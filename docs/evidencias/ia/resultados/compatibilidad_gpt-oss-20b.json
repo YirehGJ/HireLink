@@ -1,0 +1,886 @@
+{
+  "resumen": {
+    "modelo": "openai/gpt-oss-20b",
+    "fecha": "2026-10-30T23:37:33.401Z",
+    "pares": 50,
+    "con_respuesta": 50,
+    "con_error": 0,
+    "vacantes": 5,
+    "perfiles": 10,
+    "umbral_de_aviso": 0.4,
+    "modelo_ia": {
+      "acierto_primer_lugar": 1,
+      "entre_los_tres_primeros": 1,
+      "rango_medio_del_ideal": 1,
+      "mrr": 1,
+      "auc_ideal_contra_resto": 1,
+      "ndcg5": 0.93,
+      "puntaje_medio": {
+        "ideal": 0.904,
+        "afin": 0.263,
+        "resto": 0.065
+      },
+      "ideal_sobre_el_umbral": 1,
+      "resto_sobre_el_umbral": 0.026
+    },
+    "linea_base": {
+      "acierto_primer_lugar": 1,
+      "entre_los_tres_primeros": 1,
+      "rango_medio_del_ideal": 1,
+      "mrr": 1,
+      "auc_ideal_contra_resto": 1,
+      "ndcg5": 0.848
+    },
+    "correlacion_spearman_modelo_linea_base": 0.605,
+    "latencia_ms": {
+      "mediana": 11632.5,
+      "p95": 45664
+    },
+    "criterio": "Rango 1 = el perfil diseñado para la vacante obtuvo el puntaje más alto de los 10 (los empates cuentan el promedio de sus lugares). AUC: probabilidad de que el perfil ideal supere en puntaje a uno que no lo es. La relevancia afín se fijó antes de ejecutar."
+  },
+  "por_vacante": [
+    {
+      "vacante": "Analista de Datos Clínicos",
+      "evaluados": 10,
+      "ideal": "ricardo.alonso",
+      "puntaje_ideal": 0.92,
+      "rango_modelo": 1,
+      "rango_linea_base": 1,
+      "ndcg5_modelo": 0.978,
+      "ndcg5_linea_base": 0.922,
+      "tres_primeros": [
+        "ricardo.alonso (0.92)",
+        "sebastian.arellano (0.6)",
+        "carolina.mejia (0.5)"
+      ]
+    },
+    {
+      "vacante": "Desarrollador Móvil iOS",
+      "evaluados": 10,
+      "ideal": "valentina.cruz",
+      "puntaje_ideal": 0.93,
+      "rango_modelo": 1,
+      "rango_linea_base": 1,
+      "ndcg5_modelo": 0.76,
+      "ndcg5_linea_base": 0.76,
+      "tres_primeros": [
+        "valentina.cruz (0.93)",
+        "alejandro.quiroz (0.15)",
+        "carolina.mejia (0.12)"
+      ]
+    },
+    {
+      "vacante": "Administrador de Sistemas Linux",
+      "evaluados": 10,
+      "ideal": "emiliano.rojas",
+      "puntaje_ideal": 0.97,
+      "rango_modelo": 1,
+      "rango_linea_base": 1,
+      "ndcg5_modelo": 1,
+      "ndcg5_linea_base": 1,
+      "tres_primeros": [
+        "emiliano.rojas (0.97)",
+        "ricardo.alonso (0.05)",
+        "sebastian.arellano (0.05)"
+      ]
+    },
+    {
+      "vacante": "Desarrollador .NET Senior",
+      "evaluados": 10,
+      "ideal": "fernando.trevino",
+      "puntaje_ideal": 0.92,
+      "rango_modelo": 1,
+      "rango_linea_base": 1,
+      "ndcg5_modelo": 0.95,
+      "ndcg5_linea_base": 0.76,
+      "tres_primeros": [
+        "fernando.trevino (0.92)",
+        "jimena.salgado (0.2)",
+        "alejandro.quiroz (0.18)"
+      ]
+    },
+    {
+      "vacante": "Desarrollador Frontend Junior (React)",
+      "evaluados": 10,
+      "ideal": "regina.palacios",
+      "puntaje_ideal": 0.78,
+      "rango_modelo": 1,
+      "rango_linea_base": 1,
+      "ndcg5_modelo": 0.964,
+      "ndcg5_linea_base": 0.798,
+      "tres_primeros": [
+        "regina.palacios (0.78)",
+        "daniela.ochoa (0.25)",
+        "carolina.mejia (0.15)"
+      ]
+    }
+  ],
+  "filas": [
+    {
+      "vacante": "Analista de Datos Clínicos",
+      "candidato": "carolina.mejia",
+      "relevancia": 0,
+      "puntaje": 0.5,
+      "razones": [
+        "Python",
+        "SQL",
+        "Experiencia 3 años",
+        "Automatización",
+        "Mid-level"
+      ],
+      "base_coincidencia": 0.5,
+      "ms": 979,
+      "error": null
+    },
+    {
+      "vacante": "Analista de Datos Clínicos",
+      "candidato": "fernando.trevino",
+      "relevancia": 0,
+      "puntaje": 0.1,
+      "razones": [
+        "Experiencia SQL",
+        "Desarrollo backend",
+        "Sin Python",
+        "Sin Power BI",
+        "Sin estadística"
+      ],
+      "base_coincidencia": 0.25,
+      "ms": 831,
+      "error": null
+    },
+    {
+      "vacante": "Analista de Datos Clínicos",
+      "candidato": "daniela.ochoa",
+      "relevancia": 0,
+      "puntaje": 0,
+      "razones": [
+        "Sin Python",
+        "Sin SQL",
+        "Sin Power BI",
+        "Experiencia no relevante",
+        "Sin estadística"
+      ],
+      "base_coincidencia": 0,
+      "ms": 683,
+      "error": null
+    },
+    {
+      "vacante": "Analista de Datos Clínicos",
+      "candidato": "ricardo.alonso",
+      "relevancia": 2,
+      "puntaje": 0.92,
+      "razones": [
+        "Python avanzado",
+        "SQL experto",
+        "Power BI experto",
+        "Estadística sólida",
+        "Dashboard experto"
+      ],
+      "base_coincidencia": 1,
+      "ms": 502,
+      "error": null
+    },
+    {
+      "vacante": "Analista de Datos Clínicos",
+      "candidato": "valentina.cruz",
+      "relevancia": 0,
+      "puntaje": 0.1,
+      "razones": [
+        "Falta Python",
+        "Falta SQL",
+        "Falta Power BI",
+        "Sin estadística",
+        "Enfocado iOS"
+      ],
+      "base_coincidencia": 0,
+      "ms": 527,
+      "error": null
+    },
+    {
+      "vacante": "Analista de Datos Clínicos",
+      "candidato": "emiliano.rojas",
+      "relevancia": 0,
+      "puntaje": 0.05,
+      "razones": [],
+      "base_coincidencia": 0,
+      "ms": 1265,
+      "error": null
+    },
+    {
+      "vacante": "Analista de Datos Clínicos",
+      "candidato": "jimena.salgado",
+      "relevancia": 1,
+      "puntaje": 0.4,
+      "razones": [
+        "SQL sólido",
+        "Experiencia >2 años",
+        "BI con Looker",
+        "Falta Python",
+        "Falta Power BI"
+      ],
+      "base_coincidencia": 0.25,
+      "ms": 19804,
+      "error": null
+    },
+    {
+      "vacante": "Analista de Datos Clínicos",
+      "candidato": "sebastian.arellano",
+      "relevancia": 1,
+      "puntaje": 0.6,
+      "razones": [
+        "Python sólido",
+        "SQL competente",
+        "Experiencia media",
+        "Modelos predictivos",
+        "Manejo de datos"
+      ],
+      "base_coincidencia": 0.5,
+      "ms": 430,
+      "error": null
+    },
+    {
+      "vacante": "Analista de Datos Clínicos",
+      "candidato": "regina.palacios",
+      "relevancia": 0,
+      "puntaje": 0.05,
+      "razones": [
+        "Sin Python",
+        "Sin SQL",
+        "Sin Power BI",
+        "Nivel junior",
+        "Enfasis frontend"
+      ],
+      "base_coincidencia": 0,
+      "ms": 8754,
+      "error": null
+    },
+    {
+      "vacante": "Analista de Datos Clínicos",
+      "candidato": "alejandro.quiroz",
+      "relevancia": 0,
+      "puntaje": 0.05,
+      "razones": [
+        "Sin Python",
+        "Sin SQL",
+        "Sin Power BI",
+        "Falta estadística",
+        "Sector distinto"
+      ],
+      "base_coincidencia": 0,
+      "ms": 21768,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador Móvil iOS",
+      "candidato": "carolina.mejia",
+      "relevancia": 0,
+      "puntaje": 0.12,
+      "razones": [
+        "Pruebas API",
+        "CI/CD pipelines",
+        "Automatización pruebas",
+        "Agile teams",
+        "Herramientas QA"
+      ],
+      "base_coincidencia": 0,
+      "ms": 2862,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador Móvil iOS",
+      "candidato": "fernando.trevino",
+      "relevancia": 0,
+      "puntaje": 0,
+      "razones": [
+        "Sin Swift",
+        "Sin iOS",
+        "Solo .NET",
+        "No Firebase",
+        "No móvil"
+      ],
+      "base_coincidencia": 0,
+      "ms": 888,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador Móvil iOS",
+      "candidato": "daniela.ochoa",
+      "relevancia": 0,
+      "puntaje": 0,
+      "razones": [
+        "Sin experiencia Swift",
+        "Sin desarrollo iOS",
+        "Solo diseño UI",
+        "No Firebase",
+        "No Git"
+      ],
+      "base_coincidencia": 0,
+      "ms": 20732,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador Móvil iOS",
+      "candidato": "ricardo.alonso",
+      "relevancia": 0,
+      "puntaje": 0.05,
+      "razones": [
+        "Sin experiencia iOS",
+        "No Swift",
+        "Sin Firebase",
+        "Sin APIs REST",
+        "Solo análisis datos"
+      ],
+      "base_coincidencia": 0,
+      "ms": 11876,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador Móvil iOS",
+      "candidato": "valentina.cruz",
+      "relevancia": 2,
+      "puntaje": 0.93,
+      "razones": [
+        "4 años de experiencia",
+        "SwiftUI nivel 5",
+        "Firebase avanzado",
+        "REST APIs sólido",
+        "Pruebas unitarias"
+      ],
+      "base_coincidencia": 1,
+      "ms": 11876,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador Móvil iOS",
+      "candidato": "emiliano.rojas",
+      "relevancia": 0,
+      "puntaje": 0.02,
+      "razones": [
+        "Sin experiencia móvil",
+        "No Swift",
+        "Sin Firebase",
+        "Sin REST APIs",
+        "Experiencia distinta"
+      ],
+      "base_coincidencia": 0,
+      "ms": 12202,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador Móvil iOS",
+      "candidato": "jimena.salgado",
+      "relevancia": 0,
+      "puntaje": 0,
+      "razones": [],
+      "base_coincidencia": 0,
+      "ms": 11325,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador Móvil iOS",
+      "candidato": "sebastian.arellano",
+      "relevancia": 0,
+      "puntaje": 0.05,
+      "razones": [
+        "Sin experiencia iOS",
+        "No Swift",
+        "Sin Firebase",
+        "Sin REST APIs",
+        "Falta SwiftUI"
+      ],
+      "base_coincidencia": 0,
+      "ms": 43103,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador Móvil iOS",
+      "candidato": "regina.palacios",
+      "relevancia": 1,
+      "puntaje": 0.05,
+      "razones": [
+        "Sin Swift",
+        "Sin iOS",
+        "No Firebase",
+        "Solo frontend",
+        "Aún junior"
+      ],
+      "base_coincidencia": 0,
+      "ms": 11646,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador Móvil iOS",
+      "candidato": "alejandro.quiroz",
+      "relevancia": 0,
+      "puntaje": 0.15,
+      "razones": [
+        "Experiencia REST APIs",
+        "Conocimientos de arquitectura",
+        "Uso de AWS"
+      ],
+      "base_coincidencia": 0,
+      "ms": 11982,
+      "error": null
+    },
+    {
+      "vacante": "Administrador de Sistemas Linux",
+      "candidato": "carolina.mejia",
+      "relevancia": 0,
+      "puntaje": 0,
+      "razones": [
+        "Sin Linux",
+        "Sin Bash",
+        "Sin Ansible",
+        "Sin Nagios",
+        "Menos años"
+      ],
+      "base_coincidencia": 0,
+      "ms": 9956,
+      "error": null
+    },
+    {
+      "vacante": "Administrador de Sistemas Linux",
+      "candidato": "fernando.trevino",
+      "relevancia": 0,
+      "puntaje": 0,
+      "razones": [],
+      "base_coincidencia": 0,
+      "ms": 708,
+      "error": null
+    },
+    {
+      "vacante": "Administrador de Sistemas Linux",
+      "candidato": "daniela.ochoa",
+      "relevancia": 0,
+      "puntaje": 0,
+      "razones": [
+        "Sin experiencia Linux",
+        "Sin Bash",
+        "Sin Ansible",
+        "Sin Nagios",
+        "No senior"
+      ],
+      "base_coincidencia": 0,
+      "ms": 25627,
+      "error": null
+    },
+    {
+      "vacante": "Administrador de Sistemas Linux",
+      "candidato": "ricardo.alonso",
+      "relevancia": 0,
+      "puntaje": 0.05,
+      "razones": [
+        "Sin experiencia Linux",
+        "No Bash",
+        "No Ansible",
+        "No Nagios",
+        "Sin administración servidores"
+      ],
+      "base_coincidencia": 0,
+      "ms": 26721,
+      "error": null
+    },
+    {
+      "vacante": "Administrador de Sistemas Linux",
+      "candidato": "valentina.cruz",
+      "relevancia": 0,
+      "puntaje": 0,
+      "razones": [
+        "Sin experiencia Linux",
+        "Sin Bash",
+        "Sin Ansible",
+        "Sin Nagios",
+        "4 años vs 5 requeridos"
+      ],
+      "base_coincidencia": 0,
+      "ms": 16719,
+      "error": null
+    },
+    {
+      "vacante": "Administrador de Sistemas Linux",
+      "candidato": "emiliano.rojas",
+      "relevancia": 2,
+      "puntaje": 0.97,
+      "razones": [
+        "8 años Linux",
+        "Experiencia Ansible",
+        "Monitoreo Nagios",
+        "120 servidores",
+        "Disponibilidad 99.9%"
+      ],
+      "base_coincidencia": 1,
+      "ms": 27892,
+      "error": null
+    },
+    {
+      "vacante": "Administrador de Sistemas Linux",
+      "candidato": "jimena.salgado",
+      "relevancia": 0,
+      "puntaje": 0,
+      "razones": [
+        "Sin experiencia Linux",
+        "Sin Bash",
+        "Sin Ansible",
+        "Sin Nagios",
+        "Enfocado en analítica"
+      ],
+      "base_coincidencia": 0,
+      "ms": 11455,
+      "error": null
+    },
+    {
+      "vacante": "Administrador de Sistemas Linux",
+      "candidato": "sebastian.arellano",
+      "relevancia": 0,
+      "puntaje": 0.05,
+      "razones": [
+        "Sin experiencia Linux",
+        "No Bash ni Ansible",
+        "No Nagios",
+        "Menos años requeridos",
+        "Perfil ML"
+      ],
+      "base_coincidencia": 0,
+      "ms": 41299,
+      "error": null
+    },
+    {
+      "vacante": "Administrador de Sistemas Linux",
+      "candidato": "regina.palacios",
+      "relevancia": 0,
+      "puntaje": 0,
+      "razones": [
+        "Sin experiencia Linux",
+        "No Ansible",
+        "No Bash",
+        "Junior",
+        "Frontend"
+      ],
+      "base_coincidencia": 0,
+      "ms": 9265,
+      "error": null
+    },
+    {
+      "vacante": "Administrador de Sistemas Linux",
+      "candidato": "alejandro.quiroz",
+      "relevancia": 0,
+      "puntaje": 0,
+      "razones": [
+        "Sin experiencia Linux",
+        "No se menciona Bash",
+        "Falta Ansible",
+        "No se indica Nagios",
+        "Perfil de arquitecto, no admin"
+      ],
+      "base_coincidencia": 0,
+      "ms": 1594,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador .NET Senior",
+      "candidato": "carolina.mejia",
+      "relevancia": 0,
+      "puntaje": 0.1,
+      "razones": [
+        "Experiencia en SQL",
+        "Conocimiento CI/CD",
+        "Automatización pruebas",
+        "Lenguaje Python",
+        "Falta .NET"
+      ],
+      "base_coincidencia": 0,
+      "ms": 45664,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador .NET Senior",
+      "candidato": "fernando.trevino",
+      "relevancia": 2,
+      "puntaje": 0.92,
+      "razones": [
+        "Experiencia comprobada",
+        "Manejo Azure App Service",
+        "Optimización SQL Server",
+        "Mentoría desarrolladores",
+        "Reducción costos 30%"
+      ],
+      "base_coincidencia": 1,
+      "ms": 11837,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador .NET Senior",
+      "candidato": "daniela.ochoa",
+      "relevancia": 0,
+      "puntaje": 0,
+      "razones": [],
+      "base_coincidencia": 0,
+      "ms": 46554,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador .NET Senior",
+      "candidato": "ricardo.alonso",
+      "relevancia": 0,
+      "puntaje": 0.05,
+      "razones": [
+        "Experiencia en SQL",
+        "Conocimientos de Power BI",
+        "Python avanzado",
+        "Excel avanzado",
+        "Experiencia en dashboards"
+      ],
+      "base_coincidencia": 0,
+      "ms": 11882,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador .NET Senior",
+      "candidato": "valentina.cruz",
+      "relevancia": 0,
+      "puntaje": 0.05,
+      "razones": [
+        "Sin C#",
+        "Sin .NET Core",
+        "Sin SQL Server",
+        "Sin Azure",
+        "Solo Swift"
+      ],
+      "base_coincidencia": 0,
+      "ms": 1701,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador .NET Senior",
+      "candidato": "emiliano.rojas",
+      "relevancia": 0,
+      "puntaje": 0.1,
+      "razones": [
+        "Seniority equivalente",
+        "Experiencia en sistemas",
+        "Automatización de infra",
+        "Monitoreo avanzado",
+        "Gestión de servidores"
+      ],
+      "base_coincidencia": 0,
+      "ms": 35544,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador .NET Senior",
+      "candidato": "jimena.salgado",
+      "relevancia": 0,
+      "puntaje": 0.2,
+      "razones": [
+        "SQL experiencia",
+        "5 años experiencia",
+        "Análisis de datos",
+        "Conocimiento de bases de datos"
+      ],
+      "base_coincidencia": 0,
+      "ms": 28531,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador .NET Senior",
+      "candidato": "sebastian.arellano",
+      "relevancia": 0,
+      "puntaje": 0.12,
+      "razones": [
+        "Experiencia en SQL",
+        "Conocimiento Docker",
+        "MLOps pipelines",
+        "Python avanzado",
+        "AWS"
+      ],
+      "base_coincidencia": 0,
+      "ms": 15294,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador .NET Senior",
+      "candidato": "regina.palacios",
+      "relevancia": 0,
+      "puntaje": 0.02,
+      "razones": [
+        "Sin .NET",
+        "Nivel Junior",
+        "Sin SQL Server",
+        "Sin Azure",
+        "Solo Frontend"
+      ],
+      "base_coincidencia": 0,
+      "ms": 12505,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador .NET Senior",
+      "candidato": "alejandro.quiroz",
+      "relevancia": 1,
+      "puntaje": 0.18,
+      "razones": [
+        "Liderazgo de equipos",
+        "Arquitectura de microservicios",
+        "Experiencia en cloud",
+        "Sin C#/.NET",
+        "Sin SQL Server"
+      ],
+      "base_coincidencia": 0,
+      "ms": 10912,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador Frontend Junior (React)",
+      "candidato": "carolina.mejia",
+      "relevancia": 0,
+      "puntaje": 0.15,
+      "razones": [
+        "Sin React",
+        "Sin JavaScript",
+        "Sin Git",
+        "Experiencia en QA",
+        "Nivel junior"
+      ],
+      "base_coincidencia": 0,
+      "ms": 5739,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador Frontend Junior (React)",
+      "candidato": "fernando.trevino",
+      "relevancia": 0,
+      "puntaje": 0.15,
+      "razones": [
+        "Git experiencia",
+        "Conocimientos backend",
+        "Senior",
+        "Sin React"
+      ],
+      "base_coincidencia": 0.25,
+      "ms": 9881,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador Frontend Junior (React)",
+      "candidato": "daniela.ochoa",
+      "relevancia": 1,
+      "puntaje": 0.25,
+      "razones": [
+        "Experiencia UI sólida",
+        "Manejo de Figma",
+        "Gestión de librerías",
+        "Falta React",
+        "Sin JavaScript"
+      ],
+      "base_coincidencia": 0,
+      "ms": 46502,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador Frontend Junior (React)",
+      "candidato": "ricardo.alonso",
+      "relevancia": 0,
+      "puntaje": 0.05,
+      "razones": [
+        "Sin React",
+        "Sin JavaScript",
+        "Sin CSS",
+        "Sin Git",
+        "Experiencia distinta"
+      ],
+      "base_coincidencia": 0,
+      "ms": 674,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador Frontend Junior (React)",
+      "candidato": "valentina.cruz",
+      "relevancia": 1,
+      "puntaje": 0.1,
+      "razones": [
+        "Solo Git",
+        "Sin React",
+        "Sin JavaScript",
+        "Sin CSS",
+        "Experiencia iOS"
+      ],
+      "base_coincidencia": 0.25,
+      "ms": 13831,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador Frontend Junior (React)",
+      "candidato": "emiliano.rojas",
+      "relevancia": 0,
+      "puntaje": 0.05,
+      "razones": [
+        "falta React"
+      ],
+      "base_coincidencia": 0,
+      "ms": 1113,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador Frontend Junior (React)",
+      "candidato": "jimena.salgado",
+      "relevancia": 0,
+      "puntaje": 0.05,
+      "razones": [
+        "Sin React",
+        "No JavaScript",
+        "Experiencia no relevante"
+      ],
+      "base_coincidencia": 0.25,
+      "ms": 8709,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador Frontend Junior (React)",
+      "candidato": "sebastian.arellano",
+      "relevancia": 0,
+      "puntaje": 0.05,
+      "razones": [
+        "Sin React",
+        "Sin JavaScript",
+        "Sin CSS",
+        "Solo Git",
+        "Experiencia ML"
+      ],
+      "base_coincidencia": 0.25,
+      "ms": 1684,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador Frontend Junior (React)",
+      "candidato": "regina.palacios",
+      "relevancia": 2,
+      "puntaje": 0.78,
+      "razones": [
+        "React experiencia",
+        "JavaScript dominio",
+        "CSS aplicado",
+        "Git colaboración",
+        "Junior adecuado"
+      ],
+      "base_coincidencia": 1,
+      "ms": 18934,
+      "error": null
+    },
+    {
+      "vacante": "Desarrollador Frontend Junior (React)",
+      "candidato": "alejandro.quiroz",
+      "relevancia": 0,
+      "puntaje": 0.04,
+      "razones": [
+        "Sin React",
+        "Sin JavaScript",
+        "Sin CSS",
+        "Solo backend",
+        "Experiencia senior"
+      ],
+      "base_coincidencia": 0.25,
+      "ms": 11619,
+      "error": null
+    }
+  ]
+}

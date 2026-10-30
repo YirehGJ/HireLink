@@ -36,7 +36,7 @@ export function RecommendationCard({ recommendation, job }: RecommendationCardPr
                   </Badge>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Este puntaje representa la afinidad con tu perfil.</p>
+                  <p>Compatibilidad estimada entre tu perfil y los requisitos escritos de la vacante; no es una probabilidad de que te contraten.</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

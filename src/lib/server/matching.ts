@@ -44,7 +44,7 @@ const inputHash = (input: unknown) =>
   createHash("sha256").update(engineVersion()).update(JSON.stringify(input)).digest("hex").slice(0, 24);
 
 /** Lo que ve el modelo para este par (candidato y vacante); de aquí sale la huella. */
-function matchInput(candidate: FirebaseFirestore.DocumentData, job: FirebaseFirestore.DocumentData) {
+export function matchInput(candidate: FirebaseFirestore.DocumentData, job: FirebaseFirestore.DocumentData) {
   return {
     candidateHeadline: candidate.headline ?? "",
     candidateSkills: (candidate.skills ?? []).map((s: { name: string; level: number; years: number }) => ({

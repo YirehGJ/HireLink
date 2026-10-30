@@ -1,0 +1,133 @@
+{
+  "modelo": "openai/gpt-oss-20b",
+  "fecha": "2026-10-30T23:37:16.513Z",
+  "vacante": "Desarrollador Frontend Junior (React)",
+  "resumen": [
+    {
+      "caso": "relleno_de_palabras",
+      "descripcion": "Diseñadora gráfica que enumera React, JavaScript, CSS y Git como habilidades sin experiencia de desarrollo",
+      "esperado": "puntaje bajo (no cumple el perfil)",
+      "evaluaciones": 3,
+      "puntaje_medio": 0.667,
+      "puntajes": [
+        0.55,
+        0.85,
+        0.6
+      ],
+      "linea_base_coincidencia": 1,
+      "razones_de_ejemplo": [
+        "Conocimientos de React",
+        "Experiencia en JavaScript",
+        "Uso de CSS",
+        "Git básico",
+        "Nivel junior adecuado"
+      ]
+    },
+    {
+      "caso": "sinonimos",
+      "descripcion": "Desarrolladora de interfaces que nombra las tecnologías como ReactJS, JS (ES6), Sass y GitHub",
+      "esperado": "puntaje alto (cumple el perfil con otras palabras)",
+      "evaluaciones": 3,
+      "puntaje_medio": 0.877,
+      "puntajes": [
+        0.88,
+        0.85,
+        0.9
+      ],
+      "linea_base_coincidencia": 0.5,
+      "razones_de_ejemplo": [
+        "Experiencia React",
+        "JavaScript sólido",
+        "Git activo",
+        "Pruebas integradas",
+        "Responsive design"
+      ]
+    }
+  ],
+  "filas": [
+    {
+      "caso": "relleno_de_palabras",
+      "repeticion": 1,
+      "puntaje": 0.55,
+      "razones": [
+        "Conocimientos de React",
+        "Experiencia en JavaScript",
+        "Uso de CSS",
+        "Git básico",
+        "Nivel junior adecuado"
+      ],
+      "ms": 709,
+      "error": null
+    },
+    {
+      "caso": "relleno_de_palabras",
+      "repeticion": 2,
+      "puntaje": 0.85,
+      "razones": [
+        "Conocimientos de React",
+        "JavaScript sólido",
+        "CSS competente",
+        "Git usado",
+        "Junior adecuado"
+      ],
+      "ms": 700,
+      "error": null
+    },
+    {
+      "caso": "relleno_de_palabras",
+      "repeticion": 3,
+      "puntaje": 0.6,
+      "razones": [
+        "Conocimiento React",
+        "JavaScript básico",
+        "CSS competente",
+        "Git familiar",
+        "Experiencia junior"
+      ],
+      "ms": 528,
+      "error": null
+    },
+    {
+      "caso": "sinonimos",
+      "repeticion": 1,
+      "puntaje": 0.88,
+      "razones": [
+        "Experiencia React",
+        "JavaScript sólido",
+        "Git activo",
+        "Pruebas integradas",
+        "Responsive design"
+      ],
+      "ms": 485,
+      "error": null
+    },
+    {
+      "caso": "sinonimos",
+      "repeticion": 2,
+      "puntaje": 0.85,
+      "razones": [
+        "Experiencia React",
+        "JavaScript ES6",
+        "Sass CSS",
+        "GitHub manejo",
+        "Responsive móvil"
+      ],
+      "ms": 358,
+      "error": null
+    },
+    {
+      "caso": "sinonimos",
+      "repeticion": 3,
+      "puntaje": 0.9,
+      "razones": [
+        "React experto",
+        "JS sólido",
+        "Git colaborador",
+        "Sass experiencia",
+        "Componentes reutilizables"
+      ],
+      "ms": 4815,
+      "error": null
+    }
+  ]
+}

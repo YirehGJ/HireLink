@@ -1,0 +1,132 @@
+[
+  {
+    "titulo": "Analista de Datos Clínicos",
+    "seniority": "mid",
+    "ubicacion": "Ciudad de México, México",
+    "remoto": false,
+    "etiquetas": [
+      "Python",
+      "SQL",
+      "Power BI",
+      "Estadística"
+    ],
+    "descripcionMd": "## Sobre el puesto\nAnaliza datos clínicos y operativos de nuestras clínicas aliadas para mejorar la atención.\n\n### Responsabilidades\n- Construir tableros en Power BI.\n- Escribir consultas SQL y automatizar reportes con Python.\n\n### Requisitos\n- 2 o más años de experiencia en analítica."
+  },
+  {
+    "titulo": "Desarrollador Móvil iOS",
+    "seniority": "mid",
+    "ubicacion": "Ciudad de México, México",
+    "remoto": true,
+    "etiquetas": [
+      "Swift",
+      "SwiftUI",
+      "Firebase",
+      "REST APIs"
+    ],
+    "descripcionMd": "## Desarrollador Móvil iOS\n\nUn equipo dinámico y en crecimiento está buscando a un Desarrollador Móvil iOS con nivel mid que aporte pasión por la calidad y la innovación. Junto a nuestro equipo de producto, tendrás la oportunidad de crear experiencias móviles excepcionales que impacten a millones de usuarios.\n\n### Responsabilidades Principales\n- Diseñar, desarrollar y mantener aplicaciones iOS utilizando Swift y SwiftUI.\n- Integrar Firebase (Authentication, Firestore, Storage, Analytics) para potenciar las funcionalidades del producto.\n- Consumir y diseñar REST APIs, garantizando una arquitectura robusta y segura.\n- Colaborar con diseñadores, back‑end y QA para asegurar entregas de alta calidad.\n- Escribir pruebas unitarias e integraciones y participar en revisiones de código.\n\n### Cualificaciones y Habilidades\n- 3‑5 años de experiencia desarrollando aplicaciones iOS.\n- Dominio de Swift y SwiftUI.\n- Experiencia práctica con Firebase y manejo de sus servicios.\n- Conocimiento sólido de REST APIs y patrones de comunicación.\n- Familiaridad con arquitectura MVVM, Combine y patrones de diseño.\n- Buen manejo de herramientas de control de versiones (Git).\n\n### Lo que Ofrecemos\n- Oportunidades continuas de desarrollo profesional y formación.\n- Ambiente de trabajo colaborativo y flexible.\n- Horarios flexibles y posibilidad de trabajo remoto.\n- Beneficios de salud y bienestar.\n- Salario competitivo y programas de incentivos.\n- Participación en eventos y conferencias de la industria."
+  },
+  {
+    "titulo": "Ingeniero de Calidad de Software (QA Automation)",
+    "seniority": "mid",
+    "ubicacion": "Guadalajara, Jalisco, México",
+    "remoto": true,
+    "etiquetas": [
+      "Cypress",
+      "Selenium",
+      "Python",
+      "Jenkins"
+    ],
+    "descripcionMd": "# Ingeniero de Calidad de Software (QA Automation)\n\nComo Ingeniero de Calidad de Software de nivel medio, tendrás la oportunidad de impulsar la calidad y la eficiencia de nuestros productos a través de la automatización de pruebas. Trabajarás con equipos de desarrollo ágil, diseñarás y mantendrás soluciones robustas de testing que garantizan la entrega de software fiable y de alto rendimiento.\n\n## Responsabilidades Principales\n- Diseñar y desarrollar suites de pruebas automáticas utilizando Cypress, Selenium y Python.\n- Integrar y gestionar pipelines de CI/CD con Jenkins para garantizar despliegues continuos y sin errores.\n- Colaborar con equipos de desarrollo y QA para identificar, documentar y resolver defectos críticos.\n- Analizar resultados de pruebas, generar informes claros y sugerir mejoras en el proceso de desarrollo.\n- Mantener y actualizar documentación técnica relacionada con pruebas y automatización.\n\n## Cualificaciones y Habilidades\n- Experiencia comprobada con Cypress, Selenium y scripting en Python.\n- Conocimiento sólido de Jenkins y prácticas de CI/CD.\n- Capacidad para diseñar pruebas unitarias, de integración y de extremo a extremo.\n- Habilidades de comunicación efectiva en español e inglés.\n- Pensamiento analítico y enfoque proactivo para la resolución de problemas.\n\n## Lo que Ofrecemos\n- Oportunidades de desarrollo profesional y formación continua en tecnologías emergentes.\n- Ambiente de trabajo colaborativo y inclusivo.\n- Horarios flexibles y opción de trabajo remoto parcial.\n- Beneficios de salud, seguro de vida y plan de pensiones.\n- Programa de reconocimiento y recompensas por logros individuales y de equipo.\n- Acceso a eventos y conferencias del sector de QA y automatización."
+  },
+  {
+    "titulo": "Administrador de Sistemas Linux",
+    "seniority": "senior",
+    "ubicacion": "Guadalajara, Jalisco, México",
+    "remoto": false,
+    "etiquetas": [
+      "Linux",
+      "Bash",
+      "Ansible",
+      "Nagios"
+    ],
+    "descripcionMd": "## Sobre el puesto\nAdministra la infraestructura Linux que sostiene nuestra plataforma de rutas.\n\n### Responsabilidades\n- Automatizar despliegues con Ansible.\n- Monitorear servidores y atender incidentes.\n\n### Requisitos\n- 5 años administrando servidores Linux."
+  },
+  {
+    "titulo": "Desarrollador .NET Senior",
+    "seniority": "senior",
+    "ubicacion": "Mazatlán, Sinaloa, México",
+    "remoto": true,
+    "etiquetas": [
+      "C#",
+      ".NET Core",
+      "SQL Server",
+      "Azure"
+    ],
+    "descripcionMd": "# Desarrollador .NET Senior\n\nBuscamos a un **Desarrollador .NET Senior** con pasión por la ingeniería de software, que esté listo para liderar proyectos críticos y compartir su experiencia con equipos multidisciplinarios.\n\n## Responsabilidades Principales\n- Diseñar, desarrollar y mantener soluciones en C# y .NET Core.\n- Escribir consultas SQL eficientes y optimizar bases de datos SQL Server.\n- Implementar y administrar infraestructuras en Azure, garantizando disponibilidad y escalabilidad.\n- Colaborar con arquitectos y analistas de negocio para transformar requisitos en soluciones técnicas.\n- Revisar código, ofrecer feedback constructivo y promover buenas prácticas de desarrollo.\n- Mentorizar a desarrolladores junior, fomentando su crecimiento profesional.\n\n## Cualificaciones y Habilidades\n- Experiencia comprobada en desarrollo con C# y .NET Core (mínimo 5 años).\n- Dominio de SQL Server: modelado de datos, optimización y migraciones.\n- Sólidos conocimientos en Azure (App Services, Functions, DevOps, CI/CD).\n- Familiaridad con patrones de diseño, microservicios y arquitectura orientada a eventos.\n- Excelentes habilidades de comunicación y trabajo colaborativo.\n- Capacidad para tomar decisiones técnicas y resolver problemas complejos.\n\n## Lo que Ofrecemos\n- Oportunidades continuas de **desarrollo profesional** y formación técnica.\n- Ambiente de trabajo **colaborativo** y centrado en la innovación.\n- Flexibilidad horaria y posibilidad de **teletrabajo**.\n- Paquete competitivo de **beneficios** (salud, dental, seguro de vida).\n- Acceso a herramientas y tecnologías de vanguardia.\n- Programas de reconocimiento y **recompensas** por desempeño.\n- Cultura de **equilibrio vida‑profesión** y bienestar de los empleados."
+  },
+  {
+    "titulo": "Arquitecto de Software",
+    "seniority": "lead",
+    "ubicacion": "Mazatlán, Sinaloa, México",
+    "remoto": false,
+    "etiquetas": [
+      "Microservicios",
+      "Java",
+      "Kafka",
+      "AWS"
+    ],
+    "descripcionMd": "## Sobre el puesto\nDefine la arquitectura de la plataforma de pagos y guía a los equipos de ingeniería.\n\n### Responsabilidades\n- Diseñar servicios distribuidos y definir estándares técnicos.\n- Revisar decisiones de arquitectura y mentorear al equipo.\n\n### Requisitos\n- 10 años de experiencia en desarrollo de software."
+  },
+  {
+    "titulo": "Desarrollador Frontend Junior (React)",
+    "seniority": "junior",
+    "ubicacion": "Puebla, Puebla, México",
+    "remoto": true,
+    "etiquetas": [
+      "React",
+      "JavaScript",
+      "CSS",
+      "Git"
+    ],
+    "descripcionMd": "## Sobre el puesto\nSe parte del equipo que construye la plataforma educativa usada por miles de estudiantes.\n\n### Responsabilidades\n- Desarrollar componentes de interfaz en React.\n- Corregir errores y escribir pruebas.\n\n### Requisitos\n- Conocimientos de JavaScript y React."
+  },
+  {
+    "titulo": "Diseñador UI para Plataformas Educativas",
+    "seniority": "junior",
+    "ubicacion": "Puebla, Puebla, México",
+    "remoto": true,
+    "etiquetas": [
+      "Figma",
+      "Adobe XD",
+      "Sistemas de diseño",
+      "Prototipado"
+    ],
+    "descripcionMd": "# Diseñador UI para Plataformas Educativas (Junior)\n\n¡Únete a nuestro equipo de innovación educativa! Buscamos un diseñador UI apasionado, con ganas de aprender y de aportar su creatividad a la creación de experiencias digitales atractivas y accesibles para estudiantes y docentes.\n\n## Responsabilidades Principales\n- Diseñar interfaces coherentes y atractivas para aplicaciones web y móviles orientadas a la educación.\n- Colaborar con desarrolladores, product managers y especialistas en contenido para transformar requerimientos funcionales en prototipos visuales.\n- Crear y mantener sistemas de diseño y librerías de componentes reutilizables.\n- Realizar pruebas de usabilidad y recoger feedback de usuarios para iterar sobre los diseños.\n- Mantenerse actualizado con las tendencias de UI/UX y buenas prácticas en la industria.\n\n## Cualificaciones y Habilidades\n- Dominio de herramientas de diseño como **Figma** y **Adobe XD**.\n- Experiencia en la creación y gestión de **sistemas de diseño**.\n- Habilidad en prototipado interactivo y flujo de usuarios.\n- Buen sentido estético y capacidad de transformar ideas complejas en diseños claros y amigables.\n- Capacidad de trabajar de manera colaborativa y recibir retroalimentación constructiva.\n- Nivel de inglés intermedio (para revisión de documentación y comunicación con equipos internacionales).\n\n## Lo que Ofrecemos\n- Programa de desarrollo profesional con mentorías y formación continua.\n- Ambiente de trabajo dinámico y colaborativo, con oportunidades de networking interno.\n- Horario flexible y opción de trabajo remoto parcial.\n- Acceso a plataformas de aprendizaje y recursos digitales.\n- Seguro de salud corporativo y plan de bienestar.\n- Recompensas por desempeño y reconocimiento público.\n- Un equipo apasionado que valora la creatividad, la innovación y el aprendizaje constante."
+  },
+  {
+    "titulo": "Analista de Producto Digital",
+    "seniority": "mid",
+    "ubicacion": "Cancún, Quintana Roo, México",
+    "remoto": true,
+    "etiquetas": [
+      "Google Analytics",
+      "SQL",
+      "Pruebas A/B",
+      "Producto"
+    ],
+    "descripcionMd": "## Sobre el puesto\nMide y mejora el producto digital de reservas con experimentos y análisis de datos.\n\n### Responsabilidades\n- Diseñar y analizar pruebas A/B.\n- Reportar indicadores de conversión y retención.\n\n### Requisitos\n- 3 años en analítica de producto o web."
+  },
+  {
+    "titulo": "Ingeniero de Machine Learning",
+    "seniority": "mid",
+    "ubicacion": "Remoto, México",
+    "remoto": true,
+    "etiquetas": [
+      "Python",
+      "PyTorch",
+      "MLOps",
+      "Docker"
+    ],
+    "descripcionMd": "# Ingeniero de Machine Learning\n\nBuscamos un profesional apasionado por la IA y el aprendizaje automático para integrar nuestro equipo de tecnología. En este rol intermedio, serás responsable de diseñar, entrenar y desplegar modelos que impulsen decisiones estratégicas y mejoren la experiencia de nuestros usuarios.\n\n## Responsabilidades Principales\n- Diseñar e implementar pipelines de datos y modelos de aprendizaje automático utilizando Python y PyTorch.\n- Colaborar con equipos de datos y producto para traducir requisitos de negocio en soluciones técnicas.\n- Optimizar modelos para rendimiento y escalabilidad, aplicando técnicas de regularización y selección de características.\n- Automatizar el ciclo de vida de los modelos mediante prácticas MLOps, integrando CI/CD y contenedores Docker.\n- Documentar procesos y resultados, garantizando la reproducibilidad y la trazabilidad.\n\n## Cualificaciones y Habilidades\n- Experiencia comprobada con Python y PyTorch.\n- Conocimiento sólido de MLOps, incluyendo experiment tracking, model versioning y deployment.\n- Familiaridad con Docker y contenedores para despliegue de modelos.\n- Buen nivel de inglés técnico y capacidad para comunicar resultados complejos de forma clara.\n- Capacidad de trabajar de manera colaborativa y autónoma en un entorno ágil.\n\n## Lo que Ofrecemos\n- Oportunidades de desarrollo profesional con cursos y certificaciones en IA y MLOps.\n- Ambiente de trabajo colaborativo, inclusivo y con flexibilidad de horarios.\n- Acceso a herramientas y recursos tecnológicos de vanguardia.\n- Paquete salarial competitivo y bonos por rendimiento.\n- Seguro de salud y beneficios de bienestar.\n- Participación en proyectos innovadores que impactan directamente al negocio."
+  }
+]

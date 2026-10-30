@@ -66,7 +66,7 @@ function RecommendedRow({ rec }: { rec: Recommendation }) {
             )}
           </div>
         </div>
-        <Badge variant="secondary" className="font-bold self-start">
+        <Badge variant="secondary" className="font-bold self-start" title="Compatibilidad estimada con los requisitos escritos de la vacante; no es una probabilidad de contratación. La decisión es de la reclutadora.">
           <Zap className="h-3 w-3 mr-1" />{(rec.score * 100).toFixed(0)}% Match
         </Badge>
       </div>

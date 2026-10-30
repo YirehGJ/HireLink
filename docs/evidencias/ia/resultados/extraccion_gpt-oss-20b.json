@@ -1,0 +1,1036 @@
+{
+  "resumen": {
+    "modelo": "openai/gpt-oss-20b",
+    "fecha": "2026-10-30T23:20:39.482Z",
+    "cvs": 10,
+    "con_respuesta": 10,
+    "con_error": 0,
+    "habilidades": {
+      "precision_media": 0.98,
+      "recall_medio": 1,
+      "f1_medio": 0.989
+    },
+    "experiencia": {
+      "empresas_halladas": 1,
+      "puestos_hallados": 1
+    },
+    "formacion": {
+      "instituciones_halladas": 1
+    },
+    "titular_coincide": 1,
+    "error_medio_anios": 0.3,
+    "latencia_ms": {
+      "mediana": 22826,
+      "p95": 53246,
+      "media": 23682
+    },
+    "criterio": "Coincidencia por igualdad, contención o mitad de las palabras en común, sin acentos ni mayúsculas. La precisión de habilidades se mide contra la sección «Habilidades» del CV: es una cota inferior, porque el modelo puede extraer tecnologías que el CV menciona en la experiencia."
+  },
+  "filas": [
+    {
+      "archivo": "carolina.mejia.pdf",
+      "nombre": "Carolina Mejía Barrera",
+      "caracteres": 910,
+      "ms": 2245,
+      "error": null,
+      "texto": "Carolina Mejía Barrera QA Automation Engineer Zapopan, Jalisco, México | carolina.mejia@example.com | +52 33 5550 1101 RESUMEN PROFESIONAL Ingeniera de calidad con 3 años de experiencia automatizando pruebas de interfaz y de API para aplicaciones web y móviles. Trabajo con equipos ágiles y pipelines de integración continua. EXPERIENCIA LABORAL QA Automation Engineer - Plataforma Logística GDL Marzo 2023 - Presente Automatizó 220 pruebas end-to-end con Cypress y Python, redujo 60% el tiempo de regresión y las integró en Jenkins. Analista de Pruebas - Software Occidente Enero 2022 - Febrero 2023 Diseñó casos de prueba funcionales, reportó defectos en Jira y apoyó pruebas de API con Postman. EDUCACIÓN Ingeniería en Computación - Universidad de Guadalajara (2017 - 2021) HABILIDADES Cypress, Selenium, Python, Postman, Jenkins, Jira, SQL, Pruebas de API IDIOMAS Español nativo, inglés intermedio-avanzado",
+      "salida": {
+        "headline": "QA Automation Engineer",
+        "location": "Zapopan, Jalisco, México",
+        "yearsOfExperience": 3,
+        "skills": [
+          {
+            "name": "Cypress",
+            "level": 4,
+            "years": 3
+          },
+          {
+            "name": "Selenium",
+            "level": 4,
+            "years": 3
+          },
+          {
+            "name": "Python",
+            "level": 4,
+            "years": 3
+          },
+          {
+            "name": "Postman",
+            "level": 4,
+            "years": 3
+          },
+          {
+            "name": "Jenkins",
+            "level": 4,
+            "years": 3
+          },
+          {
+            "name": "Jira",
+            "level": 4,
+            "years": 3
+          },
+          {
+            "name": "SQL",
+            "level": 3,
+            "years": 3
+          },
+          {
+            "name": "Pruebas de API",
+            "level": 4,
+            "years": 3
+          }
+        ],
+        "experience": [
+          {
+            "title": "QA Automation Engineer",
+            "company": "Plataforma Logística GDL",
+            "startDate": "Marzo 2023",
+            "endDate": "Presente",
+            "description": "Automatizó 220 pruebas end-to-end con Cypress y Python, redujo 60 % del tiempo de regresión e integró los procesos en Jenkins."
+          },
+          {
+            "title": "Analista de Pruebas",
+            "company": "Software Occidente",
+            "startDate": "Enero 2022",
+            "endDate": "Febrero 2023",
+            "description": "Diseñó casos de prueba funcionales, reportó defectos en Jira y apoyó pruebas de API con Postman."
+          }
+        ],
+        "education": [
+          {
+            "institution": "Universidad de Guadalajara",
+            "degree": "Ingeniería en Computación",
+            "field": "Computación",
+            "startDate": "2017",
+            "endDate": "2021"
+          }
+        ],
+        "summary": "Ingeniera de calidad con tres años de experiencia automatizando pruebas de interfaz y API para aplicaciones web y móviles. Ha liderado la implementación de pipelines de CI y ha reducido significativamente el tiempo de regresión. Su formación en Ingeniería en Computación y su dominio de herramientas como Cypress, Selenium y Python la convierten en un activo clave para equipos ágiles."
+      },
+      "metricas": {
+        "habilidades_esperadas": 8,
+        "habilidades_extraidas": 8,
+        "habilidades_halladas": 8,
+        "recall_habilidades": 1,
+        "precision_habilidades": 1,
+        "experiencia_empresas": 1,
+        "experiencia_puestos": 1,
+        "formacion_instituciones": 1,
+        "entradas_experiencia": {
+          "esperadas": 2,
+          "extraidas": 2
+        },
+        "entradas_formacion": {
+          "esperadas": 1,
+          "extraidas": 1
+        },
+        "titular_coincide": 1,
+        "anios_verdad": 3,
+        "anios_extraidos": 3,
+        "error_anios": 0
+      }
+    },
+    {
+      "archivo": "fernando.trevino.pdf",
+      "nombre": "Fernando Treviño Salas",
+      "caracteres": 937,
+      "ms": 2065,
+      "error": null,
+      "texto": "Fernando Treviño Salas Desarrollador .NET Senior Monterrey, Nuevo León, México | fernando.trevino@example.com | +52 81 5550 1102 RESUMEN PROFESIONAL Desarrollador backend con 6 años de experiencia en aplicaciones empresariales con C# y .NET Core, bases de datos SQL Server y servicios en Azure. EXPERIENCIA LABORAL Desarrollador .NET Senior - Grupo Industrial Regio Abril 2021 - Presente Diseñó APIs REST con .NET Core para el sistema de inventarios de 12 plantas; migró servicios a Azure App Service y redujo 30% los costos de infraestructura. Desarrollador .NET - Soluciones Empresariales del Norte Enero 2019 - Marzo 2021 Mantenimiento de módulos de facturación en C# y SQL Server; implementó pruebas unitarias con xUnit. EDUCACIÓN Ingeniería en Sistemas Computacionales - Tecnológico de Monterrey (2013 - 2017) HABILIDADES C#, .NET Core, SQL Server, Azure, Entity Framework, xUnit, Docker, Git IDIOMAS Español nativo, inglés avanzado",
+      "salida": {
+        "headline": "Desarrollador .NET Senior",
+        "location": "Monterrey, Nuevo León, México",
+        "yearsOfExperience": 6,
+        "skills": [
+          {
+            "name": "C#",
+            "level": 5,
+            "years": 6
+          },
+          {
+            "name": ".NET Core",
+            "level": 5,
+            "years": 6
+          },
+          {
+            "name": "SQL Server",
+            "level": 5,
+            "years": 6
+          },
+          {
+            "name": "Azure",
+            "level": 4,
+            "years": 6
+          },
+          {
+            "name": "Entity Framework",
+            "level": 4,
+            "years": 6
+          },
+          {
+            "name": "xUnit",
+            "level": 4,
+            "years": 6
+          },
+          {
+            "name": "Docker",
+            "level": 3,
+            "years": 5
+          },
+          {
+            "name": "Git",
+            "level": 4,
+            "years": 6
+          },
+          {
+            "name": "Español",
+            "level": 5,
+            "years": 6
+          },
+          {
+            "name": "Inglés",
+            "level": 4,
+            "years": 6
+          }
+        ],
+        "experience": [
+          {
+            "title": "Desarrollador .NET Senior",
+            "company": "Grupo Industrial Regio",
+            "startDate": "Abril 2021",
+            "endDate": "Presente",
+            "description": "Diseñó APIs REST con .NET Core para un sistema de inventario de 12 plantas y migró servicios a Azure App Service, reduciendo los costos de infraestructura en un 30%."
+          },
+          {
+            "title": "Desarrollador .NET",
+            "company": "Soluciones Empresariales del Norte",
+            "startDate": "Enero 2019",
+            "endDate": "Marzo 2021",
+            "description": "Mantenimiento de módulos de facturación en C# y SQL Server e implementación de pruebas unitarias con xUnit."
+          }
+        ],
+        "education": [
+          {
+            "institution": "Tecnológico de Monterrey",
+            "degree": "Ingeniería en Sistemas Computacionales",
+            "field": "Sistemas Computacionales",
+            "startDate": "2013",
+            "endDate": "2017"
+          }
+        ],
+        "summary": "Fernando Treviño Salas es Desarrollador .NET Senior con 6 años de experiencia en desarrollo backend para aplicaciones empresariales. Ha liderado la creación de APIs REST y la migración de servicios a Azure, reduciendo costos en un 30%. Posee sólidos conocimientos en C#, .NET Core, SQL Server, Entity Framework y pruebas unitarias con xUnit. Se graduó en Ingeniería en Sistemas Computacionales del Tecnológico de Monterrey."
+      },
+      "metricas": {
+        "habilidades_esperadas": 8,
+        "habilidades_extraidas": 10,
+        "habilidades_halladas": 8,
+        "recall_habilidades": 1,
+        "precision_habilidades": 0.8,
+        "experiencia_empresas": 1,
+        "experiencia_puestos": 1,
+        "formacion_instituciones": 1,
+        "entradas_experiencia": {
+          "esperadas": 2,
+          "extraidas": 2
+        },
+        "entradas_formacion": {
+          "esperadas": 1,
+          "extraidas": 1
+        },
+        "titular_coincide": 1,
+        "anios_verdad": 6,
+        "anios_extraidos": 6,
+        "error_anios": 0
+      }
+    },
+    {
+      "archivo": "daniela.ochoa.pdf",
+      "nombre": "Daniela Ochoa Fuentes",
+      "caracteres": 809,
+      "ms": 1790,
+      "error": null,
+      "texto": "Daniela Ochoa Fuentes Diseñadora UI y Gráfica Mérida, Yucatán, México | daniela.ochoa@example.com | +52 999 555 1103 RESUMEN PROFESIONAL Diseñadora con 2 años de experiencia creando interfaces y material gráfico para marcas locales de turismo y comercio. Busco crecer hacia diseño de producto. EXPERIENCIA LABORAL Diseñadora UI - Estudio Península Agosto 2024 - Presente Diseña interfaces en Figma para tres aplicaciones y mantiene una librería de componentes. Diseñadora Gráfica - Agencia Sol Maya Enero 2023 - Julio 2024 Identidad visual, redes sociales y piezas impresas para 15 clientes. EDUCACIÓN Licenciatura en Diseño Gráfico - Universidad Autónoma de Yucatán (2018 - 2022) HABILIDADES Figma, Adobe Illustrator, Adobe XD, Photoshop, Prototipado, Sistemas de diseño IDIOMAS Español nativo, inglés básico",
+      "salida": {
+        "headline": "Diseñadora UI y Gráfica",
+        "location": "Mérida, Yucatán, México",
+        "yearsOfExperience": 2,
+        "skills": [
+          {
+            "name": "Figma",
+            "level": 4,
+            "years": 2
+          },
+          {
+            "name": "Adobe Illustrator",
+            "level": 4,
+            "years": 2
+          },
+          {
+            "name": "Adobe XD",
+            "level": 4,
+            "years": 2
+          },
+          {
+            "name": "Photoshop",
+            "level": 3,
+            "years": 2
+          },
+          {
+            "name": "Prototipado",
+            "level": 3,
+            "years": 2
+          },
+          {
+            "name": "Sistemas de diseño",
+            "level": 3,
+            "years": 2
+          }
+        ],
+        "experience": [
+          {
+            "title": "Diseñadora UI",
+            "company": "Estudio Península",
+            "startDate": "Agosto 2024",
+            "endDate": "Presente",
+            "description": "Diseña interfaces en Figma para tres aplicaciones y mantiene una librería de componentes."
+          },
+          {
+            "title": "Diseñadora Gráfica",
+            "company": "Agencia Sol Maya",
+            "startDate": "Enero 2023",
+            "endDate": "Julio 2024",
+            "description": "Identidad visual, redes sociales y piezas impresas para 15 clientes."
+          }
+        ],
+        "education": [
+          {
+            "institution": "Universidad Autónoma de Yucatán",
+            "degree": "Licenciatura",
+            "field": "Diseño Gráfico",
+            "startDate": "2018",
+            "endDate": "2022"
+          }
+        ],
+        "summary": "Diseñadora con 2 años de experiencia especializada en UI y diseño gráfico para marcas locales de turismo y comercio. Ha desarrollado interfaces en Figma y mantenido librerías de componentes en su posición actual. Se graduó en Diseño Gráfico y busca avanzar hacia diseño de producto. Posee dominio de herramientas de diseño y prototipado con enfoque en la experiencia de usuario."
+      },
+      "metricas": {
+        "habilidades_esperadas": 6,
+        "habilidades_extraidas": 6,
+        "habilidades_halladas": 6,
+        "recall_habilidades": 1,
+        "precision_habilidades": 1,
+        "experiencia_empresas": 1,
+        "experiencia_puestos": 1,
+        "formacion_instituciones": 1,
+        "entradas_experiencia": {
+          "esperadas": 2,
+          "extraidas": 2
+        },
+        "entradas_formacion": {
+          "esperadas": 1,
+          "extraidas": 1
+        },
+        "titular_coincide": 1,
+        "anios_verdad": 2,
+        "anios_extraidos": 2,
+        "error_anios": 0
+      }
+    },
+    {
+      "archivo": "ricardo.alonso.pdf",
+      "nombre": "Ricardo Alonso Peña",
+      "caracteres": 841,
+      "ms": 16871,
+      "error": null,
+      "texto": "Ricardo Alonso Peña Analista de Datos Ciudad de México, México | ricardo.alonso@example.com | +52 55 5550 1104 RESUMEN PROFESIONAL Analista de datos con 3 años de experiencia en tableros, consultas SQL y análisis exploratorio con Python para áreas comerciales y financieras. EXPERIENCIA LABORAL Analista de Datos - Comercializadora Central Junio 2022 - Presente Construyó 14 tableros en Power BI y automatizó reportes semanales con Python y Pandas, ahorrando 10 horas por semana al equipo. Analista Junior de Reportes - Finanzas Capital Enero 2021 - Mayo 2022 Consultas SQL, conciliaciones y análisis de indicadores financieros. EDUCACIÓN Licenciatura en Actuaría - Universidad Nacional Autónoma de México (2016 - 2020) HABILIDADES Python, Pandas, SQL, Power BI, Excel avanzado, Estadística, Tableau IDIOMAS Español nativo, inglés intermedio",
+      "salida": {
+        "headline": "Analista de Datos",
+        "location": "Ciudad de México, México",
+        "yearsOfExperience": 6,
+        "skills": [
+          {
+            "name": "Python",
+            "level": 4,
+            "years": 3
+          },
+          {
+            "name": "Pandas",
+            "level": 4,
+            "years": 3
+          },
+          {
+            "name": "SQL",
+            "level": 4,
+            "years": 2
+          },
+          {
+            "name": "Power BI",
+            "level": 4,
+            "years": 1
+          },
+          {
+            "name": "Excel avanzado",
+            "level": 5,
+            "years": 3
+          },
+          {
+            "name": "Estadística",
+            "level": 4,
+            "years": 3
+          },
+          {
+            "name": "Tableau",
+            "level": 2,
+            "years": 1
+          }
+        ],
+        "experience": [
+          {
+            "title": "Analista de Datos",
+            "company": "Comercializadora Central",
+            "startDate": "Junio 2022",
+            "endDate": "Presente",
+            "description": "Construyó 14 tableros en Power BI y automatizó reportes semanales con Python y Pandas, ahorrando 10 horas por semana al equipo."
+          },
+          {
+            "title": "Analista Junior de Reportes",
+            "company": "Finanzas Capital",
+            "startDate": "Enero 2021",
+            "endDate": "Mayo 2022",
+            "description": "Consultas SQL, conciliaciones y análisis de indicadores financieros."
+          }
+        ],
+        "education": [
+          {
+            "institution": "Universidad Nacional Autónoma de México",
+            "degree": "Licenciatura",
+            "field": "Actuaría",
+            "startDate": "2016",
+            "endDate": "2020"
+          }
+        ],
+        "summary": "Analista de Datos con más de 6 años de experiencia en la creación de dashboards y automatización de reportes en Power BI y Python. Ha liderado la construcción de 14 tableros y la optimización de procesos que redujeron 10 horas de trabajo semanal. Posee formación en Actuaría y competencias avanzadas en SQL, Pandas y análisis estadístico. Su enfoque combina análisis exploratorio y desarrollo de soluciones BI para áreas comerciales y financieras."
+      },
+      "metricas": {
+        "habilidades_esperadas": 7,
+        "habilidades_extraidas": 7,
+        "habilidades_halladas": 7,
+        "recall_habilidades": 1,
+        "precision_habilidades": 1,
+        "experiencia_empresas": 1,
+        "experiencia_puestos": 1,
+        "formacion_instituciones": 1,
+        "entradas_experiencia": {
+          "esperadas": 2,
+          "extraidas": 2
+        },
+        "entradas_formacion": {
+          "esperadas": 1,
+          "extraidas": 1
+        },
+        "titular_coincide": 1,
+        "anios_verdad": 3,
+        "anios_extraidos": 6,
+        "error_anios": 3
+      }
+    },
+    {
+      "archivo": "valentina.cruz.pdf",
+      "nombre": "Valentina Cruz Moreno",
+      "caracteres": 779,
+      "ms": 28781,
+      "error": null,
+      "texto": "Valentina Cruz Moreno Desarrolladora iOS Guadalajara, Jalisco, México | valentina.cruz@example.com | +52 33 5550 1105 RESUMEN PROFESIONAL Desarrolladora iOS con 4 años de experiencia construyendo aplicaciones nativas con Swift y SwiftUI, con apps publicadas en la App Store. EXPERIENCIA LABORAL Desarrolladora iOS - Apps del Pacífico Febrero 2022 - Presente Desarrolló la app de reservas con 80 mil descargas usando SwiftUI, Combine y Firebase; implementó pruebas con XCTest. Desarrolladora Móvil Junior - Estudio Digital GDL Enero 2021 - Enero 2022 Maquetación de pantallas en UIKit y consumo de APIs REST. EDUCACIÓN Ingeniería en Sistemas - ITESO (2016 - 2020) HABILIDADES Swift, SwiftUI, UIKit, Combine, Firebase, XCTest, REST APIs, Git IDIOMAS Español nativo, inglés avanzado",
+      "salida": {
+        "headline": "Desarrolladora iOS",
+        "location": "Guadalajara, Jalisco, México",
+        "yearsOfExperience": 4,
+        "skills": [
+          {
+            "name": "Swift",
+            "level": 5,
+            "years": 4
+          },
+          {
+            "name": "SwiftUI",
+            "level": 5,
+            "years": 4
+          },
+          {
+            "name": "UIKit",
+            "level": 4,
+            "years": 4
+          },
+          {
+            "name": "Combine",
+            "level": 5,
+            "years": 4
+          },
+          {
+            "name": "Firebase",
+            "level": 5,
+            "years": 4
+          },
+          {
+            "name": "XCTest",
+            "level": 5,
+            "years": 4
+          },
+          {
+            "name": "REST APIs",
+            "level": 5,
+            "years": 4
+          },
+          {
+            "name": "Git",
+            "level": 5,
+            "years": 4
+          }
+        ],
+        "experience": [
+          {
+            "title": "Desarrolladora iOS",
+            "company": "Apps del Pacífico",
+            "startDate": "Febrero 2022",
+            "endDate": "Presente",
+            "description": "Desarrolló la app de reservas con 80 mil descargas usando SwiftUI, Combine y Firebase; implementó pruebas con XCTest."
+          },
+          {
+            "title": "Desarrolladora Móvil Junior",
+            "company": "Estudio Digital GDL",
+            "startDate": "Enero 2021",
+            "endDate": "Enero 2022",
+            "description": "Maquetó pantallas en UIKit y consumió APIs REST."
+          }
+        ],
+        "education": [
+          {
+            "institution": "ITESO",
+            "degree": "Ingeniería en Sistemas",
+            "field": "Sistemas",
+            "startDate": "2016",
+            "endDate": "2020"
+          }
+        ],
+        "summary": "Valentina Cruz Moreno es una Desarrolladora iOS con cuatro años de experiencia en la creación de aplicaciones nativas en Swift y SwiftUI. Ha liderado proyectos con más de 80 mil descargas y ha trabajado con tecnologías como Combine, Firebase y XCTest. Su formación en Ingeniería en Sistemas y su dominio de UIKit, REST APIs y Git respaldan su capacidad para diseñar soluciones robustas y escalables."
+      },
+      "metricas": {
+        "habilidades_esperadas": 8,
+        "habilidades_extraidas": 8,
+        "habilidades_halladas": 8,
+        "recall_habilidades": 1,
+        "precision_habilidades": 1,
+        "experiencia_empresas": 1,
+        "experiencia_puestos": 1,
+        "formacion_instituciones": 1,
+        "entradas_experiencia": {
+          "esperadas": 2,
+          "extraidas": 2
+        },
+        "entradas_formacion": {
+          "esperadas": 1,
+          "extraidas": 1
+        },
+        "titular_coincide": 1,
+        "anios_verdad": 4,
+        "anios_extraidos": 4,
+        "error_anios": 0
+      }
+    },
+    {
+      "archivo": "emiliano.rojas.pdf",
+      "nombre": "Emiliano Rojas Cabrera",
+      "caracteres": 900,
+      "ms": 35628,
+      "error": null,
+      "texto": "Emiliano Rojas Cabrera Administrador de Sistemas Linux Querétaro, Querétaro, México | emiliano.rojas@example.com | +52 442 555 1106 RESUMEN PROFESIONAL Administrador de sistemas con 8 años de experiencia en servidores Linux, automatización con Ansible y monitoreo de infraestructura crítica. EXPERIENCIA LABORAL Administrador de Sistemas Senior - Manufactura Avanzada del Bajío Marzo 2019 - Presente Administra 120 servidores Linux, automatiza despliegues con Ansible y mantiene 99.9% de disponibilidad con monitoreo en Nagios y Zabbix. Administrador de Sistemas - Telecomunicaciones Centro Enero 2016 - Febrero 2019 Respaldos, seguridad básica y soporte de segundo nivel a servicios internos. EDUCACIÓN Ingeniería en Telemática - Instituto Politécnico Nacional (2011 - 2015) HABILIDADES Linux, Bash, Ansible, Nagios, Zabbix, Redes, Seguridad, Virtualización IDIOMAS Español nativo, inglés intermedio",
+      "salida": {
+        "headline": "Administrador de Sistemas Senior",
+        "location": "Querétaro, Querétaro, México",
+        "yearsOfExperience": 8,
+        "skills": [
+          {
+            "name": "Linux",
+            "level": 5,
+            "years": 8
+          },
+          {
+            "name": "Bash",
+            "level": 4,
+            "years": 8
+          },
+          {
+            "name": "Ansible",
+            "level": 4,
+            "years": 8
+          },
+          {
+            "name": "Nagios",
+            "level": 4,
+            "years": 8
+          },
+          {
+            "name": "Zabbix",
+            "level": 4,
+            "years": 8
+          },
+          {
+            "name": "Redes",
+            "level": 3,
+            "years": 8
+          },
+          {
+            "name": "Seguridad",
+            "level": 3,
+            "years": 8
+          },
+          {
+            "name": "Virtualización",
+            "level": 3,
+            "years": 8
+          }
+        ],
+        "experience": [
+          {
+            "title": "Administrador de Sistemas Senior",
+            "company": "Manufactura Avanzada del Bajío",
+            "startDate": "Marzo 2019",
+            "endDate": "Presente",
+            "description": "Administra 120 servidores Linux, automatiza despliegues con Ansible y mantiene 99.9% disponibilidad con monitoreo en Nagios y Zabbix."
+          },
+          {
+            "title": "Administrador de Sistemas",
+            "company": "Telecomunicaciones Centro",
+            "startDate": "Enero 2016",
+            "endDate": "Febrero 2019",
+            "description": "Respaldos, seguridad básica y soporte de segundo nivel a servicios internos."
+          }
+        ],
+        "education": [
+          {
+            "institution": "Instituto Politécnico Nacional",
+            "degree": "Ingeniería",
+            "field": "Telemática",
+            "startDate": "2011",
+            "endDate": "2015"
+          }
+        ],
+        "summary": "Emiliano Rojas Cabrera es un Administrador de Sistemas con 8 años de experiencia especializada en entornos Linux y automatización con Ansible. Ha liderado la administración de más de 120 servidores críticos, garantizando un 99.9% de disponibilidad mediante Nagios y Zabbix. Posee formación en Ingeniería en Telemática y dominio de herramientas de redes, seguridad y virtualización."
+      },
+      "metricas": {
+        "habilidades_esperadas": 8,
+        "habilidades_extraidas": 8,
+        "habilidades_halladas": 8,
+        "recall_habilidades": 1,
+        "precision_habilidades": 1,
+        "experiencia_empresas": 1,
+        "experiencia_puestos": 1,
+        "formacion_instituciones": 1,
+        "entradas_experiencia": {
+          "esperadas": 2,
+          "extraidas": 2
+        },
+        "entradas_formacion": {
+          "esperadas": 1,
+          "extraidas": 1
+        },
+        "titular_coincide": 1,
+        "anios_verdad": 8,
+        "anios_extraidos": 8,
+        "error_anios": 0
+      }
+    },
+    {
+      "archivo": "jimena.salgado.pdf",
+      "nombre": "Jimena Salgado Ríos",
+      "caracteres": 877,
+      "ms": 53246,
+      "error": null,
+      "texto": "Jimena Salgado Ríos Analista de Producto Digital Puebla, Puebla, México | jimena.salgado@example.com | +52 222 555 1107 RESUMEN PROFESIONAL Analista de producto con 5 años de experiencia en analítica web, experimentos y crecimiento para plataformas de comercio electrónico. EXPERIENCIA LABORAL Analista de Producto - Tienda en Línea Angelópolis Mayo 2021 - Presente Diseña y mide experimentos A/B; mejoró 18% la conversión del proceso de compra con base en datos de Google Analytics. Especialista en Analítica Web - Agencia Digital Puebla Enero 2019 - Abril 2021 Configuración de Google Analytics y Tag Manager, reportes de campañas y SEO técnico. EDUCACIÓN Licenciatura en Mercadotecnia - Benemérita Universidad Autónoma de Puebla (2014 - 2018) HABILIDADES Google Analytics, SQL, Pruebas A/B, SEO, Looker Studio, Producto digital, Excel IDIOMAS Español nativo, inglés avanzado",
+      "salida": {
+        "headline": "Analista de Producto Digital",
+        "location": "Puebla, Puebla, México",
+        "yearsOfExperience": 5,
+        "skills": [
+          {
+            "name": "Google Analytics",
+            "level": 5,
+            "years": 5
+          },
+          {
+            "name": "Pruebas A/B",
+            "level": 5,
+            "years": 5
+          },
+          {
+            "name": "Producto digital",
+            "level": 5,
+            "years": 5
+          },
+          {
+            "name": "SQL",
+            "level": 4,
+            "years": 4
+          },
+          {
+            "name": "SEO",
+            "level": 4,
+            "years": 3
+          },
+          {
+            "name": "Looker Studio",
+            "level": 3,
+            "years": 2
+          },
+          {
+            "name": "Excel",
+            "level": 4,
+            "years": 4
+          }
+        ],
+        "experience": [
+          {
+            "title": "Analista de Producto",
+            "company": "Tienda en Línea Angelópolis",
+            "startDate": "Mayo 2021",
+            "endDate": "Presente",
+            "description": "Diseño y medición de experimentos A/B; incrementé la conversión del proceso de compra en un 18% usando datos de Google Analytics."
+          },
+          {
+            "title": "Especialista en Analítica Web",
+            "company": "Agencia Digital Puebla",
+            "startDate": "Enero 2019",
+            "endDate": "Abril 2021",
+            "description": "Configuración de Google Analytics y Tag Manager, elaboración de reportes de campañas y optimización SEO técnico."
+          }
+        ],
+        "education": [
+          {
+            "institution": "Benemérita Universidad Autónoma de Puebla",
+            "degree": "Licenciatura",
+            "field": "Mercadotecnia",
+            "startDate": "2014",
+            "endDate": "2018"
+          }
+        ],
+        "summary": "Analista de Producto Digital con 5 años de experiencia en analítica web y experimentos A/B para plataformas de comercio electrónico. He liderado iniciativas que aumentaron la conversión en un 18% y optimizado campañas con Google Analytics y Tag Manager. Poseo formación en Mercadotecnia y dominio de herramientas como SQL, Looker Studio y SEO, y me enfoco en impulsar el crecimiento y la innovación en productos digitales."
+      },
+      "metricas": {
+        "habilidades_esperadas": 7,
+        "habilidades_extraidas": 7,
+        "habilidades_halladas": 7,
+        "recall_habilidades": 1,
+        "precision_habilidades": 1,
+        "experiencia_empresas": 1,
+        "experiencia_puestos": 1,
+        "formacion_instituciones": 1,
+        "entradas_experiencia": {
+          "esperadas": 2,
+          "extraidas": 2
+        },
+        "entradas_formacion": {
+          "esperadas": 1,
+          "extraidas": 1
+        },
+        "titular_coincide": 1,
+        "anios_verdad": 5,
+        "anios_extraidos": 5,
+        "error_anios": 0
+      }
+    },
+    {
+      "archivo": "sebastian.arellano.pdf",
+      "nombre": "Sebastián Arellano Díaz",
+      "caracteres": 1005,
+      "ms": 11530,
+      "error": null,
+      "texto": "Sebastián Arellano Díaz Ingeniero de Machine Learning Ciudad de México, México | sebastian.arellano@example.com | +52 55 5550 1108 RESUMEN PROFESIONAL Ingeniero de machine learning con 4 años de experiencia llevando modelos a producción con PyTorch, Docker y pipelines de MLOps en la nube. EXPERIENCIA LABORAL Ingeniero de Machine Learning - Laboratorio de IA Aplicada Septiembre 2022 - Presente Entrenó y desplegó modelos de clasificación de documentos con PyTorch; montó un pipeline de MLOps en AWS que redujo de 3 días a 4 horas el ciclo de reentrenamiento. Científico de Datos Junior - Consultora Analytics MX Enero 2021 - Agosto 2022 Modelos de predicción de demanda y análisis exploratorio con Python. EDUCACIÓN Maestría en Ciencias de la Computación - Centro de Investigación en Computación, IPN (2019 - 2021) Ingeniería en Computación - Universidad Autónoma Metropolitana (2014 - 2018) HABILIDADES Python, PyTorch, MLOps, Docker, AWS, scikit-learn, SQL, Git IDIOMAS Español nativo, inglés avanzado",
+      "salida": {
+        "headline": "Ingeniero de Machine Learning",
+        "location": "Ciudad de México, México",
+        "yearsOfExperience": 4,
+        "skills": [
+          {
+            "name": "Python",
+            "level": 5,
+            "years": 4
+          },
+          {
+            "name": "PyTorch",
+            "level": 4,
+            "years": 4
+          },
+          {
+            "name": "MLOps",
+            "level": 4,
+            "years": 4
+          },
+          {
+            "name": "Docker",
+            "level": 4,
+            "years": 4
+          },
+          {
+            "name": "AWS",
+            "level": 4,
+            "years": 4
+          },
+          {
+            "name": "scikit-learn",
+            "level": 4,
+            "years": 4
+          },
+          {
+            "name": "SQL",
+            "level": 3,
+            "years": 4
+          },
+          {
+            "name": "Git",
+            "level": 3,
+            "years": 4
+          }
+        ],
+        "experience": [
+          {
+            "title": "Ingeniero de Machine Learning",
+            "company": "Laboratorio de IA Aplicada",
+            "startDate": "Septiembre 2022",
+            "endDate": "Presente",
+            "description": "Entrenó y desplegó modelos de clasificación de documentos con PyTorch; montó un pipeline de MLOps en AWS que redujo el ciclo de reentrenamiento de 3 días a 4 horas."
+          },
+          {
+            "title": "Científico de Datos Junior",
+            "company": "Consultora Analytics MX",
+            "startDate": "Enero 2021",
+            "endDate": "Agosto 2022",
+            "description": "Desarrolló modelos de predicción de demanda y realizó análisis exploratorio con Python."
+          }
+        ],
+        "education": [
+          {
+            "institution": "Centro de Investigación en Computación, IPN",
+            "degree": "Maestría en Ciencias de la Computación",
+            "field": "Ciencias de la Computación",
+            "startDate": "2019",
+            "endDate": "2021"
+          },
+          {
+            "institution": "Universidad Autónoma Metropolitana",
+            "degree": "Ingeniería en Computación",
+            "field": "Computación",
+            "startDate": "2014",
+            "endDate": "2018"
+          }
+        ],
+        "summary": "Ingeniero de Machine Learning con 4 años de experiencia en la creación y despliegue de modelos de clasificación de documentos usando PyTorch y pipelines de MLOps en la nube. Ha liderado proyectos que redujeron el ciclo de reentrenamiento de 3 días a 4 horas y desarrollado modelos de predicción de demanda con Python. Posee una Maestría en Ciencias de la Computación del IPN y una Ingeniería en Computación de la Universidad Autónoma Metropolitana."
+      },
+      "metricas": {
+        "habilidades_esperadas": 8,
+        "habilidades_extraidas": 8,
+        "habilidades_halladas": 8,
+        "recall_habilidades": 1,
+        "precision_habilidades": 1,
+        "experiencia_empresas": 1,
+        "experiencia_puestos": 1,
+        "formacion_instituciones": 1,
+        "entradas_experiencia": {
+          "esperadas": 2,
+          "extraidas": 2
+        },
+        "entradas_formacion": {
+          "esperadas": 2,
+          "extraidas": 2
+        },
+        "titular_coincide": 1,
+        "anios_verdad": 4,
+        "anios_extraidos": 4,
+        "error_anios": 0
+      }
+    },
+    {
+      "archivo": "regina.palacios.pdf",
+      "nombre": "Regina Palacios Soto",
+      "caracteres": 666,
+      "ms": 41528,
+      "error": null,
+      "texto": "Regina Palacios Soto Desarrolladora Frontend Junior Toluca, Estado de México, México | regina.palacios@example.com | +52 722 555 1109 RESUMEN PROFESIONAL Desarrolladora frontend junior con 1 año de experiencia en React y JavaScript, recién egresada con proyectos propios publicados. EXPERIENCIA LABORAL Desarrolladora Frontend Junior - Estudio Nevado Febrero 2025 - Presente Desarrolla componentes en React y corrige errores de interfaz bajo la guía de un desarrollador senior. EDUCACIÓN Ingeniería en Computación - Universidad Autónoma del Estado de México (2020 - 2024) HABILIDADES React, JavaScript, HTML, CSS, Git, Figma IDIOMAS Español nativo, inglés intermedio",
+      "salida": {
+        "headline": "Desarrolladora Frontend Junior",
+        "location": "Toluca, Estado de México, México",
+        "yearsOfExperience": 1,
+        "skills": [
+          {
+            "name": "React",
+            "level": 3,
+            "years": 1
+          },
+          {
+            "name": "JavaScript",
+            "level": 3,
+            "years": 1
+          },
+          {
+            "name": "HTML",
+            "level": 2,
+            "years": 1
+          },
+          {
+            "name": "CSS",
+            "level": 2,
+            "years": 1
+          },
+          {
+            "name": "Git",
+            "level": 2,
+            "years": 1
+          },
+          {
+            "name": "Figma",
+            "level": 2,
+            "years": 1
+          }
+        ],
+        "experience": [
+          {
+            "title": "Desarrolladora Frontend Junior",
+            "company": "Estudio Nevado",
+            "startDate": "Febrero 2025",
+            "endDate": "Presente",
+            "description": "Desarrolla componentes en React y corrige errores de interfaz bajo la guía de un desarrollador senior."
+          }
+        ],
+        "education": [
+          {
+            "institution": "Universidad Autónoma del Estado de México",
+            "degree": "Ingeniería en Computación",
+            "field": "Ingeniería en Computación",
+            "startDate": "2020",
+            "endDate": "2024"
+          }
+        ],
+        "summary": "Regina Palacios Soto es una Desarrolladora Frontend Junior con un año de experiencia trabajando con React y JavaScript. Recientemente egresada de Ingeniería en Computación en la Universidad Autónoma del Estado de México, ha desarrollado proyectos propios y actualmente trabaja en Estudio Nevado, creando componentes y corrigiendo errores bajo la supervisión de un desarrollador senior. Su formación en HTML, CSS, Git y Figma complementa su enfoque práctico y su capacidad de aprendizaje continuo."
+      },
+      "metricas": {
+        "habilidades_esperadas": 6,
+        "habilidades_extraidas": 6,
+        "habilidades_halladas": 6,
+        "recall_habilidades": 1,
+        "precision_habilidades": 1,
+        "experiencia_empresas": 1,
+        "experiencia_puestos": 1,
+        "formacion_instituciones": 1,
+        "entradas_experiencia": {
+          "esperadas": 1,
+          "extraidas": 1
+        },
+        "entradas_formacion": {
+          "esperadas": 1,
+          "extraidas": 1
+        },
+        "titular_coincide": 1,
+        "anios_verdad": 1,
+        "anios_extraidos": 1,
+        "error_anios": 0
+      }
+    },
+    {
+      "archivo": "alejandro.quiroz.pdf",
+      "nombre": "Alejandro Quiroz Beltrán",
+      "caracteres": 911,
+      "ms": 43140,
+      "error": null,
+      "texto": "Alejandro Quiroz Beltrán Arquitecto de Software Monterrey, Nuevo León, México | alejandro.quiroz@example.com | +52 81 5550 1110 RESUMEN PROFESIONAL Arquitecto de software con 12 años de experiencia diseñando plataformas distribuidas con microservicios, Java y servicios en la nube para el sector financiero. EXPERIENCIA LABORAL Arquitecto de Software - Banco del Norte Digital Enero 2018 - Presente Define la arquitectura de la plataforma de pagos (Java, Kafka, AWS) que procesa 2 millones de transacciones diarias; lidera a 15 ingenieros. Líder Técnico - Fintech Regia Enero 2013 - Diciembre 2017 Diseño de microservicios y migración de un monolito a servicios independientes. EDUCACIÓN Ingeniería en Sistemas Computacionales - Tecnológico de Monterrey (2007 - 2011) HABILIDADES Arquitectura de software, Microservicios, Java, Kafka, AWS, Liderazgo de equipos, Seguridad IDIOMAS Español nativo, inglés avanzado",
+      "salida": {
+        "headline": "Arquitecto de Software",
+        "location": "Monterrey, Nuevo León, México",
+        "yearsOfExperience": 12,
+        "skills": [
+          {
+            "name": "Arquitectura de software",
+            "level": 5,
+            "years": 12
+          },
+          {
+            "name": "Microservicios",
+            "level": 5,
+            "years": 12
+          },
+          {
+            "name": "Java",
+            "level": 5,
+            "years": 12
+          },
+          {
+            "name": "Kafka",
+            "level": 4,
+            "years": 8
+          },
+          {
+            "name": "AWS",
+            "level": 4,
+            "years": 8
+          },
+          {
+            "name": "Liderazgo de equipos",
+            "level": 5,
+            "years": 12
+          },
+          {
+            "name": "Seguridad de software",
+            "level": 3,
+            "years": 3
+          }
+        ],
+        "experience": [
+          {
+            "title": "Arquitecto de Software",
+            "company": "Banco del Norte Digital",
+            "startDate": "Enero 2018",
+            "endDate": "Presente",
+            "description": "Define la arquitectura de la plataforma de pagos (Java, Kafka, AWS) que procesa 2 millones de transacciones diarias; lidera a 15 ingenieros."
+          },
+          {
+            "title": "Líder Técnico",
+            "company": "Fintech Regia",
+            "startDate": "Enero 2013",
+            "endDate": "Diciembre 2017",
+            "description": "Diseño de microservicios y migración de un monolito a servicios independientes."
+          }
+        ],
+        "education": [
+          {
+            "institution": "Tecnológico de Monterrey",
+            "degree": "Ingeniería en Sistemas Computacionales",
+            "field": "Ingeniería en Sistemas Computacionales",
+            "startDate": "2007",
+            "endDate": "2011"
+          }
+        ],
+        "summary": "Arquitecto de Software con 12 años de experiencia en el sector financiero, especializado en diseñar y liderar plataformas distribuidas basadas en microservicios con Java, Kafka y AWS. Ha liderado equipos de 15 ingenieros en la construcción de soluciones de pagos de alto rendimiento y la migración de monolitos a arquitectura de servicios. Graduado en Ingeniería en Sistemas Computacionales por el Tecnológico de Monterrey, combina habilidades técnicas avanzadas con liderazgo y enfoque en la seguridad."
+      },
+      "metricas": {
+        "habilidades_esperadas": 7,
+        "habilidades_extraidas": 7,
+        "habilidades_halladas": 7,
+        "recall_habilidades": 1,
+        "precision_habilidades": 1,
+        "experiencia_empresas": 1,
+        "experiencia_puestos": 1,
+        "formacion_instituciones": 1,
+        "entradas_experiencia": {
+          "esperadas": 2,
+          "extraidas": 2
+        },
+        "entradas_formacion": {
+          "esperadas": 1,
+          "extraidas": 1
+        },
+        "titular_coincide": 1,
+        "anios_verdad": 12,
+        "anios_extraidos": 12,
+        "error_anios": 0
+      }
+    }
+  ]
+}

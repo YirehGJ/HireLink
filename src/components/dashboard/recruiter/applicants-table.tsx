@@ -258,7 +258,7 @@ export function ApplicantsTable({ applicants, jobId, jobTitle, organizationRef }
     <Card>
       <CardHeader>
         <CardTitle>Candidatos Postulados</CardTitle>
-        <CardDescription>Ordenados por compatibilidad con la IA. Marca tu shortlist, deja notas y agenda entrevistas.</CardDescription>
+        <CardDescription>Ordenados por compatibilidad estimada con la IA (no es una probabilidad de contratación). Marca tu shortlist, deja notas y agenda entrevistas.</CardDescription>
         <div className="flex flex-wrap items-center gap-4 pt-4">
           <div className="flex items-center gap-2">
             <Switch id="only-shortlist" checked={onlyShortlist} onCheckedChange={setOnlyShortlist} />

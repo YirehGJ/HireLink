@@ -191,6 +191,9 @@ export function ApplicantDetailsDialog({ open, onOpenChange, app, candidate, rec
                   <Badge key={i} variant="lilac">{r}</Badge>
                 ))}
               </div>
+              <p className="text-xs text-muted-foreground">
+                Compatibilidad estimada con los requisitos escritos de la vacante; no es una probabilidad de contratación. La decisión es de la reclutadora.
+              </p>
             </div>
           )}
 

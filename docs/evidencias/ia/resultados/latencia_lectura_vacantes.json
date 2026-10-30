@@ -1,0 +1,171 @@
+{
+  "resumen": {
+    "fecha": "2026-10-30T23:27:25.674Z",
+    "proyecto": "hirelink-staging",
+    "consulta": "jobs con status == published, límite 20 (reglas de seguridad aplicadas)",
+    "repeticiones": 30,
+    "respuestas_ok": 30,
+    "documentos_por_consulta": 20,
+    "latencia_ms": {
+      "minimo": 117,
+      "mediana": 159,
+      "media": 169,
+      "p95": 275,
+      "maximo": 322
+    },
+    "proporcion_bajo_250_ms": 0.933,
+    "nota": "Medido desde el equipo del desarrollador hacia Firestore (Google Cloud), con red doméstica; no incluye el renderizado del navegador."
+  },
+  "medidas": [
+    {
+      "ms": 191.8320000000001,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 158.9776999999999,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 179.66229999999996,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 151.9942000000001,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 142.85840000000007,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 177.51290000000017,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 160.79309999999987,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 159.10030000000006,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 129.7213999999999,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 321.81680000000006,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 152.7234999999996,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 155.08329999999978,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 215.6234999999997,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 148.6247000000003,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 274.75769999999966,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 147.50830000000042,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 162.7601999999997,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 139.6152000000002,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 162.35739999999987,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 142.84329999999954,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 180.2551999999996,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 159.63900000000012,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 162.45070000000032,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 147.7491,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 156.39170000000013,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 139.1907000000001,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 176.0713999999998,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 117.0028999999995,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 208.6140000000005,
+      "estado": 200,
+      "documentos": 20
+    },
+    {
+      "ms": 131.79930000000058,
+      "estado": 200,
+      "documentos": 20
+    }
+  ]
+}
