@@ -72,3 +72,55 @@ rename-test-accounts.mjs
 
 # respaldos que escribe scripts/limpiar-huerfanos.mjs antes de borrar
 /scripts/respaldos/
+
+# ---------------------------------------------------------------------------------------------
+# Lo que el publico no debe ver: herramientas locales, documentos de trabajo, claves y volcados.
+# (Ignorar solo evita subir archivos nuevos; lo que ya esta versionado se quita con `git rm --cached`.)
+# ---------------------------------------------------------------------------------------------
+
+# Exportaciones y configuracion de asistentes de codigo (no forman parte de la aplicacion)
+/.agents/
+
+# Claves y certificados (ademas de *.pem, .env* y las cuentas de servicio de arriba)
+*.key
+*.p12
+*.pfx
+*.jks
+id_rsa*
+*.keystore
+
+# Documentos de trabajo del proyecto modular y comprimidos (informes, manuales, videos, respaldos)
+*.docx
+*.doc
+*.pptx
+*.xlsx
+~$*
+*.zip
+*.7z
+*.rar
+*.mp4
+*.mov
+
+# Registros, volcados y bases locales
+*.log
+*.dump
+*.bak
+*.sqlite
+*.sqlite3
+*.db
+
+# Cache y salidas locales de herramientas
+.firebase/
+.eslintcache
+.turbo/
+.cache/
+
+# Sistema operativo y editores
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+# Herramientas del editor y del asistente
+/.vscode/
+/.idx/
+/.claude/
