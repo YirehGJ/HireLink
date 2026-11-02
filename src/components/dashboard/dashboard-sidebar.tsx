@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/sidebar";
 import { LogOut } from "lucide-react";
 import { signOut } from "firebase/auth";
-import { Icons } from "@/components/icons";
+import { Logo } from "@/components/brand/logo";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
 import { NAV_CONFIG, homeFor } from "@/components/dashboard/nav-config";
 import { useApp } from "@/components/providers/app-provider";
@@ -74,9 +74,8 @@ export function DashboardSidebar() {
   return (
     <Sidebar variant="sidebar" role="complementary" aria-label="Barra lateral">
       <SidebarHeader className="h-20 items-center justify-between flex-row px-4">
-        <Link href={homeFor(role)} className="flex items-center gap-2">
-          <Icons.logo className="h-8 w-8 text-primary" />
-          <span className="text-xl font-bold font-headline tracking-tighter">HireLink</span>
+        <Link href={homeFor(role)} className="flex items-center">
+          <Logo className="h-14" />
         </Link>
         {/* En el celular la campana vive en la barra superior (MobileTopBar), siempre a la vista. */}
         {!readOnly && !isMobile && <NotificationBell uid={user.id} />}

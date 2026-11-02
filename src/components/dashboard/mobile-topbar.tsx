@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
-import { Icons } from "@/components/icons";
+import { Logo } from "@/components/brand/logo";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
 import { homeFor } from "@/components/dashboard/nav-config";
 import { useApp } from "@/components/providers/app-provider";
@@ -18,9 +18,8 @@ export function MobileTopBar() {
   return (
     <header className="sticky top-0 z-20 flex h-14 items-center gap-1 border-b bg-background/95 px-2 backdrop-blur md:hidden">
       <SidebarTrigger className="h-11 w-11" />
-      <Link href={homeFor(role)} className="flex items-center gap-2 rounded-md px-1 py-2">
-        <Icons.logo className="h-7 w-7 text-primary" />
-        <span className="text-lg font-bold font-headline tracking-tighter">HireLink</span>
+      <Link href={homeFor(role)} className="flex items-center rounded-md px-1 py-1">
+        <Logo className="h-11" />
       </Link>
       {/* El hueco mide lo mismo con o sin campana para que la barra no se mueva al cargar. */}
       <div className="ml-auto flex h-11 w-11 items-center justify-center">
