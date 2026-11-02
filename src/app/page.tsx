@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Icons } from '@/components/icons';
+import { Logo } from '@/components/brand/logo';
 import { Briefcase, Users, BrainCircuit } from 'lucide-react';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { ClientYear } from '@/components/client-year';
@@ -12,11 +12,8 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-background">
       <header className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex min-h-20 flex-wrap items-center justify-between gap-x-4 gap-y-1 py-2">
-          <Link href="/" className="flex items-center gap-2">
-            <Icons.logo className="h-8 w-8 text-primary" />
-            <span className="text-xl font-bold font-headline tracking-tighter">
-              HireLink
-            </span>
+          <Link href="/" className="flex items-center">
+            <Logo className="h-14" />
           </Link>
           <nav className="ml-auto flex items-center gap-1 sm:gap-2" aria-label="Acceso">
             <ThemeSwitcher />

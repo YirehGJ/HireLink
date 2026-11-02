@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="public/brand/logo-nombre-blanco.png">
+    <img src="public/brand/logo-nombre-negro.png" alt="HireLink" width="320">
+  </picture>
+</p>
+
 # HireLink | Plataforma de Reclutamiento con IA Explicable
 
 HireLink conecta candidatos y reclutadores usando un modelo de lenguaje (IA) que calcula

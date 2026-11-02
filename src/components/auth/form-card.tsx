@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Icons } from "@/components/icons";
+import { Logo } from "@/components/brand/logo";
 import Link from "next/link";
 
 interface FormCardProps {
@@ -15,8 +15,8 @@ export function FormCard({ title, description, children, footerContent }: FormCa
     <main id="contenido" tabIndex={-1} className="flex min-h-svh items-center justify-center p-4 sm:p-6 focus:outline-none">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <Link href="/" aria-label="HireLink, ir al inicio" className="flex justify-center items-center gap-2 mb-4">
-            <Icons.logo className="h-8 w-8 text-primary" />
+          <Link href="/" aria-label="HireLink, ir al inicio" className="flex justify-center items-center mb-4">
+            <Logo alt="" className="h-16" />
           </Link>
           <CardTitle as="h1">{title}</CardTitle>
           <CardDescription>{description}</CardDescription>
